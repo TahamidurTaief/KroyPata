@@ -1,0 +1,55 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Django Server",
+			"type": "shell",
+			"command": ".\\env\\Scripts\\activate; python manage.py runserver 127.0.0.1:8000",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/backend"
+			}
+		},
+		{
+			"label": "Start Frontend Dev Server",
+			"type": "shell",
+			"command": "npm run dev",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			}
+		},
+		{
+			"label": "Start Django Server",
+			"type": "shell",
+			"command": ".\\env\\Scripts\\activate && python manage.py runserver 127.0.0.1:8000",
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Build Frontend",
+			"type": "shell",
+			"command": "npm run build",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Start Django Server Enhanced",
+			"type": "shell",
+			"command": ".\\env\\Scripts\\activate && python manage.py runserver 127.0.0.1:8000",
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Start Frontend Enhanced",
+			"type": "shell",
+			"command": "npm run dev",
+			"isBackground": true,
+			"group": "build"
+		}
+	]
+}

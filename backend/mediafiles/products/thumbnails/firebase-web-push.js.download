@@ -1,0 +1,213 @@
+/*
+ * Copyright (c), Onnorokom Web Services Ltd (OWSL) and/or its affiliates. All rights reserved.
+ * OWSL PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ */
+
+// while importing this script into html you should set the script tag type to "module"
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+import {
+    getMessaging,
+    getToken,
+    onMessage,
+} from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-messaging.js';
+
+const CSRF = $('meta[name=csrf-token]').attr('content');
+
+const FIREBASE_COOKIE_NAME = 'fbse';
+const FIREBASE_COOKIE_TTL_DAYS = 10;
+const NOTIFICATION_PERMISSION_COOKIE_NAME = 'nt_perm'
+const NOTIFICATION_PERMISSION_COOKIE_TTL_DAYS = 365;
+const VAPID_KEY = 'BLUp6FeEzjo8lEA2QFhkOkTFxsiiGmz3o9ctSS37N-q0OqQ5D_LYGEVvRJmOr6f5A0l_1GxTUae_GlnFjbJCVdQ';
+
+// add your credentials here from firebase project console
+const firebaseConfig = {
+    apiKey: 'AIzaSyBiyajtWLiFEhmCtlGMjMpzlmL9Q-_hW-E',
+    authDomain: 'rokomari-app-cross.firebaseapp.com',
+    projectId: 'rokomari-app-cross',
+    storageBucket: 'rokomari-app-cross.appspot.com',
+    messagingSenderId: '248662726591',
+    appId: '1:248662726591:web:bc96f74e4a3f4f7803730a',
+};
+
+if (Notification.permission === 'granted') {
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+
+    let cookieToken = getCookie(FIREBASE_COOKIE_NAME);
+
+    handleGetFcmToken();
+
+    // handling notification when user is in foreground
+    onMessage(messaging, (payload) => {
+        generateNotification(payload);
+    });
+
+    function handleGetFcmToken() {
+        getToken(messaging, {
+            vapidKey: VAPID_KEY,
+        }).then((currentFcmToken) => {
+            if (!currentFcmToken) {
+                console.log('Current fcm token is null');
+            }
+
+            if (cookieToken !== currentFcmToken) {
+                saveFcmToken(currentFcmToken);
+            }
+        });
+    }
+}
+
+$(document).on('NOTIFY::GRANTED', () => {
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+    let cookieToken = getCookie(FIREBASE_COOKIE_NAME);
+
+    getToken(messaging, {
+        vapidKey: VAPID_KEY,
+    }).then(async (currentFcmToken) => {
+        if (cookieToken !== currentFcmToken) {
+            const { result } = await saveFcmToken(currentFcmToken);
+            if (result) {
+                $(document).trigger({type: 'fcm', fcmToken: currentFcmToken});
+            }
+        }
+    });
+});
+
+function saveFcmToken(fcmToken) {
+    if (!CSRF) return;
+
+    return $.ajax({
+        method: 'POST',
+        url: '/fcm/tokens?_tk=' + CSRF,
+        contentType: 'application/json',
+        data: JSON.stringify({token: fcmToken}),
+        success: (res) => {
+            if (fcmToken) {
+                setCookie(FIREBASE_COOKIE_NAME, fcmToken, FIREBASE_COOKIE_TTL_DAYS);
+                setCookie(NOTIFICATION_PERMISSION_COOKIE_NAME, '', -1);
+            } else {
+                setCookie(FIREBASE_COOKIE_NAME, fcmToken, -1);
+                setCookie(NOTIFICATION_PERMISSION_COOKIE_NAME, 'denied', NOTIFICATION_PERMISSION_COOKIE_TTL_DAYS);
+            }
+        },
+        error: (err) => {
+            console.log('Error during fcm save operation');
+        }
+    });
+}
+
+function generateNotification(payload) {
+    if (Notification.permission === 'granted') {
+        // we can send an os level notification here or it is better to show an in web view
+        // pop up notification
+        const notificationOptions = {
+            body: payload.notification.body,
+            image: payload.notification.image,
+            icon: '/favicon.ico'
+        }
+
+        const notification = new Notification(payload.notification.title, notificationOptions, null);
+        notification.addEventListener('click', () => {
+            handleRedirect(payload);
+        });
+    }
+}
+
+function setCookie (name, value, expireDays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (expireDays*24*60*60*1000));
+    var expires = 'expires='+ d.toUTCString();
+    document.cookie = name + '=' + value + ';' + expires + ';path=/';
+}
+
+function getCookie (cookieName) {
+    return ('; ' + document.cookie).split(`; ${cookieName}=`).pop().split(';')[0];
+}
+
+function handleRedirect(payload) {
+    if (!payload.data) {
+        return;
+    }
+
+    const redirectId = payload.data.redirectId;
+    const redirectType = payload.data.redirectType;
+
+    switch (redirectType) {
+        case 'home':
+            location.replace('/book');
+            break;
+        case 'product_details':
+            location.replace(`/book/${redirectId}`);
+            break;
+        case 'ebook':
+            location.replace(`/book/${redirectId}`);
+            break;
+        case 'author':
+            location.replace(`/book/author/${redirectId}`);
+            break;
+        case 'category':
+            location.replace(`/book/category/${redirectId}`);
+            break;
+        case 'popular':
+            location.replace(`/book/category/${redirectId}`);
+            break;
+        case 'publisher':
+            location.replace(`/book/publisher/${redirectId}`);
+            break;
+        case 'list':
+            location.replace(`/list/${redirectId}`);
+            break;
+        case 'offer':
+            if (redirectId === undefined || redirectId === '' || isNaN(redirectId)) {
+                location.replace('/offer');
+            } else {
+                location.replace(`/offer/details/${redirectId}`);
+            }
+            break;
+        case 'order_details':
+            location.replace(`/my-section/orders?id=${redirectId}`);
+            break;
+    }
+}
+
+// handling push notification redirects
+if ('serviceWorker' in window.navigator) {
+    window.navigator.serviceWorker.addEventListener('message', event => {
+        if (event.isTrusted && event.data && event.data.action === 'PUSH_NOTIFICATION_REDIRECT') {
+            window.location.href= event.data.url;
+        }
+    });
+}
+
+function deleteNotificationCookies() {
+    document.cookie = 'nt_pop_perm_denied=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'nt_pop_shown=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'nt_req_con_indx=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'nt_subscribed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'fbse=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+$('.js--logout-button').on('click', event => {
+    localStorage.removeItem('crisp_chat_state');
+    localStorage.removeItem('crisp_session_id');
+    localStorage.removeItem('user_data');
+    window.$crisp.push(["do", "session:reset"]);
+    event.preventDefault();
+    deleteNotificationCookies();
+    sessionStorage.removeItem('subscribedApiCalled');
+    unregisterFcmServiceWorker()
+        .finally(() => location.href = '/logout');
+})
+
+function unregisterFcmServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        return navigator.serviceWorker.getRegistrations()
+            .then(regs =>
+                regs.filter(reg => reg.active.scriptURL.indexOf('firebase-messaging-sw.js') >= 0)
+                    .forEach(reg => reg.unregister()))
+            .catch(err => console.log('Fcm Service worker un-registration failed', err));
+    }
+
+    return Promise.reject('Service Worker not found!');
+}

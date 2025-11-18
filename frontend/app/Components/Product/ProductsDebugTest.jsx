@@ -1,0 +1,66 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+
+const ProductsDebugTest = () => {
+  const [testResult, setTestResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const testAPI = async () => {
+    setLoading(true);
+    try {
+      console.log('🧪 Starting API test...');
+      const response = await fetch('http://127.0.0.1:8000/api/products/');
+      
+      console.log('Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        contentType: response.headers.get('content-type')
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('API Response:', data);
+      
+      setTestResult({
+        success: true,
+        count: data.count,
+        resultsLength: data.results?.length,
+        firstProduct: data.results?.[0]
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      setTestResult({
+        success: false,
+        error: error.message
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+      <h3 className="text-lg font-semibold mb-4">Products API Debug Test</h3>
+      
+      <button 
+        onClick={testAPI} 
+        disabled={loading}
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+      >
+        {loading ? 'Testing...' : 'Test API'}
+      </button>
+      
+      {testResult && (
+        <div className="mt-4 p-3 rounded bg-white dark:bg-gray-700">
+          <pre>{JSON.stringify(testResult, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProductsDebugTest;

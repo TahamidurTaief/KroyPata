@@ -1,0 +1,5 @@
+/backend/env
+/backend/staticfiles
+/frontend/node_modules
+/backend/debug.log
+/backend/venv

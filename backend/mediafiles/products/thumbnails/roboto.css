@@ -1,0 +1,29 @@
+/*
+ | Copyright (c), Onnorokom Web Services Ltd (OWSL) and/or its affiliates. All rights reserved.
+ | OWSL PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+*/
+
+@font-face {
+    font-family: 'roboto-bold';
+    src: url('roboto-bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'roboto-medium';
+    src: url('roboto-medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'roboto-regular';
+    src: url('roboto-regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'roboto-light';
+    src: url('roboto-light.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'roboto-thin';
+    src: url('roboto-thin.ttf') format('truetype');
+}

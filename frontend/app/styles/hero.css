@@ -1,0 +1,42 @@
+/* Hero Banner Responsive Styles */
+.hero-banner-container {
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+  aspect-ratio: 1920/600;
+}
+
+/* Desktop: 1920x600 */
+@media (min-width: 1920px) {
+  .hero-banner-container {
+    width: 1920px;
+    height: 600px;
+  }
+}
+
+/* Large screens: maintain aspect ratio */
+@media (max-width: 1919px) and (min-width: 1024px) {
+  .hero-banner-container {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1920/600;
+  }
+}
+
+/* Tablets: maintain aspect ratio */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .hero-banner-container {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1920/600;
+  }
+}
+
+/* Mobile: maintain aspect ratio */
+@media (max-width: 767px) {
+  .hero-banner-container {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1920/600;
+  }
+}

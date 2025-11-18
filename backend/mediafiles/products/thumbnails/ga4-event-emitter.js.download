@@ -1,0 +1,41 @@
+// e = event name
+// n = content_type
+// t = product id
+// m = category id
+// i = total value
+
+const ecomEventEmit=(e,n,t,m,i, linkTo=undefined, sepecialField={})=>{
+    let userId;
+    const userMeta = document.querySelector('meta[name="user-id"]');
+    if (userMeta) {
+        userId = userMeta.content;
+    } else {
+        userId = undefined;
+    }
+
+    const getPageLoadingTime = () => {
+        const [navEntry] = performance.getEntriesByType('navigation');
+    
+        if (navEntry) {
+            const pageLoadTime = (navEntry.loadEventEnd - navEntry.startTime) / 1000;
+            return pageLoadTime > 0 ? pageLoadTime : 0;
+        }
+        return 0;
+    };
+    
+
+    // Call the function
+    const loadTime = getPageLoadingTime();
+    
+    gtag("event",e,{
+        loading_time_sec: loadTime ? loadTime : 0,
+        page_path: linkTo ? linkTo : location.href,
+        product_id: t,
+        rok_uid: userId,
+        currency:"BDT",
+        value:i,
+        content_type:n,
+        items:[{item_id:"rok_"+t,item_category:m}],
+        ...sepecialField
+    });
+};

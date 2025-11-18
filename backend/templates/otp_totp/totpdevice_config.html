@@ -1,0 +1,39 @@
+{% extends "unfold/layouts/base.html" %}
+{% load i18n %}
+
+{% block content_header %}
+<div class="flex items-center justify-between">
+    <h1 class="text-2xl font-semibold">
+        {% blocktranslate with name=opts.verbose_name %}Configure {{ name }}{% endblocktranslate %}
+    </h1>
+</div>
+{% endblock %}
+
+{% block content_body %}
+<div class="p-4 bg-white border border-gray-200 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700">
+    <p>
+        {% blocktranslate with name=opts.verbose_name %}
+            This is your secret key to configure your {{ name }}.
+            Scan the QR code with your authenticator app.
+        {% endblocktranslate %}
+    </p>
+
+    <div class="my-4 text-center">
+        <img src="{{ qr_code_url }}" alt="QR Code" class="inline-block border dark:border-gray-700">
+    </div>
+
+    <p class="mt-4">
+        {% trans "If you cannot scan the code, enter this key manually:" %}
+    </p>
+
+    <div class="mt-2 p-2 font-mono text-lg bg-gray-100 rounded dark:bg-gray-900 text-center">
+        {{ key }}
+    </div>
+
+    <div class="mt-6 text-right">
+        <a href="{% url 'admin:otp_totp_totpdevice_changelist' %}" class="button button--secondary">
+            {% trans "Done" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

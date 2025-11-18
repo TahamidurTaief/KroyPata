@@ -1,0 +1,34 @@
+/*
+ | Copyright (c), Onnorokom Web Services Ltd (OWSL) and/or its affiliates. All rights reserved.
+ | OWSL PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+*/
+
+@font-face {
+    font-family: 'poppins-bold';
+    src: url('poppins-bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'poppins-semibold';
+    src: url('poppins-semibold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'poppins-medium';
+    src: url('poppins-medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'poppins-regular';
+    src: url('poppins-regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'poppins-light';
+    src: url('poppins-light.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'poppins-thin';
+    src: url('poppins-thin.ttf') format('truetype');
+}

@@ -1,0 +1,1418 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Google Fonts fallback imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* --- LIGHT MODE COLORS --- */
+  --color-background: #f9fafb;
+  --color-second-bg: #ffffff;
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #4b5563;
+  --color-button-primary: #2563eb;
+  --color-accent-orange: #f59e0b;
+  --color-accent-green: #16a34a;
+  --color-border: #e5e7eb;
+  
+  /* Order Status Colors */
+  --color-status-pending: #f59e0b;    /* Orange for pending */
+  --color-status-processing: #2563eb; /* Blue for processing */
+  --color-status-shipped: #16a34a;    /* Green for shipped */
+  --color-status-delivered: #16a34a;  /* Green for delivered */
+  --color-status-cancelled: #dc2626;  /* Red for cancelled */
+
+  --scrollbar-track: #f0f0f0;
+  --scrollbar-thumb: #3b82f6; /* Tailwind blue-500 */
+  --scrollbar-thumb-hover: #2563eb; /* Tailwind blue-600 */
+
+  /* Additional variables for clarity */
+  --color-surface: #ffffff; /* For elements that pop, like cards or menus */
+  --color-muted-bg: #e5e7eb; /* For subtle backgrounds like input fields or icons */
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+html.dark {
+  /* --- DARK MODE COLORS (these override the root values when .dark is active) --- */
+  --color-background: #1f2937;
+  --color-second-bg: #313c48;
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-button-primary: #3b82f6;
+  --color-accent-orange: #f59e0b;
+  --color-accent-green: #16a34a;
+  --color-border: #374151;
+  
+  /* Order Status Colors for Dark Mode */
+  --color-status-pending: #f59e0b;    /* Orange for pending */
+  --color-status-processing: #3b82f6; /* Blue for processing */
+  --color-status-shipped: #16a34a;    /* Green for shipped */
+  --color-status-delivered: #16a34a;  /* Green for delivered */
+  --color-status-cancelled: #ef4444;  /* Red for cancelled */
+
+  /* Additional variables for clarity */
+  --color-surface: #111827; /* A darker surface for dark mode */
+  --color-muted-bg: #374151;
+
+  --scrollbar-track: #1f1f1f;
+  --scrollbar-thumb: #60a5fa; /* Light blue */
+  --scrollbar-thumb-hover: #3b82f6;
+}
+
+/* Global Scrollbar Styles */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 8px;
+  border: 2px solid var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+/* 
+  =============================================================
+  GLOBAL STYLES & FONT SETUP
+  =============================================================
+*/
+
+/* Apply the base theme colors to the whole app */
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  width: 100%;
+}
+
+/* Keep your font family definitions */
+.poppins {
+  font-family: var(--font-poppins), 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+.lato {
+  font-family: var(--font-lato), 'Lato', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+.raleway {
+  font-family: var(--font-raleway), 'Raleway', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* Custom container style - converted from @apply */
+.container {
+  width: 95%;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
+/* 
+  =============================================================
+  THEME TOGGLE ANIMATION (from previous steps)
+  =============================================================
+*/
+.theme-toggle-sun,
+.theme-toggle-moon {
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+.theme-toggle-moon {
+  position: absolute;
+}
+/* Light mode styles */
+.theme-toggle-sun {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+.theme-toggle-moon {
+  transform: rotate(-90deg) scale(0);
+  opacity: 0;
+}
+/* Dark mode styles */
+html.dark .theme-toggle-sun {
+  transform: rotate(90deg) scale(0);
+  opacity: 0;
+}
+html.dark .theme-toggle-moon {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+
+/* 
+  =============================================================
+  HERO SECTION ANIMATIONS & EFFECTS
+  =============================================================
+*/
+
+/* Fade in up animation for hero content */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+/* Animation delays for staggered effect */
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+/* Shine animation for CTA buttons */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(300%) skewX(-15deg);
+  }
+}
+
+.animate-shine {
+  animation: shine 0.8s ease-out;
+}
+
+/* Enhanced Swiper pagination styles */
+.swiper-pagination-bullet {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.swiper-pagination-bullet-active {
+  transform: scale(1.2) !important;
+}
+
+/* Custom scrollbar for hero content */
+.hero-content::-webkit-scrollbar {
+  width: 3px;
+}
+
+.hero-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+.hero-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 
+  =============================================================
+  RESPONSIVE BANNER STYLES (1920x600px banners)
+  =============================================================
+*/
+
+/* Ensure banners maintain aspect ratio and never crop */
+.hero-banner-container {
+  position: relative;
+  width: 100%;
+  /* Aspect ratio for 1920x600 = 3.2:1 */
+  aspect-ratio: 3.2;
+  overflow: hidden;
+}
+
+/* Additional responsive breakpoints for very small screens */
+@media (max-width: 480px) {
+  .hero-banner-container {
+    /* Allow slightly taller on very small screens for better visibility */
+    aspect-ratio: 2.8;
+  }
+}
+
+@media (max-width: 320px) {
+  .hero-banner-container {
+    /* Even more generous on ultra-small screens */
+    aspect-ratio: 2.5;
+  }
+}
+
+/* Ensure banner images scale correctly */
+.hero-banner-image {
+  object-fit: contain;
+  object-position: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Make sure pagination is visible on all screen sizes */
+.swiper-pagination {
+  bottom: 1rem !important;
+}
+
+@media (max-width: 768px) {
+  .swiper-pagination {
+    bottom: 0.5rem !important;
+  }
+}
+
+/* 
+  =============================================================
+  RESPONSIVE CATEGORY CARD STYLES
+  =============================================================
+*/
+
+/* Ensure category cards are responsive and maintain proper spacing */
+.category-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .category-card-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .category-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* Enhanced hover effects for category cards */
+.category-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Image zoom effect for category cards */
+.category-image-zoom {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-image-zoom:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive text sizing for category cards */
+@media (max-width: 480px) {
+  .category-card-title {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  
+  .category-card-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 481px) {
+  .category-card-title {
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+  
+  .category-card-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+.poppins {
+  font-family: var(--font-poppins);
+}
+
+.lato {
+  font-family: var(--font-lato);
+}
+
+.raleway {
+  font-family: var(--font-raleway);
+}
+
+/* === ADD THIS FOR THEME TOGGLE ANIMATION === */
+.theme-toggle-sun,
+.theme-toggle-moon {
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+.theme-toggle-moon {
+  position: absolute;
+}
+/* Light mode styles */
+.theme-toggle-sun {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+.theme-toggle-moon {
+  transform: rotate(-90deg) scale(0);
+  opacity: 0;
+}
+/* Dark mode styles */
+.dark .theme-toggle-sun {
+  transform: rotate(90deg) scale(0);
+  opacity: 0;
+}
+.dark .theme-toggle-moon {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+
+/* Converted theme variables to regular CSS variables */
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Base styles - converted from @layer and @apply */
+/* * {
+  border-color: hsl(var(--border));
+  outline-color: hsl(var(--ring) / 50%);
+} */
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+
+
+
+
+
+/* =============================================================
+  CUSTOM SLIDER THUMB STYLES
+  =============================================================
+*/
+
+.price-range-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 1.5rem;
+  background: transparent;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.price-range-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: #fff;
+  border: 3px solid #0ea5e9; /* sky-500 */
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.15s ease-out;
+}
+
+.price-range-thumb::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.price-range-thumb::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+}
+
+.price-range-thumb::-moz-range-thumb {
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: #fff;
+  border: 3px solid #0ea5e9; /* sky-500 */
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.15s ease-out;
+}
+
+.price-range-thumb::-moz-range-thumb:hover {
+  transform: scale(1.1);
+}
+
+.price-range-thumb::-moz-range-thumb:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+}
+
+/* ============================================
+   NAVBAR SKELETON ANIMATIONS
+   ============================================ */
+
+/* Enhanced shimmer effect for skeleton loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes skeleton-wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes skeleton-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-skeleton-pulse {
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+.animate-skeleton-wave {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 2s linear infinite;
+}
+
+.animate-skeleton-glow {
+  animation: skeleton-glow 2s ease-in-out infinite;
+}
+
+/* Dark mode shimmer effect */
+.dark .animate-skeleton-wave {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* Enhanced gradient backgrounds for skeleton elements */
+.skeleton-gradient {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 2s ease-in-out infinite;
+}
+
+.dark .skeleton-gradient {
+  background: linear-gradient(
+    90deg,
+    #374151 25%,
+    #4b5563 50%,
+    #374151 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* Skeleton loading state improvements */
+.skeleton-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 2s ease-in-out infinite;
+}
+
+.dark .skeleton-item {
+  background: linear-gradient(
+    90deg,
+    #374151 0%,
+    #4b5563 50%,
+    #374151 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* Floating animation for skeleton elements */
+@keyframes skeleton-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-skeleton-float {
+  animation: skeleton-float 3s ease-in-out infinite;
+}
+
+/* Breathing effect for skeleton elements */
+@keyframes skeleton-breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.animate-skeleton-breathe {
+  animation: skeleton-breathe 2s ease-in-out infinite;
+}
+
+/* Additional modern skeleton animations */
+@keyframes skeleton-slide {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes skeleton-fade {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes skeleton-elastic {
+  0%, 100% {
+    transform: scaleX(1) scaleY(1);
+  }
+  50% {
+    transform: scaleX(1.05) scaleY(0.95);
+  }
+}
+
+.animate-skeleton-slide {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-skeleton-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  animation: skeleton-slide 2s ease-in-out infinite;
+}
+
+.dark .animate-skeleton-slide::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.animate-skeleton-fade {
+  animation: skeleton-fade 1.5s ease-in-out infinite;
+}
+
+.animate-skeleton-elastic {
+  animation: skeleton-elastic 2s ease-in-out infinite;
+}
+
+/* Enhanced skeleton item with better gradients */
+.skeleton-item-enhanced {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    110deg,
+    #f0f0f0 8%,
+    #e8e8e8 18%,
+    #e8e8e8 33%,
+    #f0f0f0 43%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 1.8s ease-in-out infinite;
+}
+
+.dark .skeleton-item-enhanced {
+  background: linear-gradient(
+    110deg,
+    #374151 8%,
+    #4b5563 18%,
+    #4b5563 33%,
+    #374151 43%
+  );
+  background-size: 200% 100%;
+}
+
+/* Skeleton loading with pulse overlay */
+.skeleton-pulse-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-pulse-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 70%
+  );
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+.dark .skeleton-pulse-overlay::after {
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 70%
+  );
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+
+/* ====================================================================
+  HORIZONTAL BANNER RESPONSIVE STYLES
+  ====================================================================
+*/
+
+/* Ensure horizontal banners are fully responsive and maintain proper aspect ratios */
+.horizontal-banner {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Banner height responsive breakpoints */
+@media (max-width: 640px) {
+  .horizontal-banner {
+    min-height: 200px;
+    max-height: 250px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .horizontal-banner {
+    min-height: 250px;
+    max-height: 300px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .horizontal-banner {
+    min-height: 300px;
+    max-height: 350px;
+  }
+}
+
+@media (min-width: 1441px) {
+  .horizontal-banner {
+    min-height: 350px;
+    max-height: 400px;
+  }
+}
+
+/* Banner text responsive sizing */
+.banner-title {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  line-height: 1.2;
+}
+
+.banner-subtitle {
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+}
+
+.banner-button {
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+}
+
+/* Enhanced hover effects for banners */
+.horizontal-banner:hover .banner-image {
+  transform: scale(1.05);
+}
+
+.horizontal-banner .banner-overlay {
+  transition: all 0.3s ease;
+}
+
+.horizontal-banner:hover .banner-overlay {
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  );
+}
+
+/* 
+  =============================================================
+  HERO BANNER HOVER ANIMATIONS
+  =============================================================
+*/
+
+/* Hero container base styles */
+.hero-banner-container {
+  position: relative;
+  width: 100%;
+  height: 600px; /* Desktop height for 1920x600 */
+  min-height: 300px;
+  max-width: 1920px; /* Desktop max width */
+  margin: 0 auto; /* Center the container */
+  overflow: hidden;
+}
+
+/* Responsive hero heights - Full responsive system */
+@media (max-width: 480px) {
+  .hero-banner-container {
+    height: 280px;
+    min-height: 250px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .hero-banner-container {
+    height: 380px;
+    min-height: 350px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hero-banner-container {
+    height: 480px;
+    min-height: 450px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .hero-banner-container {
+    height: 550px;
+    min-height: 520px;
+  }
+}
+
+@media (min-width: 1441px) {
+  .hero-banner-container {
+    height: 600px; /* Exact desktop height */
+    min-height: 600px;
+    max-width: 1920px; /* Exact desktop width */
+  }
+}
+
+/* Hero image optimization for 1920x600 aspect ratio */
+.hero-banner-image {
+  object-fit: cover;
+  object-position: center;
+  width: 100%;
+  height: 100%;
+  transition: none; /* Remove all hover animations */
+}
+
+/* Ensure proper aspect ratio maintenance */
+@media (min-width: 1441px) {
+  .hero-banner-image {
+    aspect-ratio: 1920 / 600; /* 3.2:1 ratio for 1920x600 */
+  }
+}
+
+/* Remove hover effects from hero containers */
+.hero-container-no-hover {
+  transition: none;
+}
+
+.hero-container-no-hover:hover .hero-banner-image {
+  transform: none; /* No scaling on hover */
+}
+
+/* Full width hero wrapper */
+.hero-full-width-wrapper {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+/* Hero responsive text scaling optimized for different screen sizes */
+.hero-responsive-text {
+  font-size: clamp(1rem, 3vw, 2rem);
+  line-height: 1.2;
+}
+
+/* Viewport-based responsive adjustments */
+@media (max-width: 480px) {
+  .hero-mobile-optimized {
+    padding: 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .hero-tablet-optimized {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1441px) {
+  .hero-desktop-optimized {
+    padding: 2rem;
+    font-size: 1.125rem;
+  }
+}
+
+/* Hero text responsive sizing for different breakpoints */
+.hero-title {
+  font-size: clamp(1.5rem, 5vw, 4rem);
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  font-size: clamp(0.875rem, 2.5vw, 1.5rem);
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+.hero-description {
+  font-size: clamp(0.75rem, 1.5vw, 1.125rem);
+  line-height: 1.5;
+}
+
+.hero-button-text {
+  font-size: clamp(0.875rem, 1.2vw, 1rem);
+  padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1.5rem, 3vw, 2rem);
+}
+
+/* Desktop optimizations for 1920x600 */
+@media (min-width: 1441px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.25rem;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+  }
+  
+  .hero-button-text {
+    font-size: 0.95rem;
+    padding: 0.875rem 1.75rem;
+  }
+}
+
+/* Hero overlay animation keyframes */
+@keyframes heroOverlaySlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes heroContentStagger {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Hero overlay base class */
+.hero-overlay {
+  animation: heroOverlaySlideIn 0.5s ease-out forwards;
+}
+
+/* Staggered content animations */
+.hero-content-item {
+  animation: heroContentStagger 0.6s ease-out forwards;
+}
+
+.hero-content-item:nth-child(1) { animation-delay: 0.1s; }
+.hero-content-item:nth-child(2) { animation-delay: 0.2s; }
+.hero-content-item:nth-child(3) { animation-delay: 0.3s; }
+.hero-content-item:nth-child(4) { animation-delay: 0.4s; }
+
+/* Enhanced button hover for hero */
+.hero-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.hero-button:active {
+  transform: translateY(0);
+}
+
+/* Backdrop blur support */
+@supports (backdrop-filter: blur(10px)) {
+  .hero-overlay-bg {
+    backdrop-filter: blur(8px);
+  }
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+  .hero-overlay-bg {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+  }
+  
+  html.dark .hero-overlay-bg {
+    background-color: rgba(31, 41, 55, 0.9) !important;
+  }
+}
+
+/* Mobile Navigation Enhancements */
+@media (max-width: 767px) {
+  /* Ensure mobile navigation is always visible and properly spaced */
+  .mobile-bottom-nav {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  html.dark .mobile-bottom-nav {
+    background: rgba(31, 41, 55, 0.95);
+  }
+  
+  /* Add padding to body to prevent content overlap with fixed bottom nav */
+  body {
+    padding-bottom: 95px;
+  }
+  
+  /* Ensure modal z-index is higher than navigation */
+  .mobile-menu-modal {
+    z-index: 9999 !important;
+  }
+  
+  /* Smooth animations for mobile */
+  .mobile-nav-icon {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .mobile-nav-icon:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Enhanced scrollbar for mobile menu */
+.mobile-menu-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.mobile-menu-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mobile-menu-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mobile-menu-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 2px;
+}
+
+/* Improved touch targets for mobile - iOS standard 44x44px */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements meet minimum touch target size */
+  button:not(.touch-target-exempt), 
+  a:not(.touch-target-exempt),
+  [role="button"]:not(.touch-target-exempt),
+  input[type="button"]:not(.touch-target-exempt),
+  input[type="submit"]:not(.touch-target-exempt) {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  /* Exception for icon-only buttons - ensure they meet minimum with padding */
+  button.icon-button,
+  .icon-only-button {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 10px !important;
+  }
+  
+  /* Ensure tap area is visible for small elements */
+  button:not(.touch-target-exempt)::before,
+  a:not(.touch-target-exempt)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-height: 44px;
+    min-width: 44px;
+    z-index: -1;
+  }
+  
+  /* Fix for buttons with small padding */
+  .mobile-touch-button {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 16px !important;
+  }
+  
+  /* Ensure adequate spacing between touch targets */
+  .mobile-button-group > *:not(:last-child) {
+    margin-right: 8px;
+  }
+}
+
+/* Dual Range Slider Styles */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  position: relative;
+  z-index: 3;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-moz-range-track {
+  background: transparent;
+  border: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  border: none;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+/* Dark theme overrides for range slider */
+.dark input[type="range"]::-webkit-slider-thumb {
+  border: 2px solid #374151;
+}
+
+.dark input[type="range"]::-moz-range-thumb {
+  border: 2px solid #374151;
+}
+
+/* Enhanced Sidebar Scrollbar Styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #2563eb, #1d4ed8);
+}
+
+.custom-scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 3px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #4b5563, #374151);
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6b7280, #4b5563);
+}
+
+/* Enhanced Ring Offset for Color Buttons */
+.ring-offset-white {
+  --tw-ring-offset-color: #ffffff;
+}
+
+.dark .ring-offset-white {
+  --tw-ring-offset-color: #1f2937;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Focus styles for accessibility */
+.sidebar-focus:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Animation for scale effects */
+@keyframes subtle-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-subtle-bounce {
+  animation: subtle-bounce 0.3s ease-in-out;
+}
+
+/* 
+  =============================================================
+  PAGE-SPECIFIC BORDER REMOVAL
+  =============================================================
+*/
+
+/* Remove borders from product detail pages and checkout pages */
+.product-detail-page .border,
+.product-detail-page .border-border,
+.product-detail-page .border-gray-200,
+.product-detail-page .border-gray-700,
+.product-detail-page .border-t,
+.product-detail-page .border-y,
+.product-detail-page .border-l,
+.checkout-page .border,
+.checkout-page .border-border,
+.checkout-page .border-gray-200,
+.checkout-page .border-gray-700,
+.checkout-page .border-t,
+.checkout-page .border-y,
+.checkout-page .border-l {
+  border: none !important;
+}
