@@ -1,0 +1,29 @@
+make this category carousal in home page (/). place it after hero section. 
+
+**Category Card:**
+- place category image with secific low height
+- after image place category name
+- make it seofriendly, interactive and fast and also create skellaton
+
+**How this seciton will be work:**
+- first, make a component with full container width
+- then make a card carousal which will slide smoothly and also use arrow button for manual slide
+- if i hover on this category card, then open a show modal, there place that card's all subcategory smoothly. and it should be fully interactvie, smooth and modern ui and ux based. but maintain simplicity.
+- for color use css variable form global.css
+- then decalare this component section in HomePage.jsx
+- and don't use dummy data or staic data.. directly work with dynamic data from api.
+- api link demo : https://api.icommerce.passmcq.com/api/products/categories/
+
+- don't change backend or api.
+- be careful about it. no error hsould be occord
+- and makesure that, everything is working properly.
+- remove or delete all text or .md files which you will generate.
+
+
+
+
+
+1 querier api
+2. stock
+3. damage product 
+

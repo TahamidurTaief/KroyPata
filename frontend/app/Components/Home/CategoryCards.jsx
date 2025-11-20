@@ -136,11 +136,18 @@ const CategoryCards = ({ categories = [] }) => {
   ];
 
   return (
-    <section className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <section 
+      className="container mx-auto py-12 px-4 sm:px-6 lg:px-8"
+      aria-labelledby="category-section-title"
+      role="region"
+    >
       {/* Title Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-10 xl:mb-12">
         <div>
-          <h2 className="text-xl md:text-2xl lg:text-4xl xl:text-5xl font-bold text-[var(--color-text-primary)]">
+          <h2 
+            id="category-section-title"
+            className="text-xl md:text-2xl lg:text-4xl xl:text-5xl font-bold text-[var(--color-text-primary)]"
+          >
             Shop by <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-500">Category</span>
           </h2>
           <p className="mt-2 text-sm md:text-base text-[var(--color-text-secondary)]">
@@ -150,9 +157,10 @@ const CategoryCards = ({ categories = [] }) => {
         <Link
           href="/categories"
           className="group mt-5 sm:mt-0 w-auto text-end justify-end flex flex-nowrap items-center text-sm md:text-base font-medium text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
+          aria-label="View all product categories"
         >
           View All
-          <svg xmlns="http://www.w3.org/2000/svg" className="ml-1 h-5 w-5 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="ml-1 h-5 w-5 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
           </svg>
         </Link>
@@ -179,66 +187,136 @@ const CategoryCards = ({ categories = [] }) => {
               whileTap={{ scale: 0.98 }}
               onHoverStart={() => setHoveredCard(category.id)}
               onHoverEnd={() => setHoveredCard(null)}
-              className={`group relative bg-gradient-to-br ${gradient} rounded-2xl border ${border} p-5 cursor-pointer transition-all duration-300 hover:shadow-2xl overflow-hidden`}
+              className={`group relative bg-gradient-to-br ${gradient} rounded-2xl border ${border} p-6 cursor-pointer transition-all duration-300 hover:shadow-2xl overflow-hidden`}
               onClick={() => handleCategoryClick(category.slug)}
             >
+              {/* Animated Background Overlays */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-              <div className="flex justify-between items-start mb-5 relative z-10">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-lg md:text-xl text-gray-900 dark:text-white truncate">
-                    {category.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    {category.subcategories?.length || 0} subcategories
-                  </p>
-                </div>
-                <motion.span
-                  className="text-2xl text-gray-400 dark:text-gray-500 group-hover:text-blue-500 transition-colors flex-shrink-0 ml-2"
-                  animate={{ x: hoveredCard === category.id ? 5 : 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 15 }}
+              {/* Category Name Section */}
+              <div className="mb-4 relative z-10">
+                <h3 className="font-bold text-xl md:text-2xl text-gray-900 dark:text-white mb-1 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                  {category.name}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {category.subcategories?.length || 0} subcategories
+                </p>
+              </div>
+
+              {/* Images Grid: First image takes full height, 2nd and 3rd stacked */}
+              <div className="grid grid-cols-2 gap-3 relative z-10 h-48">
+                {/* First Image - Full Height */}
+                <motion.div
+                  className="row-span-2 relative overflow-hidden rounded-xl shadow-md cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  onClick={(e) => handleSubcategoryClick(e, subcategoryData[0]?.slug, category.slug)}
                 >
-                  →
-                </motion.span>
+                  {subcategoryData[0]?.src ? (
+                    <Image
+                      src={subcategoryData[0].src}
+                      alt={`${subcategoryData[0].alt} - ${category.name} subcategory`}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                      <span className="text-gray-400 dark:text-gray-500 text-sm">No Image</span>
+                    </div>
+                  )}
+                  {subcategoryData[0]?.slug && (
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                  )}
+                  {subcategoryData[0]?.name && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                      <p className="text-white text-xs font-medium truncate">{subcategoryData[0].name}</p>
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* Second Image - Top Right */}
+                <motion.div
+                  className="relative overflow-hidden rounded-xl shadow-md cursor-pointer aspect-square"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  onClick={(e) => handleSubcategoryClick(e, subcategoryData[1]?.slug, category.slug)}
+                >
+                  {subcategoryData[1]?.src ? (
+                    <Image
+                      src={subcategoryData[1].src}
+                      alt={`${subcategoryData[1].alt} - ${category.name} subcategory`}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="(max-width: 1024px) 25vw, 12.5vw"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900 flex items-center justify-center">
+                      <span className="text-purple-400 dark:text-purple-500 text-sm">No Image</span>
+                    </div>
+                  )}
+                  {subcategoryData[1]?.slug && (
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                  )}
+                  {subcategoryData[1]?.name && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                      <p className="text-white text-xs font-medium truncate">{subcategoryData[1].name}</p>
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* Third Image - Bottom Right */}
+                <motion.div
+                  className="relative overflow-hidden rounded-xl shadow-md cursor-pointer aspect-square"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  onClick={(e) => handleSubcategoryClick(e, subcategoryData[2]?.slug, category.slug)}
+                >
+                  {subcategoryData[2]?.src ? (
+                    <Image
+                      src={subcategoryData[2].src}
+                      alt={`${subcategoryData[2].alt} - ${category.name} subcategory`}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="(max-width: 1024px) 25vw, 12.5vw"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900 flex items-center justify-center">
+                      <span className="text-blue-400 dark:text-blue-500 text-sm">No Image</span>
+                    </div>
+                  )}
+                  {subcategoryData[2]?.slug && (
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                  )}
+                  {subcategoryData[2]?.name && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                      <p className="text-white text-xs font-medium truncate">{subcategoryData[2].name}</p>
+                    </div>
+                  )}
+                </motion.div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 relative z-10">
-                {subcategoryData.map((sub, subIndex) => (
-                  <div
-                    key={`${category.id}-${sub.slug || subIndex}`}
-                    className={`flex flex-col items-center ${sub.slug ? 'cursor-pointer' : 'cursor-default'}`}
-                    onClick={(e) => handleSubcategoryClick(e, sub.slug, category.slug)}
-                  >
-                    <motion.div 
-                      className="w-full relative"
-                      whileHover={sub.slug ? { scale: 1.1, y: -3 } : {}}
-                      whileTap={sub.slug ? { scale: 0.95 } : {}}
-                    >
-                      <SubcategoryImage src={sub.src} alt={sub.alt} />
-                      {sub.slug && (
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors duration-300" />
-                      )}
-                    </motion.div>
-                    {sub.name && (
-                      <p className="text-xs text-center mt-2 text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors duration-200 truncate w-full px-1">
-                        {sub.name}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-
+              {/* Hover Action Button */}
               <motion.div
-                className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-white dark:from-gray-900 via-white/80 dark:via-gray-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-center z-20"
+                className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white dark:from-gray-900 via-white/90 dark:via-gray-900/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-center z-20"
                 initial={{ opacity: 0, y: 10 }}
               >
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-full shadow-md transition-colors"
+                  className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-sm font-semibold rounded-full shadow-lg transition-all duration-300"
                 >
-                  View Category
+                  Explore {category.name}
                 </motion.button>
               </motion.div>
             </motion.div>
@@ -246,50 +324,135 @@ const CategoryCards = ({ categories = [] }) => {
         })}
       </motion.div>
 
+      {/* Mobile UI - Modern Card Layout */}
+      <motion.section 
+        className="lg:hidden mb-12"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+      >
+        <div className="grid grid-cols-2 gap-4 md:gap-6">
+          {displayedCategories.map((category, index) => {
+            const subcategoryData = getSubcategoryData(category);
+            const gradient = cardGradients[index % cardGradients.length];
+            const border = cardBorders[index % cardBorders.length];
 
+            return (
+              <motion.div
+                key={category.id}
+                variants={itemVariants}
+                whileTap={{ scale: 0.95 }}
+                className={`group relative bg-gradient-to-br ${gradient} rounded-xl md:rounded-2xl border ${border} p-3 md:p-4 cursor-pointer transition-all duration-300 active:shadow-xl overflow-hidden`}
+                onClick={() => handleCategoryClick(category.slug)}
+              >
+                {/* Animated Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-active:opacity-100 transition-opacity duration-300" />
 
-      {/* Mobile UI - Exact same layout as /categories page */}
-      <section className="lg:hidden mb-12">
-        {/* <h2 className="text-2xl md:text-2xl lg:text-3xl font-bold mb-6 text-[var(--color-text-primary)]">
-          Top <span className="text-sky-500">Categories</span>
-        </h2> */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {categories.slice(0, 8).map((category) => {
-            try {
-              // Transform data to match CategoryCard component props exactly like /categories page
-              const categoryData = {
-                id: category.slug || category.id, // Use slug for routing consistency
-                title: category.name || 'Unknown Category',
-                images: (() => {
-                  // Collect real images only (same logic as categories page)
-                  const images = [];
-                  if (category?.image_url) images.push(category.image_url);
-                  if (Array.isArray(category?.subcategories)) {
-                    for (const sc of category.subcategories) {
-                      if (sc?.image_url && images.length < 4) images.push(sc.image_url);
-                    }
-                  }
-                  // Pad with nulls so UI can render placeholders (gradients) instead of dummy images
-                  while (images.length < 4) images.push(null);
-                  return images.slice(0, 4);
-                })(),
-                total_products: category.total_products ?? 0,
-                sub_categories: category.sub_category_count ?? (category.subcategories?.length || 0)
-              };
-              
-              return (
-                <CategoryCard
-                  key={category.id}
-                  {...categoryData}
-                />
-              );
-            } catch (error) {
-              console.error('Error rendering category:', category, error);
-              return null;
-            }
+                {/* Category Name */}
+                <div className="mb-3 relative z-10">
+                  <h3 className="font-bold text-base md:text-lg text-gray-900 dark:text-white truncate">
+                    {category.name}
+                  </h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                    {category.subcategories?.length || 0} items
+                  </p>
+                </div>
+
+                {/* Images Grid */}
+                <div className="grid grid-cols-2 gap-2 relative z-10 h-32 md:h-40">
+                  {/* First Image - Full Height */}
+                  <div
+                    className="row-span-2 relative overflow-hidden rounded-lg shadow-sm active:scale-95 transition-transform duration-200"
+                    onClick={(e) => handleSubcategoryClick(e, subcategoryData[0]?.slug, category.slug)}
+                  >
+                    {subcategoryData[0]?.src ? (
+                      <Image
+                        src={subcategoryData[0].src}
+                        alt={`${subcategoryData[0].alt} - ${category.name} subcategory`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        loading="lazy"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                        <span className="text-gray-400 dark:text-gray-500 text-xs">No Image</span>
+                      </div>
+                    )}
+                    {subcategoryData[0]?.name && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
+                        <p className="text-white text-[10px] md:text-xs font-medium truncate">
+                          {subcategoryData[0].name}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Second Image - Top Right */}
+                  <div
+                    className="relative overflow-hidden rounded-lg shadow-sm aspect-square active:scale-95 transition-transform duration-200"
+                    onClick={(e) => handleSubcategoryClick(e, subcategoryData[1]?.slug, category.slug)}
+                  >
+                    {subcategoryData[1]?.src ? (
+                      <Image
+                        src={subcategoryData[1].src}
+                        alt={`${subcategoryData[1].alt} - ${category.name} subcategory`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 25vw, 12.5vw"
+                        loading="lazy"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900 flex items-center justify-center">
+                        <span className="text-purple-400 dark:text-purple-500 text-xs">+</span>
+                      </div>
+                    )}
+                    {subcategoryData[1]?.name && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1">
+                        <p className="text-white text-[9px] md:text-[10px] font-medium truncate">
+                          {subcategoryData[1].name}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Third Image - Bottom Right */}
+                  <div
+                    className="relative overflow-hidden rounded-lg shadow-sm aspect-square active:scale-95 transition-transform duration-200"
+                    onClick={(e) => handleSubcategoryClick(e, subcategoryData[2]?.slug, category.slug)}
+                  >
+                    {subcategoryData[2]?.src ? (
+                      <Image
+                        src={subcategoryData[2].src}
+                        alt={`${subcategoryData[2].alt} - ${category.name} subcategory`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 25vw, 12.5vw"
+                        loading="lazy"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900 flex items-center justify-center">
+                        <span className="text-blue-400 dark:text-blue-500 text-xs">+</span>
+                      </div>
+                    )}
+                    {subcategoryData[2]?.name && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1">
+                        <p className="text-white text-[9px] md:text-[10px] font-medium truncate">
+                          {subcategoryData[2].name}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            );
           })}
         </div>
-      </section>
+      </motion.section>
     </section>
   );
 };

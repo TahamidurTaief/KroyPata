@@ -3,6 +3,7 @@
 
 import React from "react";
 import Hero from "./Hero";
+import CategoryCarousel from "./CategoryCarousel";
 import CategoryCards from "./CategoryCards";
 import FilterProducts from "./FilterProducts/FilterProducts";
 import HorizontalBannerSlider from "./HorizontalBanner";
@@ -15,7 +16,8 @@ const HomePage = ({ initialProducts, categories, horizontalBanners, offerBanners
   return (
     <div className="w-full min-h-screen bg-[var(--color-background)]">
       <Hero />
-      <CategoryCards categories={categories} />
+      <CategoryCarousel />
+      {/* <CategoryCards categories={categories} /> */}
       <FilterProducts 
         initialProducts={initialProducts} 
         categories={categories} 

@@ -7,8 +7,7 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { 
   X, 
-  ChevronRight, 
-  ArrowLeft,
+  ChevronRight,
   Grid3X3,
   Tag
 } from 'lucide-react';
@@ -17,19 +16,12 @@ const MobileSidebar = ({ isOpen, onClose, categories = [] }) => {
   const router = useRouter();
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [showSubcategories, setShowSubcategories] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [subcategories, setSubcategories] = useState([]);
+  const [expandedCategories, setExpandedCategories] = useState(new Set());
   const sidebarRef = useRef(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Debug log when sidebar opens/closes
-  useEffect(() => {
-    console.log('MobileSidebar isOpen:', isOpen);
-  }, [isOpen]);
 
   const isDark = mounted && theme === 'dark';
 
@@ -40,28 +32,28 @@ const MobileSidebar = ({ isOpen, onClose, categories = [] }) => {
     onClose();
   };
 
-  // Handle arrow click - show subcategories
-  const handleShowSubcategories = (category, e) => {
+  // Toggle accordion for category subcategories
+  const toggleCategoryExpansion = (categoryId, e) => {
     e.stopPropagation();
-    setSelectedCategory(category);
-    setSubcategories(category.subcategories || []);
-    setShowSubcategories(true);
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
   };
 
   // Handle subcategory click - redirect to products with subcategory filter
-  const handleSubcategoryClick = (subcategory) => {
-    const categorySlug = selectedCategory?.slug || selectedCategory?.name?.toLowerCase().replace(/\s+/g, '-') || '';
+  const handleSubcategoryClick = (category, subcategory, e) => {
+    e.stopPropagation();
+    const categorySlug = category?.slug || category?.name?.toLowerCase().replace(/\s+/g, '-') || '';
     const subcategorySlug = subcategory.slug || subcategory.name?.toLowerCase().replace(/\s+/g, '-') || '';
     
     router.push(`/products?category=${encodeURIComponent(categorySlug)}&subcategory=${encodeURIComponent(subcategorySlug)}`);
     onClose();
-  };
-
-  // Handle back from subcategories
-  const handleBackToCategories = () => {
-    setShowSubcategories(false);
-    setSelectedCategory(null);
-    setSubcategories([]);
   };
 
   // Close sidebar when clicking outside
@@ -145,76 +137,61 @@ const MobileSidebar = ({ isOpen, onClose, categories = [] }) => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                {showSubcategories 
-                  ? selectedCategory?.name || 'Subcategories'
-                  : 'Menu'
-                }
+                Categories
               </motion.h2>
-              <div className="flex items-center gap-2">
-                {showSubcategories && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    onClick={handleBackToCategories}
-                    className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all duration-200 flex items-center justify-center ${
-                      isDark 
-                        ? 'hover:bg-gray-800 text-gray-300 hover:text-white' 
-                        : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
-                    } hover:scale-105 active:scale-95`}
-                    aria-label="Back to categories"
-                  >
-                    <ArrowLeft size={20} />
-                  </motion.button>
-                )}
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.05 }}
-                  onClick={onClose}
-                  className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all duration-200 flex items-center justify-center ${
-                    isDark 
-                      ? 'hover:bg-gray-800 text-gray-300 hover:text-white' 
-                      : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
-                  } hover:scale-105 active:scale-95`}
-                  aria-label="Close menu"
-                >
-                  <X size={20} />
-                </motion.button>
-              </div>
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.05 }}
+                onClick={onClose}
+                className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all duration-200 flex items-center justify-center ${
+                  isDark 
+                    ? 'hover:bg-gray-800 text-gray-300 hover:text-white' 
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                } hover:scale-105 active:scale-95`}
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </motion.button>
             </div>
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
-              <AnimatePresence mode="wait">
-                {!showSubcategories ? (
-                  <motion.div
-                    key="main-menu"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                    className="p-4 space-y-6"
-                  >
-                    {/* Categories */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${
-                          isDark ? 'from-green-400 to-blue-400' : 'from-green-500 to-blue-500'
-                        }`} />
-                        <Grid3X3 size={16} className={isDark ? 'text-gray-300' : 'text-gray-600'} />
-                        <h3 className={`text-sm font-semibold ${
-                          isDark ? 'text-gray-300' : 'text-gray-600'
-                        }`}>
-                          CATEGORIES
-                        </h3>
-                      </div>
-                      <div className="space-y-1">
-                        {categories.map((category, index) => (
-                          <motion.div
-                            key={category.id || category.slug || index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 + index * 0.05 }}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="p-4 space-y-6"
+              >
+                {/* Categories with Accordion */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${
+                      isDark ? 'from-green-400 to-blue-400' : 'from-green-500 to-blue-500'
+                    }`} />
+                    <Grid3X3 size={16} className={isDark ? 'text-gray-300' : 'text-gray-600'} />
+                    <h3 className={`text-sm font-semibold ${
+                      isDark ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
+                      ALL CATEGORIES
+                    </h3>
+                  </div>
+                  <div className="space-y-1">
+                    {categories.map((category, index) => {
+                      const hasSubcategories = category.subcategories && category.subcategories.length > 0;
+                      const isExpanded = expandedCategories.has(category.id);
+                      
+                      return (
+                        <motion.div
+                          key={category.id || category.slug || index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 + index * 0.05 }}
+                          className="overflow-hidden"
+                        >
+                          {/* Category Item */}
+                          <div
                             className={`flex items-center justify-between p-3 rounded-xl transition-all duration-200 group ${
                               isDark 
                                 ? 'hover:bg-gradient-to-r hover:from-gray-800 hover:to-gray-700' 
@@ -253,10 +230,9 @@ const MobileSidebar = ({ isOpen, onClose, categories = [] }) => {
                               </span>
                             </div>
 
-                            {/* Arrow Button for Subcategories */}
-                            {category.subcategories && category.subcategories.length > 0 && (
+                            {/* Accordion Toggle Button */}
+                            {hasSubcategories && (
                               <div className="flex items-center gap-1">
-                                {/* Subcategory count badge */}
                                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium transition-all duration-200 ${
                                   isDark 
                                     ? 'bg-blue-900/30 text-blue-300 group-hover:bg-blue-800/50 group-hover:text-blue-200' 
@@ -265,121 +241,76 @@ const MobileSidebar = ({ isOpen, onClose, categories = [] }) => {
                                   {category.subcategories.length}
                                 </span>
                                 <button
-                                  onClick={(e) => handleShowSubcategories(category, e)}
+                                  onClick={(e) => toggleCategoryExpansion(category.id, e)}
                                   className={`min-h-[44px] min-w-[44px] p-2 rounded-full transition-all duration-200 hover:scale-110 flex items-center justify-center ${
                                     isDark 
                                       ? 'hover:bg-gray-700 text-gray-400 hover:text-blue-300' 
                                       : 'hover:bg-gray-200 text-gray-500 hover:text-blue-600'
                                   }`}
-                                  aria-label={`View ${category.subcategories.length} subcategories`}
+                                  aria-label={isExpanded ? 'Collapse subcategories' : 'Expand subcategories'}
                                 >
-                                  <ChevronRight size={16} />
+                                  <ChevronRight 
+                                    size={16} 
+                                    className={`transition-transform duration-200 ${
+                                      isExpanded ? 'rotate-90' : ''
+                                    }`}
+                                  />
                                 </button>
                               </div>
                             )}
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : (
-                  // Subcategories View
-                  <motion.div
-                    key="subcategories"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.2 }}
-                    className="p-4"
-                  >
-                    {/* Category Info */}
-                    <div className={`p-4 rounded-xl mb-4 ${
-                      isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'
-                    } border`}>
-                      <div className="flex items-center gap-3">
-                        {selectedCategory?.image_url || selectedCategory?.image ? (
-                          <div className="relative w-12 h-12 rounded-lg overflow-hidden ring-2 ring-gray-200 dark:ring-gray-600">
-                            <Image 
-                              src={selectedCategory.image_url || selectedCategory.image} 
-                              alt={selectedCategory.name || 'Category'} 
-                              fill 
-                              className="object-cover" 
-                            />
                           </div>
-                        ) : (
-                          <div className={`w-12 h-12 rounded-lg ${
-                            isDark ? 'bg-gray-700' : 'bg-gray-200'
-                          } flex items-center justify-center`}>
-                            <Tag size={20} className={isDark ? 'text-gray-400' : 'text-gray-500'} />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className={`font-semibold ${
-                            isDark ? 'text-white' : 'text-gray-900'
-                          }`}>
-                            {selectedCategory?.name || selectedCategory?.title}
-                          </h3>
-                          <p className={`text-sm ${
-                            isDark ? 'text-gray-400' : 'text-gray-500'
-                          }`}>
-                            {subcategories.length} subcategories
-                          </p>
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Subcategories List */}
-                    <div className="space-y-1">
-                      {subcategories.length === 0 ? (
-                        <div className={`text-center py-8 ${
-                          isDark ? 'text-gray-400' : 'text-gray-500'
-                        }`}>
-                          <Tag size={32} className="mx-auto mb-2 opacity-50" />
-                          <p>No subcategories found</p>
-                        </div>
-                      ) : (
-                        subcategories.map((subcategory, index) => (
-                          <motion.button
-                            key={subcategory.id || subcategory.slug || index}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            onClick={() => handleSubcategoryClick(subcategory)}
-                            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${
-                              isDark 
-                                ? 'hover:bg-gray-800 text-gray-200' 
-                                : 'hover:bg-gray-50 text-gray-700'
-                            }`}
-                          >
-                            {/* Subcategory Image */}
-                            {subcategory.image_url || subcategory.image ? (
-                              <div className="relative w-8 h-8 rounded-lg overflow-hidden ring-2 ring-gray-200 dark:ring-gray-600">
-                                <Image 
-                                  src={subcategory.image_url || subcategory.image} 
-                                  alt={subcategory.name || 'Subcategory'} 
-                                  fill 
-                                  className="object-cover" 
-                                />
-                              </div>
-                            ) : (
-                              <div className={`w-8 h-8 rounded-lg ${
-                                isDark ? 'bg-gray-700' : 'bg-gray-200'
-                              } flex items-center justify-center`}>
-                                <Tag size={14} className={isDark ? 'text-gray-400' : 'text-gray-500'} />
-                              </div>
+                          {/* Subcategories Accordion Panel */}
+                          <AnimatePresence>
+                            {hasSubcategories && isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="pl-12 pr-3 py-2 space-y-1">
+                                  {category.subcategories.map((subcategory, subIdx) => (
+                                    <motion.button
+                                      key={subcategory.id || subcategory.slug || subIdx}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: subIdx * 0.03 }}
+                                      onClick={(e) => handleSubcategoryClick(category, subcategory, e)}
+                                      className={`w-full flex items-center gap-2 p-2 rounded-lg transition-all duration-150 ${
+                                        isDark 
+                                          ? 'hover:bg-gray-800 text-gray-300 hover:text-white' 
+                                          : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                                      }`}
+                                    >
+                                      {subcategory.image_url || subcategory.image ? (
+                                        <div className="relative w-6 h-6 rounded-md overflow-hidden">
+                                          <Image 
+                                            src={subcategory.image_url || subcategory.image} 
+                                            alt={subcategory.name || 'Subcategory'} 
+                                            fill 
+                                            className="object-cover" 
+                                          />
+                                        </div>
+                                      ) : (
+                                        <div className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
+                                      )}
+                                      <span className="text-sm font-medium text-left">
+                                        {subcategory.name || subcategory.title}
+                                      </span>
+                                    </motion.button>
+                                  ))}
+                                </div>
+                              </motion.div>
                             )}
-                            
-                            {/* Subcategory Name */}
-                            <span className="font-medium text-left">
-                              {subcategory.name || subcategory.title}
-                            </span>
-                          </motion.button>
-                        ))
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                          </AnimatePresence>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </>

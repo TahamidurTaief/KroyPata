@@ -53,41 +53,147 @@ const ThemeToggle = () => {
   );
 };
 
-const CategoryDropdown = ({ isOpen, categories, onClose }) => (
-  <AnimatePresence>
-    {isOpen && (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
-        className="absolute top-full left-0 mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-lg z-50 max-h-[70vh] overflow-y-auto py-2"
-      >
-        {categories.length === 0 ? (
-          <div className="px-4 py-2 text-sm text-gray-500">No categories found</div>
-        ) : (
-          <ul>
-            {categories.map((cat, idx) => (
-              <li key={cat.id || idx}>
-                <Link
-                  href={`/products?category=${encodeURIComponent(cat.slug || cat.name)}`}
-                  className="block px-4 py-2.5 text-sm hover:bg-[var(--color-muted-bg)] transition-colors text-[var(--color-text-primary)] flex items-center gap-3"
-                  onClick={onClose}
-                >
-                  {cat.image_url || cat.image ? (
-                     <Image src={cat.image_url || cat.image} width={20} height={20} alt={cat.name} className="rounded-full object-cover w-5 h-5" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700" />
-                  )}
-                  {cat.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
+const CategoryDropdown = ({ isOpen, categories, onClose }) => {
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [showSubcategories, setShowSubcategories] = useState(false);
+  const hoverTimeoutRef = useRef(null);
+
+  const handleCategoryHover = (category) => {
+    // Clear any existing timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    
+    if (category?.subcategories && category.subcategories.length > 0) {
+      setHoveredCategory(category);
+      setShowSubcategories(true);
+    } else {
+      // Delay hiding to prevent flickering
+      hoverTimeoutRef.current = setTimeout(() => {
+        setShowSubcategories(false);
+        setHoveredCategory(null);
+      }, 150);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    // Add delay before closing to prevent flickering
+    hoverTimeoutRef.current = setTimeout(() => {
+      setShowSubcategories(false);
+      setHoveredCategory(null);
+    }, 200);
+  };
+
+  const handleMouseEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          className="absolute top-full left-0 mt-2 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-lg z-50 max-h-[70vh] overflow-visible flex"
+        >
+          {/* Categories Column */}
+          <div className="w-64 overflow-y-auto py-2 border-r border-[var(--color-border)]">
+            {categories.length === 0 ? (
+              <div className="px-4 py-2 text-sm text-gray-500">No categories found</div>
+            ) : (
+              <ul>
+                {categories.map((cat, idx) => {
+                  const hasSubcategories = cat.subcategories && cat.subcategories.length > 0;
+                  const isHovered = hoveredCategory?.id === cat.id;
+                  
+                  return (
+                    <li 
+                      key={cat.id || idx}
+                      onMouseEnter={() => handleCategoryHover(cat)}
+                    >
+                      <Link
+                        href={`/products?category=${encodeURIComponent(cat.slug || cat.name)}`}
+                        className={`px-4 py-2.5 text-sm transition-colors text-[var(--color-text-primary)] flex items-center justify-between gap-3 group ${
+                          isHovered ? 'bg-[var(--color-muted-bg)]' : 'hover:bg-[var(--color-muted-bg)]'
+                        }`}
+                        onClick={onClose}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          {cat.image_url || cat.image ? (
+                            <Image src={cat.image_url || cat.image} width={20} height={20} alt={cat.name} className="rounded-full object-cover w-5 h-5" />
+                          ) : (
+                            <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700" />
+                          )}
+                          <span className="flex-1">{cat.name}</span>
+                        </div>
+                        {hasSubcategories && (
+                          <IoIosArrowDown size={14} className="transform -rotate-90 text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors" />
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          {/* Subcategories Panel - Shows on hover */}
+          <AnimatePresence>
+            {showSubcategories && hoveredCategory && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.15 }}
+                className="w-64 overflow-y-auto py-2 px-2"
+              >
+                <div className="px-3 py-2 mb-2 border-b border-[var(--color-border)]">
+                  <p className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wide font-medium">
+                    {hoveredCategory.name}
+                  </p>
+                </div>
+                {hoveredCategory.subcategories.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-gray-500">No subcategories</div>
+                ) : (
+                  <div className="space-y-1">
+                    {hoveredCategory.subcategories.map((sub, idx) => (
+                      <Link
+                        key={sub.id || idx}
+                        href={`/products?category=${encodeURIComponent(hoveredCategory.slug || hoveredCategory.name)}&subcategory=${encodeURIComponent(sub.slug || sub.name)}`}
+                        className="px-3 py-2 text-sm hover:bg-[var(--color-muted-bg)] rounded-md transition-colors text-[var(--color-text-primary)] flex items-center gap-2"
+                        onClick={onClose}
+                      >
+                        {sub.image_url || sub.image ? (
+                          <Image src={sub.image_url || sub.image} width={16} height={16} alt={sub.name} className="rounded object-cover w-4 h-4" />
+                        ) : (
+                          <div className="w-1 h-1 rounded-full bg-[var(--color-text-secondary)]" />
+                        )}
+                        {sub.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 export default function NavbarClient({ initialCategories = [], initialOfferCategories = [] }) {
   const { openAuthModal, user, isAuthenticated, logout } = useAuth();
@@ -106,9 +212,10 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   
-  // Refs for clicking outside
+  // Refs for clicking outside and hover delays
   const catsRef = useRef(null);
   const userRef = useRef(null);
+  const categoryHoverTimeout = useRef(null);
 
   // Scroll Listener
   useEffect(() => {
@@ -149,8 +256,9 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const navContainerRef = useRef(null);
   const moreDropdownRef = useRef(null);
+  const offerLinksRef = useRef([]);
 
-  // Calculate visible and overflow offers based on container width
+  // Calculate visible and overflow offers based on actual rendered widths
   useEffect(() => {
     if (!initialOfferCategories || initialOfferCategories.length === 0) {
       setVisibleOffers([]);
@@ -158,44 +266,90 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
       return;
     }
 
+    // Initially show all offers to measure them
+    setVisibleOffers(initialOfferCategories);
+    setOverflowOffers([]);
+
     const calculateVisibleOffers = () => {
       const container = navContainerRef.current;
       if (!container) return;
 
       const containerWidth = container.offsetWidth;
-      const allCatsButtonWidth = 180; // Approximate width of "All Categories" button
-      const moreButtonWidth = 100; // Approximate width of "More" button
-      const padding = 50; // Extra padding for safety
+      const allCatsButton = catsRef.current;
+      const allCatsButtonWidth = allCatsButton ? allCatsButton.offsetWidth : 180;
+      const moreButtonWidth = 120; // Reserve space for "More" button
+      const gap = 24; // gap-6 = 24px
+      const padding = 32; // Container padding
       
-      let availableWidth = containerWidth - allCatsButtonWidth - moreButtonWidth - padding;
+      let availableWidth = containerWidth - allCatsButtonWidth - moreButtonWidth - padding - (gap * 2);
       let currentWidth = 0;
       let visibleCount = 0;
 
-      // Estimate each offer link width (approximate based on text length)
-      for (let i = 0; i < initialOfferCategories.length; i++) {
-        const offer = initialOfferCategories[i];
-        const estimatedWidth = offer.title.length * 8 + 40; // rough estimation
-        
-        if (currentWidth + estimatedWidth <= availableWidth) {
-          currentWidth += estimatedWidth;
-          visibleCount++;
-        } else {
-          break;
+      // Calculate based on actual offer link widths if they're rendered
+      if (offerLinksRef.current && offerLinksRef.current.length > 0) {
+        for (let i = 0; i < offerLinksRef.current.length; i++) {
+          const linkElement = offerLinksRef.current[i];
+          if (!linkElement) continue;
+          
+          const linkWidth = linkElement.offsetWidth + gap;
+          
+          if (currentWidth + linkWidth <= availableWidth) {
+            currentWidth += linkWidth;
+            visibleCount++;
+          } else {
+            break;
+          }
+        }
+      } else {
+        // Fallback to estimation if refs not available
+        for (let i = 0; i < initialOfferCategories.length; i++) {
+          const offer = initialOfferCategories[i];
+          const estimatedWidth = (offer.title?.length || 10) * 8 + 40 + gap;
+          
+          if (currentWidth + estimatedWidth <= availableWidth) {
+            currentWidth += estimatedWidth;
+            visibleCount++;
+          } else {
+            break;
+          }
         }
       }
 
-      // Ensure at least 2 offers are visible if space permits
-      if (visibleCount < 2 && initialOfferCategories.length >= 2 && containerWidth > 600) {
-        visibleCount = 2;
+      // Show at most 4 visible offers on desktop to prevent overcrowding
+      visibleCount = Math.min(visibleCount, 4);
+      
+      // Ensure at least 1 offer is visible if space permits
+      if (visibleCount < 1 && initialOfferCategories.length >= 1 && containerWidth > 400) {
+        visibleCount = 1;
       }
 
-      setVisibleOffers(initialOfferCategories.slice(0, visibleCount));
-      setOverflowOffers(initialOfferCategories.slice(visibleCount));
+      // Only update if counts actually changed to prevent infinite loops
+      const newVisibleOffers = initialOfferCategories.slice(0, visibleCount);
+      const newOverflowOffers = initialOfferCategories.slice(visibleCount);
+      
+      setVisibleOffers(prev => {
+        if (JSON.stringify(prev) !== JSON.stringify(newVisibleOffers)) {
+          return newVisibleOffers;
+        }
+        return prev;
+      });
+      
+      setOverflowOffers(prev => {
+        if (JSON.stringify(prev) !== JSON.stringify(newOverflowOffers)) {
+          return newOverflowOffers;
+        }
+        return prev;
+      });
     };
 
-    calculateVisibleOffers();
+    // Delay calculation to ensure DOM is fully rendered
+    const timeoutId = setTimeout(calculateVisibleOffers, 100);
+    
     window.addEventListener('resize', calculateVisibleOffers);
-    return () => window.removeEventListener('resize', calculateVisibleOffers);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', calculateVisibleOffers);
+    };
   }, [initialOfferCategories]);
 
   // Click outside for More dropdown
@@ -270,9 +424,9 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
             </div>
 
             {/* SHOP ICON (Replaced Flag) */}
-            <Link href="/products" className="flex items-center gap-2 cursor-pointer hover:opacity-80">
+            <Link href="/products" className="flex items-center gap-2 cursor-pointer group">
               <CiShop size={28} className="text-[var(--color-text-primary)]" />
-              <div className="text-xs leading-tight">
+              <div className="text-xs leading-tight group-hover:opacity-80 transition-opacity">
                 <p className="text-[var(--color-text-secondary)]">Browse</p>
                 <p className="font-bold text-[var(--color-text-primary)]">Shop</p>
               </div>
@@ -280,7 +434,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
 
             {/* User Account Section - Updated Logic */}
             <div 
-              className="flex items-center gap-2 cursor-pointer hover:opacity-80 relative"
+              className="flex items-center gap-2 cursor-pointer relative group"
               ref={userRef}
               onClick={() => {
                 if (isAuthenticated) {
@@ -291,7 +445,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
               }}
             >
               <CiUser size={28} className="text-[var(--color-text-primary)]" />
-              <div className="text-xs leading-tight">
+              <div className="text-xs leading-tight group-hover:opacity-80 transition-opacity">
                 {/* Label: Welcome / Customer / Wholesaler */}
                 <p className={`${isWholesaler ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[var(--color-text-secondary)]'}`}>
                     {getUserLabel()}
@@ -334,7 +488,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
             </div>
 
             {/* Cart */}
-            <Link href="/cart" className="flex items-center gap-2 cursor-pointer hover:opacity-80 relative">
+            <Link href="/cart" className="flex items-center gap-2 cursor-pointer relative group">
               <div className="relative">
                 <CiShoppingCart size={30} className="text-[var(--color-text-primary)]" />
                 {cartMounted && cartCount > 0 && (
@@ -343,8 +497,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                   </span>
                 )}
               </div>
-              <div className="flex flex-col text-xs">
-                 <span className="bg-black text-white px-1.5 rounded-full mb-0.5 text-[9px] w-fit">0</span>
+              <div className="flex flex-col text-xs group-hover:opacity-80 transition-opacity">
                  <span className="font-bold text-[var(--color-text-primary)]">Cart</span>
               </div>
             </Link>
@@ -359,10 +512,23 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
         <div className="border-t border-[var(--color-border)]">
           <div ref={navContainerRef} className="container mx-auto px-4 flex items-center h-12 gap-6">
             
-            {/* All Categories Pill Button */}
-            <div className="relative" ref={catsRef}>
+            {/* All Categories Pill Button - Hover Activated */}
+            <div 
+              className="relative" 
+              ref={catsRef}
+              onMouseEnter={() => {
+                if (categoryHoverTimeout.current) {
+                  clearTimeout(categoryHoverTimeout.current);
+                }
+                setAllCatsOpen(true);
+              }}
+              onMouseLeave={() => {
+                categoryHoverTimeout.current = setTimeout(() => {
+                  setAllCatsOpen(false);
+                }, 200);
+              }}
+            >
               <button 
-                onClick={() => setAllCatsOpen(!allCatsOpen)}
                 className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition-colors ${allCatsOpen ? 'bg-black text-white' : 'bg-[var(--color-muted-bg)] hover:bg-gray-300 dark:hover:bg-gray-700 text-[var(--color-text-primary)]'}`}
               >
                 <IoMdMenu size={20} />
@@ -379,9 +545,12 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
 
             {/* Special Offers - Dynamic from Backend */}
             <nav className="flex-1 flex items-center gap-6">
-              {visibleOffers.map((offer) => (
+              {visibleOffers.map((offer, idx) => (
                 <Link
                   key={offer.id}
+                  ref={(el) => {
+                    if (el) offerLinksRef.current[idx] = el;
+                  }}
                   href={offer.link}
                   target="_blank"
                   rel="noopener noreferrer"

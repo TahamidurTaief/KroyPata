@@ -1,56 +1,54 @@
 "use client";
 
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { LuShoppingCart, LuHeart, LuEye } from "react-icons/lu";
-import { FiX } from "react-icons/fi";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LuShoppingCart, LuHeart } from "react-icons/lu";
+import { motion } from "framer-motion";
 import { useModal } from "@/app/contexts/ModalContext";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { addToCart } from "@/app/lib/cartUtils";
 import { useThemeAssets } from "@/app/hooks/useThemeAssets";
-import { formatBDTWithIcon, ProductPrice } from "@/app/utils/currencyWithIcon";
 import { WholesalePricingDisplay, WholesalePricingBadge, useWholesalePricingLogic } from "./WholesalePricingNew";
 import Tk_icon from "./Tk_icon";
 
 const ProductCard = ({ productData }) => {
   const { showModal } = useModal();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { noImagePlaceholder, fallbackPlaceholder, mounted } = useThemeAssets();
   
-  // Call hook at component level, not inside event handler
+  // Hook for wholesale logic
   const { isUsingWholesalePrice, minimumPurchase } = useWholesalePricingLogic(productData);
   
   const colors = productData?.colors || [];
   const sizes = productData?.sizes || [];
   const inStock = productData?.stock > 0;
+  const isWholesaler = user?.is_wholesaler === true;
 
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(colors?.[0] || null);
-  const [selectedSize, setSelectedSize] = useState(sizes?.[0] || null);
+  const [selectedColor] = useState(colors?.[0] || null);
+  const [selectedSize] = useState(sizes?.[0] || null);
   const [imageError, setImageError] = useState(false);
   
-  const allImages = [productData?.thumbnail_url, ...(productData?.additional_images?.map(img => img.image) || [])].filter(Boolean);
-  const [selectedImage, setSelectedImage] = useState(allImages[0] || null); 
-
   const productUrl = `/products/${productData?.slug}`;
+
+  // Helper to get plain description
+  const plainDescription = productData?.short_description 
+    ? productData.short_description 
+    : productData?.description?.replace(/<[^>]*>?/gm, '') || '';
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!inStock) return;
     
-    // Use the values calculated at component level
     const quantity = isUsingWholesalePrice && minimumPurchase > 1 ? minimumPurchase : 1;
     
-    // Add item to cart using utility function with user data for wholesale pricing
     const result = addToCart(productData, {
       quantity: quantity,
       selectedColor,
       selectedSize,
-      user: user  // Pass user data to determine pricing
+      user: user 
     });
     
     if (result.success) {
@@ -63,7 +61,6 @@ const ProductCard = ({ productData }) => {
         onPrimaryAction: () => { window.location.href = '/cart'; },
         secondaryActionText: 'Continue'
       });
-      closeQuickView();
     } else {
       showModal({
         status: 'error',
@@ -86,305 +83,214 @@ const ProductCard = ({ productData }) => {
     });
   };
 
-  const handleQuickView = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setQuickViewOpen(true);
-  };
-
-  const closeQuickView = () => setQuickViewOpen(false);
-  
-  // Get the appropriate placeholder image based on theme and product image availability
   const getImageSrc = (imageSrc) => {
     if (imageError || !imageSrc) {
-      // If error or no image, use theme-aware placeholder
       return mounted ? noImagePlaceholder : fallbackPlaceholder;
     }
     return imageSrc;
   };
 
-  const handleImageError = () => {
-    setImageError(true);
-  };
-
   return (
-    <>
-      <Link href={productUrl} passHref className="h-full">
-        <motion.div
-          className="group relative bg-[var(--color-surface)] p-3 rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300  h-full flex flex-col"
-          whileHover={{ scale: 1.02 }}
-        >
-          <div className="relative aspect-square overflow-hidden rounded-lg mb-3">
-            <Image
-              src={getImageSrc(productData?.thumbnail_url)}
-              alt={productData?.name || 'Product Image'}
-              fill
-              className="object-cover rounded-lg transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              onError={handleImageError}
-              unoptimized={getImageSrc(productData?.thumbnail_url).endsWith('.svg')}
-            />
-            
-            {/* Pricing Badge - Positioned at top-right corner */}
-            <div className="absolute top-2 right-2 z-10">
-              <WholesalePricingBadge 
-                product={productData}
-                hideUnavailableOnUnauthenticated={false}
-                forceShowUnavailable={false}
-              />
-            </div>
-            
-            <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-              {[
-                { icon: LuEye, action: handleQuickView, label: "Quick View" },
-                { icon: LuHeart, action: handleAddToWishlist, label: "Wishlist", active: isWishlisted },
-                { icon: LuShoppingCart, action: handleAddToCart, label: "Add to Cart", disabled: !inStock },
-              ].map((item, index) => (
-                <motion.button
-                  key={index}
-                  onClick={item.action}
-                  disabled={item.disabled}
-                  className={`min-h-[44px] min-w-[44px] p-3 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center ${item.active ? "bg-red-500 text-white" : "bg-white/90 text-gray-800 hover:bg-white"} disabled:bg-gray-300 disabled:cursor-not-allowed`}
-                  aria-label={item.label}
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <item.icon className={`text-lg ${item.active ? 'fill-current' : ''}`} />
-                </motion.button>
-              ))}
-            </div>
-          </div>
-          <div className="flex-grow flex flex-col">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{productData?.sub_category?.name || 'Category'}</span>
-            <h3 className="font-semibold text-foreground mt-1 mb-2 line-clamp-2 group-hover:text-primary transition-colors">{productData?.name}</h3>
-            
-            {/* Stock Info */}
-            <div className="flex flex-col gap-1 mb-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className={`font-medium ${inStock ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {inStock ? `${productData?.stock} in stock` : 'Out of stock'}
-                </span>
-              </div>
-            </div>
-            
-            <div className="mt-auto">
-              {/* Use new wholesale pricing component with user-specific display */}
-              <WholesalePricingDisplay 
-                product={productData} 
-                size="medium"
-                showLabels={true} // Always show labels and badges
-                hideUnavailableOnUnauthenticated={false} // Show wholesale status clearly
-                forceShowUnavailable={false}
-                showOnlyPrimaryPrice={false} // Always show full pricing info in cards
-              />
-              
-              {/* Add to Cart Button */}
-              <motion.button
-                onClick={handleAddToCart}
-                disabled={!inStock}
-                className={`w-full mt-3 min-h-[44px] py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
-                  inStock 
-                    ? 'bg-blue-500 text-white hover:bg-blue-600 hover:shadow-md' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                whileHover={inStock ? { scale: 1.02 } : {}}
-                whileTap={inStock ? { scale: 0.98 } : {}}
-              >
-                <LuShoppingCart className="w-4 h-4" />
-                {inStock ? 'Add to Cart' : 'Out of Stock'}
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
-      </Link>
-
-      <AnimatePresence>
-        {quickViewOpen && (
-          <motion.div 
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            onClick={closeQuickView}
-            style={{ zIndex: 9999 }}
+    <Link href={productUrl} passHref className="h-full block">
+      <motion.div
+        className="group relative bg-[var(--color-surface)] p-3 rounded-[32px] shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col border border-white/50 dark:border-gray-700"
+        whileHover={{ y: -8 }}
+      >
+        {/* 1. Image Section */}
+        <div className="relative aspect-[4/4.5] w-full overflow-hidden rounded-[28px] bg-gray-50 dark:bg-gray-800 mb-4">
+          <Image
+            src={getImageSrc(productData?.thumbnail_url)}
+            alt={productData?.name || 'Product Image'}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            onError={() => setImageError(true)}
+            unoptimized={getImageSrc(productData?.thumbnail_url).endsWith('.svg')}
+          />
+          
+          {/* Wishlist Button - Glassmorphism Style (Top Right) */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleAddToWishlist}
+            className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 z-20 shadow-sm ${
+              isWishlisted 
+                ? 'bg-red-500/90 text-white shadow-red-500/30' 
+                : 'bg-white/40 hover:bg-white/80 text-white border border-white/30'
+            }`}
+            aria-label="Add to wishlist"
           >
-            <motion.div 
-              className="bg-[var(--color-surface)] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl relative flex flex-col md:flex-row border border-gray-200 dark:border-gray-700" 
-              initial={{ y: 30, scale: 0.95, opacity: 0 }} 
-              animate={{ y: 0, scale: 1, opacity: 1 }} 
-              exit={{ y: 30, scale: 0.95, opacity: 0 }} 
-              transition={{ type: "spring", damping: 20, stiffness: 200 }} 
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <button 
-                onClick={closeQuickView} 
-                className="absolute top-4 right-4 min-h-[44px] min-w-[44px] bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-3 rounded-full z-30 hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-lg border border-gray-200 dark:border-gray-600 flex items-center justify-center" 
-                aria-label="Close quick view"
-              >
-                <FiX className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-              </button>
+            <LuHeart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+          </motion.button>
 
-              {/* Left Side - Images */}
-              <div className="w-full md:w-1/2 p-6">
-                <div className="relative aspect-square mb-4 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-                  <Image 
-                    src={getImageSrc(selectedImage)} 
-                    alt={productData?.name || 'Product Image'} 
-                    fill 
-                    className="object-cover" 
-                    onError={handleImageError}
-                    unoptimized={getImageSrc(selectedImage).endsWith('.svg')}
-                  />
-                </div>
-                
-                {/* Thumbnail Navigation */}
-                {allImages.length > 1 && (
-                  <div className="flex gap-2 justify-center">
-                    {allImages.map((img, idx) => (
-                      <button 
-                        key={idx} 
-                        onClick={() => setSelectedImage(img)} 
-                        className={`relative h-16 w-16 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
-                          selectedImage === img 
-                            ? "border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800" 
-                            : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                        }`}
-                      >
-                        <Image 
-                          src={getImageSrc(img)} 
-                          alt={`Thumbnail ${idx + 1}`} 
-                          fill 
-                          className="object-cover" 
-                          onError={handleImageError}
-                          unoptimized={getImageSrc(img).endsWith('.svg')}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Right Side - Product Info */}
-              <div className="w-full md:w-1/2 p-6 flex flex-col overflow-y-auto">
-                <div className="flex-grow">
-                  {/* Product Title */}
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                    {productData?.name}
-                  </h2>
-                  
-                  {/* Category */}
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-3 block">
-                    {productData?.sub_category?.name || 'Category'}
+          {/* Wholesale Badge (Top Left) */}
+          {isWholesaler && (
+            <div className="absolute top-4 left-4 z-10">
+              {productData?.wholesale_price && parseFloat(productData.wholesale_price) > 0 ? (
+                // Show discount percentage for wholesale
+                productData?.price && parseFloat(productData.price) > parseFloat(productData.wholesale_price) && (
+                  <span className="bg-blue-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg border border-white/20">
+                    -{Math.round(((parseFloat(productData.price) - parseFloat(productData.wholesale_price)) / parseFloat(productData.price)) * 100)}%
                   </span>
-                  
-                  {/* Enhanced price display in Quick View */}
-                  <div className="mb-4">
-                    <WholesalePricingDisplay 
-                      product={productData} 
-                      size="large"
-                      showLabels={true} // Show all details in quick view
-                      className="text-blue-600 dark:text-blue-400"
-                      hideUnavailableOnUnauthenticated={true}
-                      forceShowUnavailable={false}
-                      showOnlyPrimaryPrice={false} // Show full details in quick view
-                    />
-                  </div>
-                  
-                  {/* Stock Status */}
-                  <div className="mb-4">
-                    <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
-                      inStock 
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' 
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
-                    }`}>
-                      {inStock ? 'In Stock' : 'Out of Stock'}
+                )
+              ) : (
+                // Show "Not for Wholesale" badge
+                <span className="bg-red-600/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg border border-white/20">
+                  Not WSL
+                </span>
+              )}
+            </div>
+          )}
+          
+          {/* Regular customer discount badge */}
+          {!isWholesaler && productData?.discount_price && productData?.price && parseFloat(productData.price) > parseFloat(productData.discount_price) && (
+            <div className="absolute top-4 left-4 z-10">
+              <span className="bg-red-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg border border-white/20">
+                -{Math.round(((parseFloat(productData.price) - parseFloat(productData.discount_price)) / parseFloat(productData.price)) * 100)}%
+              </span>
+            </div>
+          )}
+        </div>
+        
+        {/* 2. Content Section */}
+        <div className="px-1 flex-grow flex flex-col">
+          {/* Category Badge */}
+          {productData?.sub_category?.name && (
+            <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full mb-2 w-fit">
+              {productData.sub_category.name}
+            </span>
+          )}
+
+          {/* Title */}
+          <h3 className="text-base font-semibold text-[var(--color-text-primary)] leading-tight mb-2 line-clamp-2 group-hover:text-[var(--color-button-primary)] transition-colors">
+            {productData?.name}
+          </h3>
+          
+          {/* 3. Footer: Price & Add to Cart Button */}
+          <div className="mt-auto flex items-end justify-between gap-3">
+            <div className="flex flex-col pb-1">
+              {isWholesaler ? (
+                // Wholesaler pricing display
+                productData?.wholesale_price && parseFloat(productData.wholesale_price) > 0 ? (
+                  <>
+                    {/* Minimum Quantity Badge */}
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-accent-orange)] mb-1 flex items-center gap-1">
+                      <span>Min Qty: {minimumPurchase}</span>
+                    </div>
+                    
+                    {/* Wholesale Price */}
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <Tk_icon size={18} className="text-blue-600 dark:text-blue-400" />
+                      <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        {parseFloat(productData.wholesale_price).toFixed(2)}
+                      </span>
+                      <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 ml-1">
+                        WSL
+                      </span>
+                    </div>
+                    
+                    {/* Regular Price (strikethrough) */}
+                    {productData?.price && (
+                      <div className="flex items-center gap-1">
+                        <Tk_icon size={12} className="text-gray-400" />
+                        <span className="text-xs text-gray-400 line-through">
+                          {parseFloat(productData.price).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Discount Percentage */}
+                    {productData?.price && parseFloat(productData.price) > parseFloat(productData.wholesale_price) && (
+                      <div className="text-[10px] font-bold text-green-600 dark:text-green-400 mt-0.5">
+                        Save {Math.round(((parseFloat(productData.price) - parseFloat(productData.wholesale_price)) / parseFloat(productData.price)) * 100)}%
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // No wholesale price available
+                  <>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 mb-1">
+                      Not for Wholesale
+                    </div>
+                    
+                    {/* Show regular price */}
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <Tk_icon size={18} className="text-[var(--color-text-primary)]" />
+                      <span className="text-xl font-bold text-[var(--color-text-primary)]">
+                        {productData?.discount_price 
+                          ? parseFloat(productData.discount_price).toFixed(2)
+                          : parseFloat(productData?.price || 0).toFixed(2)
+                        }
+                      </span>
+                    </div>
+                    
+                    {/* Regular Price (if discount available) */}
+                    {productData?.discount_price && productData?.price && (
+                      <div className="flex items-center gap-1">
+                        <Tk_icon size={12} className="text-gray-400" />
+                        <span className="text-xs text-gray-400 line-through">
+                          {parseFloat(productData.price).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )
+              ) : (
+                // Regular customer pricing
+                <>
+                  {/* Sale Price or Regular Price */}
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <Tk_icon size={18} className="text-[var(--color-text-primary)]" />
+                    <span className="text-xl font-bold text-[var(--color-text-primary)]">
+                      {productData?.discount_price 
+                        ? parseFloat(productData.discount_price).toFixed(2)
+                        : parseFloat(productData?.price || 0).toFixed(2)
+                      }
                     </span>
                   </div>
                   
-                  {/* Description */}
-                  <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm leading-relaxed line-clamp-3">
-                    {productData?.description?.replace(/<[^>]*>?/gm, '') || 'No description available.'}
-                  </p>
-                  
-                  {/* Color Selection */}
-                  {colors?.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="font-medium mb-3 text-gray-900 dark:text-white">
-                        Color: {selectedColor?.name && <span className="font-normal text-gray-600 dark:text-gray-400">{selectedColor.name}</span>}
-                      </h4>
-                      <div className="flex gap-2 flex-wrap">
-                        {colors.map((color) => (
-                          <button 
-                            key={color.id} 
-                            onClick={() => setSelectedColor(color)} 
-                            className={`min-h-[44px] min-w-[44px] w-12 h-12 rounded-full border-2 transition-all hover:scale-110 ${
-                              selectedColor?.id === color.id 
-                                ? "ring-2 ring-offset-2 ring-blue-500 border-blue-500" 
-                                : "border-gray-300 dark:border-gray-600 hover:border-gray-400"
-                            }`} 
-                            style={{ backgroundColor: color.hex_code }}
-                            title={color.name}
-                            aria-label={`Select ${color.name} color`}
-                          />
-                        ))}
-                      </div>
+                  {/* Regular Price (if on sale) */}
+                  {productData?.discount_price && productData?.price && (
+                    <div className="flex items-center gap-1">
+                      <Tk_icon size={12} className="text-gray-400" />
+                      <span className="text-xs text-gray-400 line-through">
+                        {parseFloat(productData.price).toFixed(2)}
+                      </span>
                     </div>
                   )}
                   
-                  {/* Size Selection */}
-                  {sizes?.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="font-medium mb-3 text-gray-900 dark:text-white">
-                        Size: {selectedSize?.name && <span className="font-normal text-gray-600 dark:text-gray-400">{selectedSize.name}</span>}
-                      </h4>
-                      <div className="flex gap-2 flex-wrap">
-                        {sizes.map((size) => (
-                          <button 
-                            key={size.id} 
-                            onClick={() => setSelectedSize(size)} 
-                            className={`min-h-[44px] px-4 py-3 text-sm rounded-lg border transition-all hover:scale-105 ${
-                              selectedSize?.id === size.id 
-                                ? "bg-blue-600 text-white border-blue-600" 
-                                : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                            }`}
-                            aria-label={`Select size ${size.name}`}
-                          >
-                            {size.name}
-                          </button>
-                        ))}
-                      </div>
+                  {/* Discount Percentage */}
+                  {productData?.discount_price && productData?.price && parseFloat(productData.price) > parseFloat(productData.discount_price) && (
+                    <div className="text-[10px] font-bold text-green-600 dark:text-green-400 mt-0.5">
+                      Save {Math.round(((parseFloat(productData.price) - parseFloat(productData.discount_price)) / parseFloat(productData.price)) * 100)}%
                     </div>
                   )}
-                  
-                  
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
-                  <button 
-                    onClick={handleAddToCart} 
-                    disabled={!inStock} 
-                    className="w-full min-h-[48px] py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100 shadow-lg hover:shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
-                  >
-                    <LuShoppingCart className="w-5 h-5" />
-                    {inStock ? "Add to Cart" : "Out of Stock"}
-                  </button>
-                  
-                  <Link 
-                    href={productUrl} 
-                    className="text-center min-h-[44px] py-3 px-6 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors hover:underline flex items-center justify-center"
-                    onClick={closeQuickView}
-                  >
-                    View Full Details →
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+                </>
+              )}
+            </div>
+
+            {/* Add to Cart Button with Icon */}
+            <motion.button
+              onClick={handleAddToCart}
+              disabled={!inStock}
+              whileTap={{ scale: 0.95 }}
+              className={`
+                px-5 py-2 mt-2 rounded-full font-bold text-sm shadow-xl transition-all duration-300
+                flex items-center gap-2
+                ${inStock 
+                  ? 'bg-[#1f2937] dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-200 hover:shadow-2xl hover:-translate-y-0.5' 
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700'
+                }
+              `}
+              aria-label="Add to cart"
+            >
+              {/* <LuShoppingCart className="w-4 h-4" /> */}
+              Add to Cart
+              {inStock ? "" : "Sold"}
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    </Link>
   );
 };
 
