@@ -78,7 +78,7 @@ export const useProducts = (filters = {}, page = 1) => {
   return {
     products: data?.results || [],
     totalCount: data?.count || 0,
-    totalPages: Math.ceil((data?.count || 0) / 10),
+    totalPages: Math.ceil((data?.count || 0) / 24),
     isLoading,
     isError: error,
     mutate,

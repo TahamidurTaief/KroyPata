@@ -234,16 +234,14 @@ const ProductPage = () => {
         </div>
 
         <div className="flex flex-col xl:flex-row gap-4 md:gap-6">
-          {/* Desktop Sidebar - FIXED positioning */}
+          {/* Desktop Sidebar */}
           <aside className="hidden xl:block w-full xl:w-80 flex-shrink-0">
-            <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
-              <Sidebar 
-                filters={filters} 
-                onFilterChange={handleFilterChange} 
-                onClearFilters={clearFilters} 
-                theme={mounted ? resolvedTheme : 'light'} 
-              />
-            </div>
+            <Sidebar 
+              filters={filters} 
+              onFilterChange={handleFilterChange} 
+              onClearFilters={clearFilters} 
+              theme={mounted ? resolvedTheme : 'light'} 
+            />
           </aside>
 
           {/* Main Content */}

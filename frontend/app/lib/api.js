@@ -403,7 +403,7 @@ async function fetchAPI(endpoint, options = {}) {
 export const getProducts = async (filters = {}, page = 1) => {
     console.log('🔧 getProducts called with:', { filters, page });
     
-    const params = new URLSearchParams({ page });
+    const params = new URLSearchParams({ page, page_size: 24 });
 
     if (filters.category) {
         params.append('category', filters.category);

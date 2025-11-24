@@ -238,32 +238,30 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
         </button>
       </div>
 
-      <div className={`overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8 flex-1 transition-all duration-300 ${
-        isDark ? "custom-scrollbar-dark" : "custom-scrollbar"
-      }`}>
+      <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 flex-1 transition-all duration-300">
         {/* Sort By Section */}
-        <div className="space-y-3 sm:space-y-4">
-          <h3 className={`text-base sm:text-lg font-raleway font-bold tracking-wide transition-colors duration-300 ${
+        <div className="space-y-2">
+          <h3 className={`text-sm font-semibold transition-colors duration-300 ${
             isDark ? "text-gray-200" : "text-gray-800"
           }`}>
             Sort By
           </h3>
-          <div className="space-y-2 sm:space-y-3 pl-1 sm:pl-2">
+          <div className="space-y-1.5 pl-1">
             {sortOptions.map((option) => (
-              <div key={option.value} className="flex items-center gap-2 sm:gap-3">
+              <div key={option.value} className="flex items-center gap-2">
                 <button 
                   onClick={() => handleSortChange(option.value)} 
-                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 sidebar-focus ${
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                     filters.sort === option.value 
-                      ? "bg-blue-500 border-blue-500 scale-110 animate-subtle-bounce" 
+                      ? "bg-blue-500 border-blue-500" 
                       : isDark 
-                        ? "border-gray-500 hover:border-gray-400 hover:bg-gray-700/30" 
-                        : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                        ? "border-gray-500 hover:border-gray-400" 
+                        : "border-gray-300 hover:border-gray-400"
                   }`}
                 >
-                  {filters.sort === option.value && <Check size={10} className="sm:w-3 sm:h-3 text-white" />}
+                  {filters.sort === option.value && <Check size={10} className="text-white" />}
                 </button>
-                <span className={`text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                <span className={`text-xs font-medium transition-colors duration-200 ${
                   isDark ? "text-gray-300" : "text-gray-700"
                 }`}>
                   {option.label}
@@ -274,13 +272,13 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
         </div>
 
         {/* Price Range Section */}
-        <div className="space-y-4">
-          <h3 className={`text-lg font-raleway font-bold tracking-wide transition-colors duration-300 ${
+        <div className="space-y-2">
+          <h3 className={`text-sm font-semibold transition-colors duration-300 ${
             isDark ? "text-gray-200" : "text-gray-800"
           }`}>
             Price Range
           </h3>
-          <div className="pl-2 space-y-5">
+          <div className="pl-1 space-y-3">
             <div className="relative">
               <div className="relative h-6 flex items-center">
                 {/* Track */}
@@ -356,59 +354,59 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
         {/* Categories/Subcategories Section */}
         {filters.category ? (
           // Show subcategories when category is selected
-          <div className="space-y-4">
-            <div className="flex flex-col items-start justify-between gap-3">
+          <div className="space-y-2">
+            <div className="flex flex-col items-start justify-between gap-2">
               <button
                 onClick={() => onFilterChange({ category: "", subcategory: "", subcategories: [] })}
-                className={`text-sm px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+                className={`text-xs px-2 py-1 rounded-md font-medium transition-all duration-200 ${
                   isDark 
-                    ? "text-red-400 hover:text-red-300 bg-red-900/20 hover:bg-red-900/30 border border-red-800/30" 
-                    : "text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200"
+                    ? "text-red-400 hover:text-red-300 bg-red-900/20 hover:bg-red-900/30" 
+                    : "text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100"
                 }`}
               >
-                ← Back to All Categories
+                ← Back to Categories
               </button>
-              <h3 className={`text-lg font-raleway font-bold tracking-wide transition-colors duration-300 ${
+              <h3 className={`text-sm font-semibold transition-colors duration-300 ${
                 isDark ? "text-gray-200" : "text-gray-800"
               }`}>
                 Subcategories
               </h3>
             </div>
-            <div className="space-y-3 pl-2">
+            <div className="space-y-2 pl-1">
               {displayedSubcategories.map((subcat) => {
                 const isSelected = filters.subcategories?.includes(subcat.slug) || filters.subcategory === subcat.slug;
                 return (
                   <div 
                     key={subcat.id} 
                     onClick={() => handleSubcategoryChange(subcat.slug)} 
-                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 border-2 sidebar-focus ${
+                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                       isSelected 
                         ? isDark 
-                          ? "bg-blue-900/30 border-blue-600 shadow-lg shadow-blue-900/20 animate-subtle-bounce" 
-                          : "bg-blue-50 border-blue-400 shadow-lg shadow-blue-100/50 animate-subtle-bounce"
+                          ? "bg-blue-900/30 border-blue-600" 
+                          : "bg-blue-50 border-blue-400"
                         : isDark 
-                          ? "hover:bg-gray-700/50 border-transparent hover:border-gray-600/50 hover:shadow-md" 
-                          : "hover:bg-gray-50 border-transparent hover:border-gray-200 hover:shadow-md"
+                          ? "hover:bg-gray-700/50 border-transparent" 
+                          : "hover:bg-gray-50 border-transparent"
                     }`}
                   >
                     {subcat.image && (
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden ring-2 ring-gray-200 dark:ring-gray-600">
+                      <div className="relative w-8 h-8 rounded-md overflow-hidden">
                         <Image src={subcat.image} alt={subcat.name} fill className="object-cover" />
                       </div>
                     )}
-                    <span className={`flex-1 font-medium transition-colors duration-200 ${
+                    <span className={`flex-1 text-xs font-medium transition-colors duration-200 ${
                       isDark ? "text-gray-200" : "text-gray-800"
                     }`}>
                       {subcat.name}
                     </span>
-                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
                       isSelected 
-                        ? "bg-blue-500 border-blue-500 scale-110" 
+                        ? "bg-blue-500 border-blue-500" 
                         : isDark 
-                          ? "border-gray-500 hover:border-gray-400" 
-                          : "border-gray-300 hover:border-gray-400"
+                          ? "border-gray-500" 
+                          : "border-gray-300"
                     }`}>
-                      {isSelected && <Check size={12} className="text-white" />}
+                      {isSelected && <Check size={10} className="text-white" />}
                     </div>
                   </div>
                 );
@@ -416,71 +414,71 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
               {subcategories.length > 5 && (
                 <button 
                   onClick={() => setShowAllSubcategories(!showAllSubcategories)}
-                  className={`w-full text-sm px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  className={`w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 ${
                     isDark 
                       ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
                       : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   }`}
                 >
-                  {showAllSubcategories ? "Show Less" : `Show All (${subcategories.length})`}
+                  {showAllSubcategories ? "See Less" : `See More (${subcategories.length})`}
                 </button>
               )}
             </div>
           </div>
         ) : (
           // Show categories when no category is selected
-          <div className="space-y-4">
-            <h3 className={`text-lg font-raleway font-bold tracking-wide transition-colors duration-300 ${
+          <div className="space-y-2">
+            <h3 className={`text-sm font-semibold transition-colors duration-300 ${
               isDark ? "text-gray-200" : "text-gray-800"
             }`}>
               Categories
             </h3>
-            <div className="space-y-3 pl-2">
+            <div className="space-y-2 pl-1">
               {displayedCategories.map((cat) => (
                 <div 
                   key={cat.id} 
                   onClick={() => handleCategoryChange(cat.slug)} 
-                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 border-2 ${
+                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                     filters.category === cat.slug 
                       ? isDark 
-                        ? "bg-blue-900/30 border-blue-600 shadow-lg shadow-blue-900/20" 
-                        : "bg-blue-50 border-blue-400 shadow-lg shadow-blue-100/50"
+                        ? "bg-blue-900/30 border-blue-600" 
+                        : "bg-blue-50 border-blue-400"
                       : isDark 
-                        ? "hover:bg-gray-700/50 border-transparent hover:border-gray-600/50" 
-                        : "hover:bg-gray-50 border-transparent hover:border-gray-200"
+                        ? "hover:bg-gray-700/50 border-transparent" 
+                        : "hover:bg-gray-50 border-transparent"
                   }`}
                 >
                   {cat.image && (
-                    <div className="relative w-10 h-10 rounded-lg overflow-hidden ring-2 ring-gray-200 dark:ring-gray-600">
+                    <div className="relative w-8 h-8 rounded-md overflow-hidden">
                       <Image src={cat.image} alt={cat.name} fill className="object-cover" />
                     </div>
                   )}
-                  <span className={`flex-1 font-medium transition-colors duration-200 ${
+                  <span className={`flex-1 text-xs font-medium transition-colors duration-200 ${
                     isDark ? "text-gray-200" : "text-gray-800"
                   }`}>
                     {cat.name}
                   </span>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                     filters.category === cat.slug 
-                      ? "bg-blue-500 border-blue-500 scale-110" 
+                      ? "bg-blue-500 border-blue-500" 
                       : isDark 
-                        ? "border-gray-500 hover:border-gray-400" 
-                        : "border-gray-300 hover:border-gray-400"
+                        ? "border-gray-500" 
+                        : "border-gray-300"
                   }`}>
-                    {filters.category === cat.slug && <Check size={12} className="text-white" />}
+                    {filters.category === cat.slug && <Check size={10} className="text-white" />}
                   </div>
                 </div>
               ))}
               {categories.length > 5 && (
                 <button 
                   onClick={() => setShowAllCategories(!showAllCategories)}
-                  className={`w-full text-sm px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  className={`w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 ${
                     isDark 
                       ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
                       : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   }`}
                 >
-                  {showAllCategories ? "Show Less" : `Show All (${categories.length})`}
+                  {showAllCategories ? "See Less" : `See More (${categories.length})`}
                 </button>
               )}
             </div>
@@ -489,47 +487,47 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
 
         {/* Brand Section */}
         {brands.length > 0 && (
-          <div className="space-y-4">
-            <h3 className={`text-lg font-raleway font-bold tracking-wide transition-colors duration-300 ${
+          <div className="space-y-2">
+            <h3 className={`text-sm font-semibold transition-colors duration-300 ${
               isDark ? "text-gray-200" : "text-gray-800"
             }`}>
               Brands
             </h3>
-            <div className="space-y-3 pl-2">
+            <div className="space-y-2 pl-1">
               {displayedBrands.map((brand) => {
                 const isSelected = filters.brands?.includes(brand.slug) || filters.brand === brand.slug;
                 return (
                   <div 
                     key={brand.id} 
                     onClick={() => handleBrandChange(brand.slug)} 
-                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 border-2 ${
+                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                       isSelected 
                         ? isDark 
-                          ? "bg-blue-900/30 border-blue-600 shadow-lg shadow-blue-900/20" 
-                          : "bg-blue-50 border-blue-400 shadow-lg shadow-blue-100/50"
+                          ? "bg-blue-900/30 border-blue-600" 
+                          : "bg-blue-50 border-blue-400"
                         : isDark 
-                          ? "hover:bg-gray-700/50 border-transparent hover:border-gray-600/50" 
-                          : "hover:bg-gray-50 border-transparent hover:border-gray-200"
+                          ? "hover:bg-gray-700/50 border-transparent" 
+                          : "hover:bg-gray-50 border-transparent"
                     }`}
                   >
                     {brand.image && (
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden ring-2 ring-gray-200 dark:ring-gray-600">
+                      <div className="relative w-8 h-8 rounded-md overflow-hidden">
                         <Image src={brand.image} alt={brand.name} fill className="object-cover" />
                       </div>
                     )}
-                    <span className={`flex-1 font-medium transition-colors duration-200 ${
+                    <span className={`flex-1 text-xs font-medium transition-colors duration-200 ${
                       isDark ? "text-gray-200" : "text-gray-800"
                     }`}>
                       {brand.name}
                     </span>
-                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
                       isSelected 
-                        ? "bg-blue-500 border-blue-500 scale-110" 
+                        ? "bg-blue-500 border-blue-500" 
                         : isDark 
-                          ? "border-gray-500 hover:border-gray-400" 
-                          : "border-gray-300 hover:border-gray-400"
+                          ? "border-gray-500" 
+                          : "border-gray-300"
                     }`}>
-                      {isSelected && <Check size={12} className="text-white" />}
+                      {isSelected && <Check size={10} className="text-white" />}
                     </div>
                   </div>
                 );
@@ -537,13 +535,13 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
               {brands.length > 5 && (
                 <button 
                   onClick={() => setShowAllBrands(!showAllBrands)}
-                  className={`w-full text-sm px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  className={`w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 ${
                     isDark 
                       ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
                       : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   }`}
                 >
-                  {showAllBrands ? "Show Less" : `Show All (${brands.length})`}
+                  {showAllBrands ? "See Less" : `See More (${brands.length})`}
                 </button>
               )}
             </div>
@@ -551,31 +549,31 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
         )}
 
         {/* Colors Section */}
-        <div className="space-y-3 sm:space-y-4">
-          <h3 className={`text-base sm:text-lg font-raleway font-bold tracking-wide transition-colors duration-300 ${
+        <div className="space-y-2">
+          <h3 className={`text-sm font-semibold transition-colors duration-300 ${
             isDark ? "text-gray-200" : "text-gray-800"
           }`}>
             Colors
           </h3>
-          <div className="pl-1 sm:pl-2">
-            <div className="flex flex-wrap gap-2 sm:gap-3">
+          <div className="pl-1">
+            <div className="flex flex-wrap gap-2">
               {displayedColors.map((color) => (
                 <button 
                   key={color.id} 
                   onClick={() => handleColorChange(color.name)} 
-                  className={`relative w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg ${
+                  className={`relative w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ${
                     filters.colors.includes(color.name) 
-                      ? "ring-4 ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-800 scale-110" 
+                      ? "ring-2 ring-blue-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-800" 
                       : isDark 
-                        ? "hover:scale-105 ring-2 ring-gray-600 hover:ring-gray-500" 
-                        : "hover:scale-105 ring-2 ring-gray-300 hover:ring-gray-400"
+                        ? "ring-1 ring-gray-600" 
+                        : "ring-1 ring-gray-300"
                   }`} 
                   style={{ backgroundColor: color.hex_code }} 
                   title={color.name}
                 >
                   {filters.colors.includes(color.name) && (
-                    <div className="absolute inset-0 rounded-xl bg-black/20 flex items-center justify-center">
-                      <Check size={14} className="sm:w-4 sm:h-4 text-white drop-shadow-lg" />
+                    <div className="absolute inset-0 rounded-lg bg-black/20 flex items-center justify-center">
+                      <Check size={12} className="text-white" />
                     </div>
                   )}
                 </button>
@@ -584,13 +582,13 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
             {colors.length > 6 && (
               <button 
                 onClick={() => setShowAllColors(!showAllColors)}
-                className={`w-full text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg mt-2 sm:mt-3 font-medium transition-all duration-200 ${
+                className={`w-full text-xs px-2 py-1.5 rounded-md mt-2 font-medium transition-all duration-200 ${
                   isDark 
                     ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
                     : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                 }`}
               >
-                {showAllColors ? "Show Less" : `Show All (${colors.length})`}
+                {showAllColors ? "See Less" : `See More (${colors.length})`}
               </button>
             )}
           </div>
@@ -598,62 +596,55 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
 
         {/* Shipping Categories Section */}
         {shippingCategories.length > 0 && (
-          <div className="space-y-4">
-            <h3 className={`text-lg font-raleway font-bold tracking-wide transition-colors duration-300 ${
+          <div className="space-y-2">
+            <h3 className={`text-sm font-semibold transition-colors duration-300 ${
               isDark ? "text-gray-200" : "text-gray-800"
             }`}>
               Shipping Options
             </h3>
-            <div className="space-y-3 pl-2">
+            <div className="space-y-2 pl-1">
               {displayedShippingCategories.map((category) => (
                 <div 
                   key={category.id} 
                   onClick={() => handleShippingCategoryChange(category.id)} 
-                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 border-2 ${
+                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                     (filters.shipping_categories || []).includes(category.id) 
                       ? isDark 
-                        ? "bg-blue-900/30 border-blue-600 shadow-lg shadow-blue-900/20" 
-                        : "bg-blue-50 border-blue-400 shadow-lg shadow-blue-100/50"
+                        ? "bg-blue-900/30 border-blue-600" 
+                        : "bg-blue-50 border-blue-400"
                       : isDark 
-                        ? "hover:bg-gray-700/50 border-transparent hover:border-gray-600/50" 
-                        : "hover:bg-gray-50 border-transparent hover:border-gray-200"
+                        ? "hover:bg-gray-700/50 border-transparent" 
+                        : "hover:bg-gray-50 border-transparent"
                   }`}
                 >
                   <div className="flex-1 min-w-0">
-                    <h4 className={`font-semibold truncate transition-colors duration-200 ${
+                    <h4 className={`text-xs font-medium truncate transition-colors duration-200 ${
                       isDark ? "text-gray-200" : "text-gray-800"
                     }`}>
                       {category.name}
                     </h4>
-                    {category.description && (
-                      <p className={`text-xs truncate mt-1 transition-colors duration-200 ${
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }`}>
-                        {category.description}
-                      </p>
-                    )}
                   </div>
-                  <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
                     (filters.shipping_categories || []).includes(category.id) 
-                      ? "bg-blue-500 border-blue-500 scale-110" 
+                      ? "bg-blue-500 border-blue-500" 
                       : isDark 
-                        ? "border-gray-500 hover:border-gray-400" 
-                        : "border-gray-300 hover:border-gray-400"
+                        ? "border-gray-500" 
+                        : "border-gray-300"
                   }`}>
-                    {(filters.shipping_categories || []).includes(category.id) && <Check size={12} className="text-white" />}
+                    {(filters.shipping_categories || []).includes(category.id) && <Check size={10} className="text-white" />}
                   </div>
                 </div>
               ))}
               {shippingCategories.length > 5 && (
                 <button 
                   onClick={() => setShowAllShippingCategories(!showAllShippingCategories)}
-                  className={`w-full text-sm px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  className={`w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 ${
                     isDark 
                       ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
                       : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   }`}
                 >
-                  {showAllShippingCategories ? "Show Less" : `Show All (${shippingCategories.length})`}
+                  {showAllShippingCategories ? "See Less" : `See More (${shippingCategories.length})`}
                 </button>
               )}
             </div>
