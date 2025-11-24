@@ -11,6 +11,7 @@ import Review from "./Review";
 import BlogSection from "./BlogSection";
 import OfferBanner from "./OfferBanner";
 import EnhancedSectionRenderer from "../Common/EnhancedSectionRenderer";
+import CategoryBasedSection from "./CategoryBasedSection";
 
 const HomePage = ({ initialProducts, categories, horizontalBanners, offerBanners }) => {
   return (
@@ -22,6 +23,10 @@ const HomePage = ({ initialProducts, categories, horizontalBanners, offerBanners
         initialProducts={initialProducts} 
         categories={categories} 
       />
+      
+      {/* Category-Based Product Sections with Search */}
+      <CategoryBasedSection />
+      
       {/* Horizontal Banner Slider with all banners */}
       <HorizontalBannerSlider banners={horizontalBanners} />
       {/* <Review /> */}
