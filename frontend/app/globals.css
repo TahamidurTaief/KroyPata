@@ -32,6 +32,35 @@
   /* Additional variables for clarity */
   --color-surface: #ffffff; /* For elements that pop, like cards or menus */
   --color-muted-bg: #e5e7eb; /* For subtle backgrounds like input fields or icons */
+  
+  /* Cart-specific color variables */
+  --cart-bg: #f9fafb; /* Cart page background */
+  --cart-card-bg: #ffffff; /* Cart card backgrounds */
+  --cart-card-border: #e5e7eb; /* Cart card borders */
+  --cart-totals-bg: #fcd34d; /* Cart totals yellow background */
+  --cart-totals-text: #1f2937; /* Cart totals text color */
+  --cart-button-primary: #111827; /* Primary cart buttons (black) */
+  --cart-button-secondary: #f3f4f6; /* Secondary cart buttons (light gray) */
+  --cart-button-secondary-hover: #e5e7eb; /* Secondary button hover */
+  --cart-text-primary: #1f2937; /* Primary text in cart */
+  --cart-text-secondary: #6b7280; /* Secondary text in cart */
+  --cart-text-muted: #9ca3af; /* Muted text in cart */
+  --cart-success-bg: #f0fdf4; /* Success message background */
+  --cart-success-border: #bbf7d0; /* Success message border */
+  --cart-success-text: #166534; /* Success message text */
+  --cart-error-bg: #fef2f2; /* Error message background */
+  --cart-error-border: #fecaca; /* Error message border */
+  --cart-error-text: #dc2626; /* Error message text */
+  --cart-warning-bg: #fffbeb; /* Warning message background */
+  --cart-warning-border: #fed7aa; /* Warning message border */
+  --cart-warning-text: #ea580c; /* Warning message text */
+  --cart-input-bg: #ffffff; /* Input field background */
+  --cart-input-border: #d1d5db; /* Input field border */
+  --cart-input-focus: #111827; /* Input field focus border */
+  --cart-shadow: rgba(0, 0, 0, 0.1); /* Card shadows */
+  --cart-muted-bg: #f3f4f6; /* Muted background elements */
+  --cart-price-color: #374151; /* Dark-ish price color for light mode */
+  --cart-total-price-color: #f59e0b; /* Highlighted total price color */
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -87,6 +116,35 @@ html.dark {
   /* Additional variables for clarity */
   --color-surface: #111827; /* A darker surface for dark mode */
   --color-muted-bg: #374151;
+  
+  /* Cart-specific color variables for dark mode */
+  --cart-bg: #1f2937; /* Cart page background - dark */
+  --cart-card-bg: #374151; /* Cart card backgrounds - dark */
+  --cart-card-border: #4b5563; /* Cart card borders - dark */
+  --cart-totals-bg: #f59e0b; /* Cart totals yellow background - stays same */
+  --cart-totals-text: #111827; /* Cart totals text color - dark on yellow */
+  --cart-button-primary: #f9fafb; /* Primary cart buttons (white on dark) */
+  --cart-button-secondary: #4b5563; /* Secondary cart buttons (dark gray) */
+  --cart-button-secondary-hover: #6b7280; /* Secondary button hover - dark */
+  --cart-text-primary: #f9fafb; /* Primary text in cart - white */
+  --cart-text-secondary: #d1d5db; /* Secondary text in cart - light gray */
+  --cart-text-muted: #9ca3af; /* Muted text in cart - stays same */
+  --cart-success-bg: #064e3b; /* Success message background - dark */
+  --cart-success-border: #059669; /* Success message border - dark */
+  --cart-success-text: #10b981; /* Success message text - bright green */
+  --cart-error-bg: #7f1d1d; /* Error message background - dark */
+  --cart-error-border: #dc2626; /* Error message border - dark */
+  --cart-error-text: #f87171; /* Error message text - light red */
+  --cart-warning-bg: #78350f; /* Warning message background - dark */
+  --cart-warning-border: #f59e0b; /* Warning message border - dark */
+  --cart-warning-text: #fbbf24; /* Warning message text - light orange */
+  --cart-input-bg: #374151; /* Input field background - dark */
+  --cart-input-border: #6b7280; /* Input field border - dark */
+  --cart-input-focus: #f9fafb; /* Input field focus border - white */
+  --cart-shadow: rgba(0, 0, 0, 0.3); /* Card shadows - darker */
+  --cart-muted-bg: #4b5563; /* Muted background elements - dark */
+  --cart-price-color: #d1d5db; /* Light-ish price color for dark mode */
+  --cart-total-price-color: #fbbf24; /* Highlighted total price color for dark mode */
 
   --scrollbar-track: #1f1f1f;
   --scrollbar-thumb: #60a5fa; /* Light blue */

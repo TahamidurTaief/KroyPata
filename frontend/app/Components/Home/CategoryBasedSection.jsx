@@ -2,25 +2,42 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { getProducts, getCategories } from "@/app/lib/api";
+import { getProducts, getCategories, getOfferBanners } from "@/app/lib/api";
 import { useRouter } from "next/navigation";
 import ProductCard from "@/app/Components/Common/ProductCard";
 import SkeletonCard from "@/app/Components/Common/SkeletonCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import { useThemePlaceholder } from "@/app/hooks/useThemeImage";
 
 const CategoryBasedSection = () => {
   const [categories, setCategories] = useState([]);
   const [categoryProducts, setCategoryProducts] = useState({});
+  const [verticalBanners, setVerticalBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Fetch top 3 categories on mount
+  // Fetch top 3 categories and vertical banners on mount
   useEffect(() => {
     const fetchTopCategories = async () => {
       try {
-        const categoriesData = await getCategories();
+        const [categoriesData, bannersData] = await Promise.all([
+          getCategories(),
+          getOfferBanners()
+        ]);
+        
+        console.log("📦 Categories Data:", categoriesData);
+        console.log("🎨 Banners Data:", bannersData);
+        
         const topCategories = categoriesData.slice(0, 3);
         setCategories(topCategories);
+
+        // Filter vertical banners - get all active vertical banners
+        const verticalBannersFiltered = (bannersData?.results || bannersData || [])
+          .filter(banner => banner.banner_type === 'vertical' && banner.is_active);
+        
+        console.log("🎨 Filtered Vertical Banners:", verticalBannersFiltered);
+        setVerticalBanners(verticalBannersFiltered);
 
         // Fetch products for each category
         const productsPromises = topCategories.map(async (category) => {
@@ -74,6 +91,7 @@ const CategoryBasedSection = () => {
                 key={category.id}
                 category={category}
                 products={categoryProducts[category.slug] || []}
+                verticalBanner={verticalBanners[index] || null}
                 index={index}
                 onCategoryClick={handleCategoryClick}
               />
@@ -86,11 +104,12 @@ const CategoryBasedSection = () => {
 };
 
 // Product Carousel Component for each category
-const CategoryProductCarousel = ({ category, products, index, onCategoryClick }) => {
+const CategoryProductCarousel = ({ category, products, verticalBanner, index, onCategoryClick }) => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollContainerRef = React.useRef(null);
+  const { placeholderUrl } = useThemePlaceholder();
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -192,28 +211,37 @@ const CategoryProductCarousel = ({ category, products, index, onCategoryClick })
         )}
       </div>
 
-      {/* Products Grid/Carousel - Responsive */}
-      <div
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 lg:overflow-x-auto lg:flex lg:scrollbar-hide lg:scroll-smooth pb-2"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
-        {products.length > 0 ? (
-          products.map((product, idx) => (
-            <div key={product.id} className="h-full lg:flex-shrink-0 lg:w-[200px] xl:w-[220px]">
-              <ProductCard productData={product} />
+      {/* Products Grid/Carousel - Responsive with Fixed Banner */}
+      <div className="relative">
+        {/* Fixed Vertical Banner - Always shown on desktop, stays in place */}
+        <VerticalBannerCard 
+          banner={verticalBanner} 
+          placeholderUrl={placeholderUrl}
+        />
+
+        {/* Scrollable Products Container */}
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 lg:overflow-x-auto lg:flex lg:scrollbar-hide lg:scroll-smooth lg:ml-[220px] xl:ml-[240px] pb-2"
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {products.length > 0 ? (
+            products.map((product, idx) => (
+              <div key={product.id} className="h-full lg:flex-shrink-0 lg:w-[200px] xl:w-[220px]">
+                <ProductCard productData={product} />
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+              <p className="text-base md:text-lg">No products available in this category</p>
             </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
-            <p className="text-base md:text-lg">No products available in this category</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Scroll Indicator Dots (Mobile/Tablet) */}
@@ -228,6 +256,75 @@ const CategoryProductCarousel = ({ category, products, index, onCategoryClick })
         </div>
       )}
     </motion.div>
+  );
+};
+
+// Vertical Banner Card Component with fallback - Fixed Position
+const VerticalBannerCard = ({ banner, placeholderUrl }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  // Get the banner image URL with priority: image > image_url > effective_image_light/dark
+  const getBannerImageUrl = () => {
+    if (!banner) return null;
+    
+    return banner.image || 
+           banner.image_url || 
+           banner.effective_image_light || 
+           banner.effective_image_dark ||
+           banner.image_light_upload ||
+           banner.image_dark_upload ||
+           null;
+  };
+
+  const bannerImageUrl = getBannerImageUrl();
+  const displayImageUrl = imageError ? placeholderUrl : (bannerImageUrl || placeholderUrl);
+  
+  // Determine if this is a clickable banner
+  const isClickable = banner && banner.button_url;
+  
+  const bannerContent = (
+    <>
+      <Image
+        src={displayImageUrl}
+        alt={banner?.alt_text || banner?.title || 'Category Banner'}
+        fill
+        className="object-cover transition-transform duration-300 group-hover:scale-105"
+        sizes="(max-width: 1024px) 0px, (max-width: 1280px) 200px, 220px"
+        onError={() => setImageError(true)}
+        priority={false}
+      />
+      
+      {/* Overlay with title if exists and has actual banner */}
+      {banner && banner.title && !imageError && (
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
+          <div className="text-white">
+            <h4 className="font-bold text-lg mb-1">{banner.title}</h4>
+            {banner.discount_text && (
+              <p className="text-sm font-semibold text-yellow-400">{banner.discount_text}</p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <div className="hidden lg:block lg:absolute lg:left-0 lg:top-0 lg:z-10 lg:w-[200px] xl:w-[220px] h-[400px] relative overflow-hidden rounded-xl shadow-lg group cursor-pointer">
+      {isClickable ? (
+        <a 
+          href={banner.button_url} 
+          target={banner.button_url?.startsWith('http') ? '_blank' : '_self'}
+          rel={banner.button_url?.startsWith('http') ? 'noopener noreferrer' : ''}
+          className="block w-full h-full"
+        >
+          {bannerContent}
+        </a>
+      ) : (
+        <div className="block w-full h-full">
+          {bannerContent}
+        </div>
+      )}
+    </div>
   );
 };
 

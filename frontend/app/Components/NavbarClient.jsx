@@ -20,8 +20,8 @@ import { IoBagCheckOutline, IoCameraOutline } from "react-icons/io5";
 
 // Modals & Sidebars
 import MobileMenuModal from "./Modals/MobileMenuModal";
-import SimpleSearchModal from "./Modals/SimpleSearchModal";
 import MobileSidebar from "./MobileSidebar";
+import SearchDropdown from "./SearchDropdown";
 
 // --- Sub-Components ---
 
@@ -125,7 +125,7 @@ const CategoryDropdown = ({ isOpen, categories, onClose }) => {
                       onMouseEnter={() => handleCategoryHover(cat)}
                     >
                       <Link
-                        href={`/products?category=${encodeURIComponent(cat.slug || cat.name)}`}
+                        href={`/categories?category=${encodeURIComponent(cat.slug || cat.name)}`}
                         className={`px-4 py-2.5 text-sm transition-colors text-[var(--color-text-primary)] flex items-center justify-between gap-3 group ${
                           isHovered ? 'bg-[var(--color-muted-bg)]' : 'hover:bg-[var(--color-muted-bg)]'
                         }`}
@@ -172,7 +172,7 @@ const CategoryDropdown = ({ isOpen, categories, onClose }) => {
                     {hoveredCategory.subcategories.map((sub, idx) => (
                       <Link
                         key={sub.id || idx}
-                        href={`/products?category=${encodeURIComponent(hoveredCategory.slug || hoveredCategory.name)}&subcategory=${encodeURIComponent(sub.slug || sub.name)}`}
+                        href={`/categories?category=${encodeURIComponent(hoveredCategory.slug || hoveredCategory.name)}&subcategory=${encodeURIComponent(sub.slug || sub.name)}`}
                         className="px-3 py-2 text-sm hover:bg-[var(--color-muted-bg)] rounded-md transition-colors text-[var(--color-text-primary)] flex items-center gap-2"
                         onClick={onClose}
                       >
@@ -204,7 +204,6 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
   // UI States
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   
   // Menus
   const [allCatsOpen, setAllCatsOpen] = useState(false);
@@ -234,10 +233,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if(searchQuery.trim()) setIsSearchModalOpen(true);
-  };
+
 
   // Helper to determine User Label logic
   const getUserLabel = () => {
@@ -385,30 +381,14 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
             />
           </Link>
 
-          {/* 2. Search Bar (Modern Minimal Style) */}
-          <div className="flex-1 max-w-3xl relative">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <div className="relative flex items-center border border-[var(--color-border)] rounded-full bg-[var(--color-muted-bg)] focus-within:bg-[var(--color-surface)] focus-within:border-[var(--color-text-secondary)] transition-all">
-                <CiSearch 
-                  size={20} 
-                  className="absolute left-4 text-[var(--color-text-secondary)] pointer-events-none" 
-                />
-                <input 
-                  type="text"
-                  placeholder="Search for products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchModalOpen(true)}
-                  className="w-full h-11 pl-11 pr-14 rounded-full bg-transparent text-sm outline-none placeholder:text-[var(--color-text-secondary)] text-[var(--color-text-primary)]"
-                />
-                <button 
-                  type="submit"
-                  className="absolute right-1 h-9 w-9 bg-[var(--color-text-primary)] hover:bg-[var(--color-text-secondary)] text-[var(--color-surface)] rounded-full flex items-center justify-center transition-all flex-shrink-0"
-                >
-                  <CiSearch size={20} strokeWidth={2} />
-                </button>
-              </div>
-            </form>
+          {/* 2. Search Bar with Dropdown Suggestions */}
+          <div className="flex-1 max-w-3xl">
+            <SearchDropdown 
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onClose={() => setSearchQuery("")}
+              placeholder="Search for products..."
+            />
           </div>
 
           {/* 3. Right Actions */}
@@ -543,8 +523,8 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
               />
             </div>
 
-            {/* Special Offers - Dynamic from Backend */}
-            <nav className="flex-1 flex items-center gap-6">
+            {/* Special Offers - Simple Text Buttons */}
+            <nav className="flex-1 flex items-center justify-end gap-6">
               {visibleOffers.map((offer, idx) => (
                 <Link
                   key={offer.id}
@@ -554,28 +534,40 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                   href={offer.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`text-sm whitespace-nowrap font-medium hover:opacity-80 transition-opacity flex items-center gap-2 ${
-                    offer.badge_text ? 'text-red-600 font-bold' : 'text-[var(--color-text-primary)]'
+                  className={`text-sm font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap group ${
+                    offer.badge_text 
+                      ? 'text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400' 
+                      : 'text-[var(--color-text-primary)] hover:text-[var(--color-text-secondary)]'
                   }`}
                 >
+                  {/* Icon */}
                   {offer.icon_class && <i className={offer.icon_class} />}
-                  {offer.title}
+                  
+                  {/* Title */}
+                  <span className="relative">
+                    {offer.title}
+                    {/* Underline on hover */}
+                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-current transition-all duration-200 group-hover:w-full" />
+                  </span>
+                  
+                  {/* Badge */}
                   {offer.badge_text && (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full bg-${offer.badge_color || 'red'}-500 text-white uppercase font-bold`}>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase font-bold tracking-wider">
                       {offer.badge_text}
                     </span>
                   )}
                 </Link>
               ))}
               
-              {/* More Dropdown - Only show if there are overflow offers */}
+              {/* More Dropdown - Simplified */}
               {overflowOffers.length > 0 && (
-                <div className="relative ml-auto" ref={moreDropdownRef}>
+                <div className="relative" ref={moreDropdownRef}>
                   <button
                     onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
-                    className="flex items-center gap-1 text-sm font-medium text-[var(--color-text-primary)] cursor-pointer hover:opacity-80"
+                    className="flex items-center gap-1 text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-text-secondary)] transition-colors"
                   >
-                    More <IoIosArrowDown className={`transition-transform ${moreDropdownOpen ? 'rotate-180' : ''}`} />
+                    More 
+                    <IoIosArrowDown className={`transition-transform duration-300 ${moreDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   <AnimatePresence>
@@ -586,7 +578,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute top-full right-0 mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-lg z-50 max-h-[70vh] overflow-y-auto py-2"
                       >
-                        {overflowOffers.map((offer) => (
+                        {overflowOffers.map((offer, idx) => (
                           <Link
                             key={offer.id}
                             href={offer.link}
@@ -601,7 +593,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                                 <span className="font-medium">{offer.title}</span>
                               </div>
                               {offer.badge_text && (
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded-full bg-${offer.badge_color || 'red'}-500 text-white uppercase font-bold`}>
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase font-bold">
                                   {offer.badge_text}
                                 </span>
                               )}
@@ -637,11 +629,13 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
           </button>
 
           {/* Mobile Search Input */}
-          <div className="flex-1 relative" onClick={() => setIsSearchModalOpen(true)}>
-             <div className="w-full h-10 bg-[var(--color-muted-bg)] border border-[var(--color-border)] rounded-full flex items-center px-4 text-sm text-[var(--color-text-secondary)] cursor-pointer hover:bg-[var(--color-surface)] hover:border-[var(--color-text-secondary)] transition-all">
-                <CiSearch size={20} className="mr-2 flex-shrink-0" />
-                <span className="flex-1 truncate">Search products...</span>
-             </div>
+          <div className="flex-1">
+            <SearchDropdown 
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onClose={() => setSearchQuery("")}
+              placeholder="Search products..."
+            />
           </div>
 
           {/* Mobile Cart */}
@@ -655,21 +649,25 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
           </Link>
         </div>
         
-        {/* Mobile Categories Scroll - Now shows Special Offers */}
-        <div className="flex items-center gap-3 px-4 pb-2 overflow-x-auto scrollbar-hide">
+        {/* Mobile Special Offers Scroll - Simple Text Buttons */}
+        <div className="flex items-center gap-4 px-4 pb-2 overflow-x-auto scrollbar-hide">
            {initialOfferCategories.length > 0 ? (
-             initialOfferCategories.slice(0, 8).map((offer) => (
+             initialOfferCategories.slice(0, 8).map((offer, idx) => (
                <Link 
-                 key={offer.id} 
+                 key={offer.id}
                  href={offer.link} 
                  target="_blank"
                  rel="noopener noreferrer"
-                 className="flex-shrink-0 text-xs bg-[var(--color-muted-bg)] px-3 py-1 rounded-full text-[var(--color-text-primary)] flex items-center gap-1.5"
+                 className={`flex-shrink-0 text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                   offer.badge_text 
+                     ? 'text-red-600 dark:text-red-500' 
+                     : 'text-[var(--color-text-primary)]'
+                 }`}
                >
-                 {offer.icon_class && <i className={offer.icon_class} style={{ fontSize: '10px' }} />}
+                 {offer.icon_class && <i className={offer.icon_class} style={{ fontSize: '11px' }} />}
                  <span className="whitespace-nowrap">{offer.title}</span>
                  {offer.badge_text && (
-                   <span className={`text-[8px] px-1 py-0.5 rounded-full bg-${offer.badge_color || 'red'}-500 text-white uppercase font-bold`}>
+                   <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase font-bold tracking-wider">
                      {offer.badge_text}
                    </span>
                  )}
@@ -677,7 +675,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
              ))
            ) : (
              initialCategories.slice(0, 6).map((cat, i) => (
-               <Link key={i} href={`/products?category=${cat.slug}`} className="flex-shrink-0 text-xs bg-[var(--color-muted-bg)] px-3 py-1 rounded-full text-[var(--color-text-primary)]">
+               <Link key={i} href={`/categories?category=${cat.slug}`} className="flex-shrink-0 text-xs text-[var(--color-text-primary)] font-medium whitespace-nowrap">
                  {cat.name}
                </Link>
              ))
@@ -736,13 +734,6 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
         offerCategories={initialOfferCategories}
       />
 
-      {/* Global Search Modal */}
-      <SimpleSearchModal
-        isOpen={isSearchModalOpen}
-        onClose={() => setIsSearchModalOpen(false)}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
     </>
   );
 }

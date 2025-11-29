@@ -1,3 +1,4 @@
+// app/Components/Cart/OrderSummary.jsx
 "use client";
 
 import CartItem from "./CartItem";
@@ -5,39 +6,33 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
-// This component displays the list of items in the cart.
 const OrderSummary = ({ cartItems, onUpdateQuantity, onRemoveItem }) => {
-  // Calculate total weight for cart
-  const totalWeight = cartItems.reduce((sum, item) => {
-    const weight = parseFloat(item.weight || 0);
-    const quantity = item.quantity || 0;
-    return sum + (weight * quantity);
-  }, 0);
-
   return (
-    <div className="bg-[var(--color-second-bg)] rounded-xl border border-[var(--color-border)] shadow-lg w-full">
-      <div className="p-4 border-b border-[var(--color-border)]">
-        {/* FIX: Corrected the invalid CSS class name here */}
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] lato">
-            Shopping Cart ({cartItems.reduce((acc, item) => acc + item.quantity, 0)} items)
-          </h2>
-          {totalWeight > 0 && (
-            <div className="text-sm text-[var(--color-text-secondary)]">
-              Total Weight: <span className="font-medium">{totalWeight.toFixed(2)}kg</span>
-            </div>
-          )}
-        </div>
+    <div className="rounded-[20px] sm:rounded-[24px] shadow-sm p-4 sm:p-6 lg:p-8 h-full" style={{ backgroundColor: 'var(--cart-card-bg)', boxShadow: '0 1px 3px var(--cart-shadow)' }}>
+      {/* Header Section */}
+      <div className="mb-4 sm:mb-6 lg:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold mb-1" style={{ color: 'var(--cart-text-primary)' }}>Shopping Bag</h2>
+        <p className="text-xs sm:text-sm" style={{ color: 'var(--cart-text-secondary)' }}>
+          {cartItems.reduce((acc, item) => acc + item.quantity, 0)} items in your bag.
+        </p>
       </div>
-      <div className="divide-y divide-[var(--color-border)]">
+
+      {/* Table Headers - Hidden on mobile, visible on md+ */}
+      {cartItems.length > 0 && (
+        <div className="hidden md:grid grid-cols-12 gap-4 pb-3 sm:pb-4 text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--cart-text-primary)' }}>
+          <div className="col-span-6">Product</div>
+          <div className="col-span-2 text-center">Price</div>
+          <div className="col-span-2 text-center">Quantity</div>
+          <div className="col-span-2 text-center">Total Price</div>
+        </div>
+      )}
+
+      {/* Items List */}
+      <div className="mt-2">
         <AnimatePresence>
           {cartItems.length > 0 ? (
             cartItems.map((item, index) => {
-              // Generate a unique key prioritizing variantId, then id, then fallback to index
-              const uniqueKey = item.variantId || 
-                               (item.id ? `item-${item.id}` : null) || 
-                               `cart-item-${index}`;
-              
+              const uniqueKey = item.variantId || (item.id ? `item-${item.id}` : `cart-item-${index}`);
               return (
                 <CartItem
                   key={uniqueKey}
@@ -51,18 +46,19 @@ const OrderSummary = ({ cartItems, onUpdateQuantity, onRemoveItem }) => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center p-12"
+              className="text-center py-12 sm:py-16 lg:py-20"
             >
-              <ShoppingCart size={48} className="mx-auto text-[var(--color-text-secondary)] mb-4" />
-              <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-2">Your cart is empty</h3>
-              <p className="text-[var(--color-text-secondary)] mb-6">
-                Looks like you haven't added anything to your cart yet.
-              </p>
+              <ShoppingCart size={48} className="mx-auto mb-4" style={{ color: 'var(--cart-text-muted)' }} />
+              <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: 'var(--cart-text-primary)' }}>Your cart is empty</h3>
+              <p className="mb-4 sm:mb-6 text-sm" style={{ color: 'var(--cart-text-secondary)' }}>Looks like you haven't added anything yet.</p>
               <Link
                 href="/products"
-                className="inline-block bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:bg-primary/90 transition-opacity"
+                className="inline-block font-bold py-2.5 sm:py-3 px-6 sm:px-8 rounded-full transition-colors text-sm"
+                style={{ backgroundColor: 'var(--cart-button-primary)', color: 'var(--cart-card-bg)' }}
+                onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+                onMouseLeave={(e) => e.target.style.opacity = '1'}
               >
-                continue 
+                Start Shopping
               </Link>
             </motion.div>
           )}

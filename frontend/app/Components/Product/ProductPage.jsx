@@ -192,24 +192,27 @@ const ProductPage = () => {
   // Prevent hydration mismatch
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[var(--color-background)]">
-        <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
-          <div className="mb-4 md:mb-6">
-            <div className="h-6 sm:h-8 bg-gray-300 dark:bg-gray-600 rounded w-48 sm:w-64 mb-2 animate-pulse"></div>
-            <div className="h-3 sm:h-4 bg-gray-300 dark:bg-gray-600 rounded w-64 sm:w-96 animate-pulse"></div>
-          </div>
-          <div className="flex flex-col xl:flex-row gap-4 md:gap-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950">
+        <div className="container mx-auto px-4 py-6 lg:py-8">
+          <div className="flex flex-col xl:flex-row gap-6">
             <aside className="hidden xl:block w-full xl:w-80 flex-shrink-0">
-              <div className="h-96 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+              <div className="h-96 bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"></div>
             </aside>
             <main className="flex-1 min-w-0">
-              <div className="h-12 sm:h-16 bg-gray-300 dark:bg-gray-600 rounded mb-4 md:mb-6 animate-pulse"></div>
-              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
+              {/* Skeleton for Search/Sort Row */}
+              <div className="flex gap-3 mb-6">
+                <div className="flex-1 h-11 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
+                <div className="w-40 h-11 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
+                <div className="xl:hidden w-24 h-11 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
+              </div>
+              {/* Skeleton for Products Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="bg-gray-300 dark:bg-gray-600 rounded-xl h-48 sm:h-56 md:h-64 w-full"></div>
-                    <div className="h-3 sm:h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mt-2"></div>
-                    <div className="h-4 sm:h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mt-1"></div>
+                    <div className="bg-gray-200 dark:bg-gray-800 rounded-xl h-56 md:h-64 w-full mb-3"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2 mb-2"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-2/3"></div>
                   </div>
                 ))}
               </div>
@@ -221,32 +224,29 @@ const ProductPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
-        {/* Page Header */}
-        <div className="mb-4 md:mb-6">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {pageTitle}
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-            {pageDescription}
-          </p>
-        </div>
-
-        <div className="flex flex-col xl:flex-row gap-4 md:gap-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950">
+      <div className="container mx-auto px-4 py-6 lg:py-8">
+        <div className="flex flex-col xl:flex-row gap-6">
           {/* Desktop Sidebar */}
-          <aside className="hidden xl:block w-full xl:w-80 flex-shrink-0">
-            <Sidebar 
-              filters={filters} 
-              onFilterChange={handleFilterChange} 
-              onClearFilters={clearFilters} 
-              theme={mounted ? resolvedTheme : 'light'} 
-            />
-          </aside>
+          <motion.aside 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className="hidden xl:block w-full xl:w-80 flex-shrink-0"
+          >
+            <div className="sticky top-6">
+              <Sidebar 
+                filters={filters} 
+                onFilterChange={handleFilterChange} 
+                onClearFilters={clearFilters} 
+                theme={mounted ? resolvedTheme : 'light'} 
+              />
+            </div>
+          </motion.aside>
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">
-            {/* Product List Header */}
+            {/* Compact Header with Search and Sort */}
             <ProductListHeader
               totalProducts={totalCount}
               currentPage={currentPage}
@@ -259,21 +259,32 @@ const ProductPage = () => {
             />
 
             {/* Product Grid */}
-            <ProductGrid 
-              products={products}
-              isLoading={isLoading}
-              isError={isError}
-            />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <ProductGrid 
+                products={products}
+                isLoading={isLoading}
+                isError={isError}
+              />
+            </motion.div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-8"
+              >
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={handlePageChange}
                 />
-              </div>
+              </motion.div>
             )}
           </main>
         </div>
@@ -288,8 +299,11 @@ const ProductPage = () => {
               className="fixed inset-0 z-50 xl:hidden"
             >
               {/* Backdrop */}
-              <div
-                className="absolute inset-0 bg-black bg-opacity-50"
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                 onClick={() => setShowMobileFilters(false)}
               />
               
@@ -299,19 +313,21 @@ const ProductPage = () => {
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="absolute left-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-800 shadow-xl overflow-y-auto"
+                className="absolute left-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto"
               >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-sky-500 to-blue-600">
+                  <h3 className="text-lg font-semibold text-white">
                     Filters
                   </h3>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setShowMobileFilters(false)}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                   >
-                    <FiX size={20} />
-                  </button>
+                    <FiX size={20} className="text-white" />
+                  </motion.button>
                 </div>
                 
                 {/* Sidebar Content */}
@@ -335,9 +351,14 @@ const ProductPage = () => {
         </AnimatePresence>
         
         {/* Dynamic Sections for Products Page */}
-        <div className="container mx-auto px-4 py-8">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12"
+        >
           <EnhancedSectionRenderer page="products" />
-        </div>
+        </motion.div>
       </div>
     </div>
   );

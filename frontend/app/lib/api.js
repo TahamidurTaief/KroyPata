@@ -400,10 +400,10 @@ async function fetchAPI(endpoint, options = {}) {
 }
 
 // Product and related fetches
-export const getProducts = async (filters = {}, page = 1) => {
-    console.log('🔧 getProducts called with:', { filters, page });
+export const getProducts = async (filters = {}, page = 1, pageSize = 24) => {
+    console.log('🔧 getProducts called with:', { filters, page, pageSize });
     
-    const params = new URLSearchParams({ page, page_size: 24 });
+    const params = new URLSearchParams({ page, page_size: pageSize });
 
     if (filters.category) {
         params.append('category', filters.category);
@@ -524,7 +524,7 @@ export const getProductBySlug = cache(async (slug) => fetchAPI(`/api/products/pr
 export const getCategories = cache(async () => {
   try {
     const response = await fetchAPI('/api/products/categories/', {
-      next: { revalidate: 300 } // Cache for 5 minutes since categories change less frequently
+      next: { revalidate: 600 } // Cache for 10 minutes since categories change less frequently
     });
     
     // Handle errors - return empty array instead of fallback data
@@ -1458,7 +1458,21 @@ export const getNavbarData = cache(async () => {
 
 export const getOfferCategories = cache(async () => {
   if (DEBUG_API) console.log('🌐 Fetching offer categories...');
-  return fetchAPI('/api/website/offer-categories/');
+  try {
+    const response = await fetchAPI('/api/website/offer-categories/', {
+      next: { revalidate: 600 } // Cache for 10 minutes
+    });
+    
+    if (response?.error) {
+      console.warn('Offer categories API error:', response.error);
+      return [];
+    }
+    
+    return response?.results || response || [];
+  } catch (error) {
+    console.warn('Offer categories fetch failed:', error);
+    return [];
+  }
 });
 
 export const getHeroBanners = cache(async () => {

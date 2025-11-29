@@ -31,7 +31,7 @@ const FilterProducts = ({ initialProducts, categories }) => {
 
         console.log('🔧 Fetching products for category:', selectedCategory || 'All Products');
         
-        const newProductsData = await getProducts(searchParams);
+        const newProductsData = await getProducts(searchParams, 1, 10);
         
         if (newProductsData?.error) {
           console.error('API Error:', newProductsData.error);
@@ -60,7 +60,7 @@ const FilterProducts = ({ initialProducts, categories }) => {
         setIsLoading(true);
         
         try {
-          const authenticatedProducts = await getProducts({}, 1);
+          const authenticatedProducts = await getProducts({}, 1, 10);
           
           if (authenticatedProducts?.results) {
             console.log('✅ Got authenticated products with wholesale pricing:', authenticatedProducts.results.length);
