@@ -1,19 +1,9 @@
 // Wholeseller registration API
 export const registerWholeseller = async (formData) => {
-  console.log('🔧 Wholeseller registration - FormData entries:');
-  for (let [key, value] of formData.entries()) {
-    console.log(`${key}:`, value instanceof File ? `File: ${value.name}` : value);
-  }
-  
-  console.log('🔧 API_BASE_URL:', API_BASE_URL);
-  console.log('🔧 Full URL:', `${API_BASE_URL}/api/auth/register/wholesaler/`);
-  
   const response = await fetchAPI('/api/auth/register/wholesaler/', {
     method: 'POST',
     body: formData, // FormData object - don't JSON.stringify it
   });
-
-  console.log('🔧 Wholeseller registration response:', response);
 
   if (response.error) {
     return response;
@@ -34,11 +24,9 @@ export const getBrands = cache(async (categorySlug = null) => {
       params.append('category', categorySlug);
     }
     const url = params.toString() ? `/api/products/brands/?${params.toString()}` : '/api/products/brands/';
-    console.log('🏷️ Fetching brands with URL:', url);
     const response = await fetchAPI(url, {
       next: { revalidate: 300 } // Cache for 5 minutes
     });
-    console.log('🏷️ Brands response:', response);
     if (response?.error) {
       console.warn('Brands API error:', response.error);
       return [];
@@ -76,7 +64,7 @@ const API_BASE_URL = (() => {
 })();
 
 // Debug API calls
-const DEBUG_API = true;
+const DEBUG_API = false;
 
 // Test function to check API connectivity
 export const testAPIConnection = async () => {

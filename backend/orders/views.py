@@ -395,7 +395,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             'payment'
         ).prefetch_related(
             'items__product',
-            'items__product__thumbnail',
             'items__product__additional_images',
             'items__color',
             'items__size',
@@ -523,6 +522,18 @@ class OrderViewSet(viewsets.ModelViewSet):
         Supports both authenticated users and anonymous guest orders.
         """
         try:
+            # Log incoming request data for debugging
+            logger.info(f"📦 Order creation request received from user: {request.user if request.user.is_authenticated else 'Anonymous'}")
+            logger.info(f"📦 Request data keys: {request.data.keys() if hasattr(request.data, 'keys') else 'N/A'}")
+            logger.info(f"📦 Items count: {len(request.data.get('items', []))}")
+            logger.info(f"📦 Shipping method ID: {request.data.get('shipping_method')}")
+            
+            # Log first item details for debugging
+            items = request.data.get('items', [])
+            if items:
+                first_item = items[0]
+                logger.info(f"📦 First item structure: {first_item}")
+            
             with transaction.atomic():
                 serializer = self.get_serializer(data=request.data, context={'request': request})
                 
@@ -561,8 +572,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             import traceback
             error_traceback = traceback.format_exc()
             logger.exception(f"Order creation failed: {str(e)}")
-            print(f"❌ Order creation failed: {str(e)}")
-            print(f"❌ Full traceback:\n{error_traceback}")
             
             return Response({
                 'success': False,
@@ -673,9 +682,8 @@ class OrderViewSet(viewsets.ModelViewSet):
                 
                 try:
                     shipping_address = Address.objects.create(**address_fields)
-                    print(f"✅ Created address for {'user' if request.user.is_authenticated else 'guest'}: {shipping_address}")
                 except Exception as e:
-                    print(f"❌ Failed to create address: {e}")
+                    logger.exception(f"Failed to create address: {e}")
                     return Response({
                         'success': False,
                         'message': f'Failed to create shipping address: {str(e)}'

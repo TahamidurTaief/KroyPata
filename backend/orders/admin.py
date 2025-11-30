@@ -8,7 +8,7 @@ from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from .models import (
     Order, OrderItem, ShippingMethod, OrderUpdate, OrderPayment, Coupon, ShippingTier,
-    ShippingCategory, FreeShippingRule
+    ShippingCategory, FreeShippingRule, CashOnDelivery
 )
 
 class ShippingTierInline(TabularInline):
@@ -210,6 +210,36 @@ class OrderPaymentInline(admin.StackedInline):
     def has_add_permission(self, request, obj=None):
         return False
 
+class CashOnDeliveryInline(admin.StackedInline):
+    """Inline for cash on delivery details"""
+    model = CashOnDelivery
+    extra = 0
+    readonly_fields = ('created_at', 'updated_at', 'payment_collected_at', 'actual_delivery_date')
+    
+    fieldsets = (
+        ('Customer Contact Details', {
+            'fields': ('customer_full_name', 'alternative_phone', 'special_instructions')
+        }),
+        ('Delivery Information', {
+            'fields': ('delivery_status', 'scheduled_delivery_date', 'actual_delivery_date', 'delivery_attempts')
+        }),
+        ('Payment Collection', {
+            'fields': ('amount_to_collect', 'amount_collected', 'payment_collected_at')
+        }),
+        ('Delivery Team', {
+            'fields': ('delivery_person_name', 'delivery_person_phone'),
+            'classes': ('collapse',)
+        }),
+        ('Notes & Tracking', {
+            'fields': ('delivery_notes',),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
 class OrderUpdateInline(TabularInline):
     model = OrderUpdate
     extra = 1
@@ -221,7 +251,7 @@ class OrderAdmin(ModelAdmin):
     list_filter = ('status', 'payment_status', 'shipping_method', 'ordered_at')
     search_fields = ('order_number', 'customer_name', 'customer_email', 'customer_phone', 'tracking_number')
     readonly_fields = ('order_number', 'total_amount', 'cart_subtotal', 'ordered_at')
-    inlines = [OrderItemInline, OrderPaymentInline, OrderUpdateInline]
+    inlines = [OrderItemInline, OrderPaymentInline, CashOnDeliveryInline, OrderUpdateInline]
     
     fieldsets = (
         ('Order Information', {
@@ -285,3 +315,76 @@ class FreeShippingRuleAdmin(ModelAdmin):
         count = obj.applicable_categories.count()
         return f"{count} categories" if count > 0 else "All categories"
     applicable_categories_count.short_description = 'Applies To'
+
+@admin.register(CashOnDelivery)
+class CashOnDeliveryAdmin(ModelAdmin):
+    list_display = (
+        'order_number', 'customer_full_name', 'alternative_phone', 
+        'delivery_status', 'amount_to_collect', 'amount_collected', 
+        'delivery_attempts', 'scheduled_delivery_date', 'created_at'
+    )
+    list_filter = ('delivery_status', 'created_at', 'scheduled_delivery_date')
+    search_fields = (
+        'order__order_number', 'customer_full_name', 'alternative_phone', 
+        'delivery_person_name', 'delivery_person_phone'
+    )
+    readonly_fields = ('created_at', 'updated_at', 'payment_collected_at', 'actual_delivery_date')
+    
+    fieldsets = (
+        ('Order Information', {
+            'fields': ('order',)
+        }),
+        ('Customer Contact Details', {
+            'fields': ('customer_full_name', 'alternative_phone', 'special_instructions')
+        }),
+        ('Delivery Management', {
+            'fields': ('delivery_status', 'scheduled_delivery_date', 'actual_delivery_date', 'delivery_attempts')
+        }),
+        ('Payment Collection', {
+            'fields': ('amount_to_collect', 'amount_collected', 'payment_collected_at')
+        }),
+        ('Delivery Team Assignment', {
+            'fields': ('delivery_person_name', 'delivery_person_phone'),
+            'classes': ('collapse',)
+        }),
+        ('Delivery Notes & Tracking', {
+            'fields': ('delivery_notes',),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def order_number(self, obj):
+        return obj.order.order_number
+    order_number.short_description = 'Order Number'
+    order_number.admin_order_field = 'order__order_number'
+    
+    def get_queryset(self, request):
+        """Optimize queryset with related objects"""
+        qs = super().get_queryset(request)
+        return qs.select_related('order')
+    
+    actions = ['mark_out_for_delivery', 'mark_delivered', 'increment_delivery_attempts']
+    
+    def mark_out_for_delivery(self, request, queryset):
+        """Mark selected COD orders as out for delivery"""
+        updated = queryset.update(delivery_status=CashOnDelivery.DeliveryStatus.OUT_FOR_DELIVERY)
+        self.message_user(request, f'{updated} orders marked as out for delivery.')
+    mark_out_for_delivery.short_description = 'Mark as out for delivery'
+    
+    def mark_delivered(self, request, queryset):
+        """Mark selected COD orders as delivered"""
+        for cod in queryset:
+            cod.mark_as_delivered()
+        self.message_user(request, f'{queryset.count()} orders marked as delivered and paid.')
+    mark_delivered.short_description = 'Mark as delivered & paid'
+    
+    def increment_delivery_attempts(self, request, queryset):
+        """Increment delivery attempts for selected orders"""
+        for cod in queryset:
+            cod.increment_delivery_attempt("Delivery attempt via admin action")
+        self.message_user(request, f'Incremented delivery attempts for {queryset.count()} orders.')
+    increment_delivery_attempts.short_description = 'Increment delivery attempts'

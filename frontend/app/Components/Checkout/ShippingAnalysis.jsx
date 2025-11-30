@@ -95,15 +95,25 @@ export default function ShippingAnalysis({ cartItems, cartTotal, onAnalysisUpdat
         available_shipping_methods: [
           {
             id: 'standard',
-            name: 'Standard Delivery',
+            name: 'Standard Delivery (3-5 days)',
             calculated_price: 5.99,
-            base_price: 5.99
+            base_price: 5.99,
+            delivery_estimated_time: '3-5 business days'
           },
           {
             id: 'express',
-            name: 'Express Delivery',
+            name: 'Express Delivery (1-2 days)',
             calculated_price: 12.99,
-            base_price: 12.99
+            base_price: 12.99,
+            delivery_estimated_time: '1-2 business days'
+          },
+          {
+            id: 'free',
+            name: 'Free Standard Shipping',
+            calculated_price: 0,
+            base_price: 0,
+            delivery_estimated_time: '5-7 business days',
+            is_free_shipping_rule: true
           }
         ],
         cart_analysis: {

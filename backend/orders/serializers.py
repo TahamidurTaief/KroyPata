@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from decimal import Decimal
 from .models import (
     Order, OrderItem, OrderUpdate, ShippingMethod, OrderPayment, Coupon, ShippingTier,
-    ShippingCategory, FreeShippingRule
+    ShippingCategory, FreeShippingRule, CashOnDelivery
 )
 from products.models import Product, Color, Size, CategoryMinimumOrderQuantity
 from products.serializers import ColorSerializer, SizeSerializer
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # New serializers for order creation with atomic transactions
 class OrderItemCreateSerializer(serializers.Serializer):
     """Serializer for order items (write-only)"""
-    product = serializers.IntegerField()
+    product = serializers.UUIDField()  # Changed from IntegerField to UUIDField
     color = serializers.IntegerField(allow_null=True, required=False)
     size = serializers.IntegerField(allow_null=True, required=False)
     quantity = serializers.IntegerField(min_value=1)
@@ -65,19 +65,34 @@ class OrderPaymentCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("Transaction ID already exists.")
         return value
 
+class ShippingAddressSerializer(serializers.Serializer):
+    """Serializer for creating shipping address from order data"""
+    street_address = serializers.CharField(max_length=255, required=True)
+    address_line_1 = serializers.CharField(max_length=255, required=False)
+    city = serializers.CharField(max_length=100, required=True)
+    state = serializers.CharField(max_length=100, required=True)
+    zip_code = serializers.CharField(max_length=20, required=True)
+    postal_code = serializers.CharField(max_length=20, required=False)
+    country = serializers.CharField(max_length=100, default='Bangladesh')
+
 class OrderCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating orders with nested items and payment"""
     items = OrderItemCreateSerializer(many=True, write_only=True)
     payment = OrderPaymentCreateSerializer(write_only=True, required=False)
     coupon_code = serializers.CharField(max_length=50, required=False, write_only=True)
+    payment_method = serializers.CharField(max_length=10, required=False, write_only=True)
+    cod_details = serializers.DictField(required=False, write_only=True)
+    shipping_address = serializers.JSONField(write_only=True)  # Accept as JSON object
+    shipping_method = serializers.IntegerField(write_only=True, required=False, allow_null=True)  # Allow null for free shipping
     
     class Meta:
         model = Order
         fields = [
             'customer_name', 'customer_email', 'customer_phone',
             'shipping_address', 'shipping_method', 'items',
-            'coupon_code', 'payment', 'order_number', 'total_amount',
-            'cart_subtotal', 'status', 'payment_status', 'ordered_at'
+            'coupon_code', 'payment', 'payment_method', 'cod_details',
+            'order_number', 'total_amount', 'cart_subtotal', 'status', 
+            'payment_status', 'ordered_at'
         ]
         read_only_fields = ['order_number', 'total_amount', 'cart_subtotal', 'status', 'payment_status', 'ordered_at']
     
@@ -88,22 +103,38 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         return value
     
     def validate_shipping_address(self, value):
-        """Validate that shipping address exists"""
-        try:
-            Address.objects.get(id=value.id)
-        except Address.DoesNotExist:
-            raise serializers.ValidationError("Shipping address does not exist.")
+        """Validate shipping address data"""
+        if isinstance(value, dict):
+            # Validate required fields
+            street_address = value.get('street_address') or value.get('address_line_1')
+            if not street_address:
+                raise serializers.ValidationError("Street address is required.")
+            if not value.get('city'):
+                raise serializers.ValidationError("City is required.")
+            if not value.get('state'):
+                raise serializers.ValidationError("State is required.")
+            zip_code = value.get('zip_code') or value.get('postal_code')
+            if not zip_code:
+                raise serializers.ValidationError("Zip code is required.")
         return value
     
     def validate_shipping_method(self, value):
         """Validate that shipping method exists and is active"""
+        # Handle 'free' as a special case for free shipping
+        if value == 'free' or value is None:
+            return None
+        
         try:
-            shipping_method = ShippingMethod.objects.get(id=value.id)
+            # Convert to integer if string
+            method_id = int(value) if isinstance(value, str) else value
+            shipping_method = ShippingMethod.objects.get(id=method_id)
             if not shipping_method.is_active:
                 raise serializers.ValidationError("Selected shipping method is not available.")
+            return method_id
+        except (ValueError, TypeError):
+            raise serializers.ValidationError("Invalid shipping method ID.")
         except ShippingMethod.DoesNotExist:
             raise serializers.ValidationError("Shipping method does not exist.")
-        return value
     
     def create(self, validated_data):
         """Create order with items and payment in atomic transaction"""
@@ -111,10 +142,51 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             items_data = validated_data.pop('items')
             payment_data = validated_data.pop('payment', None)
             coupon_code = validated_data.pop('coupon_code', None)
+            payment_method = validated_data.pop('payment_method', None)
+            cod_details = validated_data.pop('cod_details', None)
+            shipping_address_data = validated_data.pop('shipping_address')
+            shipping_method_id = validated_data.pop('shipping_method')
             
             # Get user from request context if available
             request = self.context.get('request')
             user = request.user if request and request.user.is_authenticated else None
+            
+            # Create or get shipping address
+            if isinstance(shipping_address_data, dict):
+                street_address = shipping_address_data.get('street_address') or shipping_address_data.get('address_line_1', '')
+                zip_code = shipping_address_data.get('zip_code') or shipping_address_data.get('postal_code', '')
+                
+                shipping_address = Address.objects.create(
+                    user=user,
+                    address_line_1=street_address,
+                    city=shipping_address_data.get('city', ''),
+                    state=shipping_address_data.get('state', ''),
+                    postal_code=zip_code,
+                    country=shipping_address_data.get('country', 'Bangladesh'),
+                    is_default=False
+                )
+            else:
+                raise serializers.ValidationError("Invalid shipping address format.")
+            
+            # Get shipping method
+            shipping_method = None
+            if shipping_method_id:
+                try:
+                    shipping_method = ShippingMethod.objects.get(id=shipping_method_id)
+                except ShippingMethod.DoesNotExist:
+                    # If shipping method doesn't exist, try to get the first active one
+                    shipping_method = ShippingMethod.objects.filter(is_active=True).first()
+                    if not shipping_method:
+                        raise serializers.ValidationError("No active shipping method available.")
+            else:
+                # If no shipping method ID provided (e.g., free shipping), get the first active one as fallback
+                shipping_method = ShippingMethod.objects.filter(is_active=True).first()
+                if not shipping_method:
+                    raise serializers.ValidationError("No active shipping method available.")
+            
+            # Add to validated_data
+            validated_data['shipping_address'] = shipping_address
+            validated_data['shipping_method'] = shipping_method
             
             with transaction.atomic():
                 try:
@@ -323,17 +395,57 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                         traceback.print_exc()
                         raise serializers.ValidationError(f"Error creating order: {str(e)}")
                     
-                    # Create payment if provided
-                    if payment_data:
+                    # Handle payment creation based on method
+                    if payment_method == 'cod':
+                        # Create COD payment record
+                        try:
+                            from .models import CashOnDelivery
+                            
+                            # Create OrderPayment record for COD
+                            order_payment = OrderPayment.objects.create(
+                                order=order,
+                                payment_method=OrderPayment.PaymentMethod.COD,
+                                admin_account_number='',
+                                sender_number='',
+                                transaction_id=f'COD-{order.order_number}'
+                            )
+                            
+                            # Create CashOnDelivery record
+                            cod_data = {
+                                'customer_full_name': cod_details.get('customer_full_name', order.customer_name),
+                                'alternative_phone': cod_details.get('alternative_phone', order.customer_phone),
+                                'special_instructions': cod_details.get('special_instructions', ''),
+                                'amount_to_collect': total_amount
+                            }
+                            
+                            CashOnDelivery.objects.create(
+                                order=order,
+                                **cod_data
+                            )
+                            
+                            # Set order payment status to COD_PENDING
+                            order.payment_status = Order.PaymentStatus.COD_PENDING
+                            order.save()
+                            
+                            logger.info(f"COD order created: {order.order_number}")
+                            
+                        except Exception as e:
+                            logger.exception("Error creating COD record")
+                            raise serializers.ValidationError(f"Error creating COD record: {str(e)}")
+                            
+                    elif payment_data:
+                        # Handle regular payment methods
                         try:
                             # Set admin account number if not provided
                             if 'admin_account_number' not in payment_data:
                                 # Default admin account number based on payment method
-                                payment_method = payment_data['payment_method']
-                                if payment_method == OrderPayment.PaymentMethod.BKASH:
+                                payment_method_type = payment_data['payment_method']
+                                if payment_method_type == OrderPayment.PaymentMethod.BKASH:
                                     payment_data['admin_account_number'] = '01700000000'  # Default bKash number
-                                elif payment_method == OrderPayment.PaymentMethod.NAGAD:
+                                elif payment_method_type == OrderPayment.PaymentMethod.NAGAD:
                                     payment_data['admin_account_number'] = '01800000000'  # Default Nagad number
+                                elif payment_method_type == OrderPayment.PaymentMethod.ROCKET:
+                                    payment_data['admin_account_number'] = '01900000000'  # Default Rocket number
                                 else:
                                     payment_data['admin_account_number'] = 'CARD_GATEWAY'  # Default for card
                             

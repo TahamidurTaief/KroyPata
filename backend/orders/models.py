@@ -637,6 +637,7 @@ class Order(models.Model):
         PENDING = 'PENDING', 'Pending'
         PAID = 'PAID', 'Paid'
         FAILED = 'FAILED', 'Failed'
+        COD_PENDING = 'COD_PENDING', 'Cash on Delivery - Pending'
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders', db_index=True)
     order_number = models.CharField(max_length=50, unique=True, blank=True, db_index=True)
@@ -730,12 +731,14 @@ class OrderPayment(models.Model):
     class PaymentMethod(models.TextChoices):
         BKASH = 'bkash', 'bKash'
         NAGAD = 'nagad', 'Nagad'
+        ROCKET = 'rocket', 'Rocket'
         CARD = 'card', 'Card'
+        COD = 'cod', 'Cash on Delivery'
 
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')
-    admin_account_number = models.CharField(max_length=50, help_text="Required backend-set account number")
-    sender_number = models.CharField(max_length=50, help_text="Required customer's payment number")
-    transaction_id = models.CharField(max_length=100, help_text="Required transaction/Reference ID")
+    admin_account_number = models.CharField(max_length=50, help_text="Required backend-set account number", blank=True, null=True)
+    sender_number = models.CharField(max_length=50, help_text="Required customer's payment number", blank=True, null=True)
+    transaction_id = models.CharField(max_length=100, help_text="Required transaction/Reference ID", blank=True, null=True)
     payment_method = models.CharField(max_length=10, choices=PaymentMethod.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -746,3 +749,116 @@ class OrderPayment(models.Model):
 
     def __str__(self):
         return f"Payment for {self.order.order_number} - {self.get_payment_method_display()}"
+
+class CashOnDelivery(models.Model):
+    """Cash on Delivery details for orders"""
+    
+    class DeliveryStatus(models.TextChoices):
+        PENDING = 'PENDING', 'Pending Delivery'
+        OUT_FOR_DELIVERY = 'OUT_FOR_DELIVERY', 'Out for Delivery'
+        DELIVERED = 'DELIVERED', 'Delivered & Paid'
+        PAYMENT_FAILED = 'PAYMENT_FAILED', 'Payment Failed at Delivery'
+        RETURNED = 'RETURNED', 'Returned to Sender'
+    
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='cash_on_delivery')
+    
+    # Customer contact details for delivery
+    customer_full_name = models.CharField(max_length=100, help_text="Full name for delivery verification")
+    alternative_phone = models.CharField(max_length=20, help_text="Alternative contact number for delivery coordination")
+    special_instructions = models.TextField(blank=True, null=True, help_text="Special delivery instructions from customer")
+    
+    # Delivery tracking
+    delivery_status = models.CharField(
+        max_length=20, 
+        choices=DeliveryStatus.choices, 
+        default=DeliveryStatus.PENDING,
+        help_text="Current delivery status for COD order"
+    )
+    
+    # Delivery attempts and notes
+    delivery_attempts = models.PositiveIntegerField(default=0, help_text="Number of delivery attempts made")
+    delivery_notes = models.TextField(blank=True, null=True, help_text="Internal delivery notes for delivery team")
+    
+    # Payment collection details
+    amount_to_collect = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        help_text="Total amount to collect from customer at delivery"
+    )
+    amount_collected = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        default=0, 
+        help_text="Actual amount collected at delivery"
+    )
+    payment_collected_at = models.DateTimeField(blank=True, null=True, help_text="Timestamp when payment was collected")
+    
+    # Delivery team information
+    delivery_person_name = models.CharField(max_length=100, blank=True, null=True, help_text="Name of delivery person")
+    delivery_person_phone = models.CharField(max_length=20, blank=True, null=True, help_text="Delivery person contact number")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    scheduled_delivery_date = models.DateField(blank=True, null=True, help_text="Scheduled delivery date")
+    actual_delivery_date = models.DateTimeField(blank=True, null=True, help_text="Actual delivery timestamp")
+    
+    class Meta:
+        verbose_name = "Cash on Delivery"
+        verbose_name_plural = "Cash on Delivery Orders"
+        indexes = [
+            models.Index(fields=['delivery_status', '-created_at'], name='cod_status_created_idx'),
+            models.Index(fields=['scheduled_delivery_date'], name='cod_scheduled_date_idx'),
+        ]
+    
+    def __str__(self):
+        return f"COD for Order {self.order.order_number} - {self.get_delivery_status_display()}"
+    
+    def save(self, *args, **kwargs):
+        # Auto-set amount to collect from order total if not set
+        if not self.amount_to_collect and self.order:
+            self.amount_to_collect = self.order.total_amount
+        super().save(*args, **kwargs)
+    
+    def is_payment_complete(self):
+        """Check if payment has been fully collected"""
+        return self.amount_collected >= self.amount_to_collect
+    
+    def get_payment_balance(self):
+        """Get remaining amount to be collected"""
+        return self.amount_to_collect - self.amount_collected
+    
+    def mark_as_delivered(self, collected_amount=None, delivery_person_name=None, notes=None):
+        """Mark COD order as delivered and payment collected"""
+        from django.utils import timezone
+        
+        self.delivery_status = self.DeliveryStatus.DELIVERED
+        self.actual_delivery_date = timezone.now()
+        self.payment_collected_at = timezone.now()
+        
+        if collected_amount is not None:
+            self.amount_collected = collected_amount
+        else:
+            self.amount_collected = self.amount_to_collect
+        
+        if delivery_person_name:
+            self.delivery_person_name = delivery_person_name
+        
+        if notes:
+            self.delivery_notes = notes
+        
+        # Update order status and payment status
+        self.order.status = Order.OrderStatus.DELIVERED
+        self.order.payment_status = Order.PaymentStatus.PAID
+        self.order.save()
+        
+        self.save()
+    
+    def increment_delivery_attempt(self, notes=None):
+        """Increment delivery attempt counter and add notes"""
+        self.delivery_attempts += 1
+        if notes:
+            existing_notes = self.delivery_notes or ""
+            timestamp = timezone.now().strftime("%Y-%m-%d %H:%M")
+            self.delivery_notes = f"{existing_notes}\n[{timestamp}] Attempt #{self.delivery_attempts}: {notes}".strip()
+        self.save()

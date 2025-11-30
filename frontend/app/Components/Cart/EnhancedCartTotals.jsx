@@ -41,6 +41,10 @@ const EnhancedCartTotals = ({
           </span>
         </div>
 
+        <div className="flex justify-between items-center text-xs sm:text-sm font-medium" style={{ color: 'var(--cart-totals-text)' }}>
+          <span>Design by Fluttertop</span>
+          <span>Free</span>
+        </div>
 
         {discount > 0 && (
           <div className="flex justify-between items-center text-xs sm:text-sm font-medium" style={{ color: 'var(--cart-success-text)' }}>

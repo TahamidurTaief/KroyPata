@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiCreditCard, FiSmartphone, FiLoader, FiCheckCircle } from "react-icons/fi";
+import { FaTruck } from "react-icons/fa";
 import Tk_icon from "../Common/Tk_icon";
 import { createOrderWithPayment } from "@/app/lib/api";
 import { handleCheckoutSuccess } from "@/app/lib/checkoutUtils";
@@ -97,12 +98,15 @@ const OrderPaymentModal = ({
   onSuccess,
   cartItems = [],
   totalAmount = 0,
-  cartSubtotal = 0, // Add cart subtotal prop
+  cartSubtotal = 0,
   shippingMethod = null,
   shippingAddress = null,
-  userDetails = null, // Add user details prop
+  userDetails = null,
   adminAccountNumber = null,
-  redirectToConfirmation = true // New prop to control redirection
+  redirectToConfirmation = true,
+  paymentMethod = "bkash",
+  codDetails = null,
+  mobileBankingDetails = null
 }) => {
   const router = useRouter();
   const { isAuthenticated, openAuthModal } = useAuth();
@@ -208,20 +212,30 @@ const OrderPaymentModal = ({
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.sender_number.trim()) {
-      newErrors.sender_number = 'Sender number is required';
-    } else if (!/^[0-9+\-\s]+$/.test(formData.sender_number)) {
-      newErrors.sender_number = 'Please enter a valid phone number';
-    }
-    
-    if (!formData.transaction_id.trim()) {
-      newErrors.transaction_id = 'Transaction ID is required';
-    } else if (formData.transaction_id.length < 3) {
-      newErrors.transaction_id = 'Transaction ID must be at least 3 characters';
-    }
-    
-    if (!formData.payment_method) {
-      newErrors.payment_method = 'Please select a payment method';
+    // Skip form validation for COD and mobile banking as they're handled in checkout page
+    if (paymentMethod === "cod") {
+      // COD validation already handled in checkout page
+      return true;
+    } else if (paymentMethod === "mobile") {
+      // Mobile banking validation already handled in checkout page
+      return true;
+    } else {
+      // Validate payment fields for other methods (if any)
+      if (!formData.sender_number.trim()) {
+        newErrors.sender_number = 'Sender number is required';
+      } else if (!/^[0-9+\-\s]+$/.test(formData.sender_number)) {
+        newErrors.sender_number = 'Please enter a valid phone number';
+      }
+      
+      if (!formData.transaction_id.trim()) {
+        newErrors.transaction_id = 'Transaction ID is required';
+      } else if (formData.transaction_id.length < 3) {
+        newErrors.transaction_id = 'Transaction ID must be at least 3 characters';
+      }
+      
+      if (!formData.payment_method) {
+        newErrors.payment_method = 'Please select a payment method';
+      }
     }
 
     setErrors(newErrors);
@@ -291,10 +305,6 @@ const OrderPaymentModal = ({
         cart_subtotal: calculatedSubtotal,
         shipping_address: shippingAddress?.id,
         shipping_method: shippingMethod?.id,
-        sender_number: formData.sender_number,
-        transaction_id: formData.transaction_id,
-        payment_method: formData.payment_method,
-        admin_account_number: fetchedAdminAccountNumber || adminAccountNumber,
         items: cartItems.map(item => ({
           product: item.product_id || item.id,
           color: item.color_id,
@@ -303,6 +313,47 @@ const OrderPaymentModal = ({
           unit_price: item.price || item.unit_price
         }))
       };
+
+      // Handle payment method specific fields
+      if (paymentMethod === "cod") {
+        // For Cash on Delivery
+        orderData.payment_method = "cod";
+        if (codDetails) {
+          orderData.cod_details = {
+            customer_full_name: codDetails.fullName,
+            alternative_phone: codDetails.alternativePhone,
+            special_instructions: codDetails.notes
+          };
+        }
+      } else if (paymentMethod === "mobile" && mobileBankingDetails) {
+        // For mobile banking payments
+        orderData.sender_number = mobileBankingDetails.senderNumber;
+        orderData.transaction_id = mobileBankingDetails.transactionId;
+        orderData.payment_method = mobileBankingDetails.paymentMethod;
+        
+        // Set admin account number based on payment method
+        if (mobileBankingDetails.paymentMethod === "bkash") {
+          orderData.admin_account_number = "01700000000";
+        } else if (mobileBankingDetails.paymentMethod === "nagad") {
+          orderData.admin_account_number = "01800000000";
+        } else if (mobileBankingDetails.paymentMethod === "rocket") {
+          orderData.admin_account_number = "01900000000";
+        }
+        
+        // Create payment data for the order
+        orderData.payment = {
+          sender_number: mobileBankingDetails.senderNumber,
+          transaction_id: mobileBankingDetails.transactionId,
+          payment_method: mobileBankingDetails.paymentMethod,
+          admin_account_number: orderData.admin_account_number
+        };
+      } else {
+        // For other payments (fallback)
+        orderData.sender_number = formData.sender_number;
+        orderData.transaction_id = formData.transaction_id;
+        orderData.payment_method = formData.payment_method;
+        orderData.admin_account_number = fetchedAdminAccountNumber || adminAccountNumber;
+      }
 
       // Ensure required Order model fields are provided
       // Use userDetails if available, otherwise use reasonable defaults
@@ -470,7 +521,9 @@ const OrderPaymentModal = ({
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Payment Information
+                {paymentMethod === "cod" ? "Order Confirmation" : 
+                 paymentMethod === "mobile" ? "Payment Confirmation" : 
+                 "Payment Information"}
               </h2>
               <button
                 onClick={onClose}
@@ -505,8 +558,93 @@ const OrderPaymentModal = ({
               {/* Form Content - No longer a form tag here */}
               {!submitSuccess && (
                 <div className="p-6 space-y-6">
-                  {/* Admin Account Number (Read-only) */}
-                  {(fetchedAdminAccountNumber || adminAccountNumber) && (
+                  {/* COD Confirmation */}
+                  {paymentMethod === "cod" && (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-green-50 dark:bg-green-900/10 rounded-lg border border-green-200 dark:border-green-800">
+                        <div className="flex items-center gap-2 text-green-800 dark:text-green-300 mb-2">
+                          <FaTruck className="w-4 h-4" />
+                          <span className="font-medium">Cash on Delivery Selected</span>
+                        </div>
+                        <p className="text-sm text-green-700 dark:text-green-400">
+                          You will pay ৳{totalAmount} in cash when your order is delivered to your doorstep.
+                        </p>
+                      </div>
+                      
+                      {codDetails && (
+                        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                          <h3 className="font-medium text-gray-900 dark:text-white mb-3">Delivery Contact Details:</h3>
+                          <div className="space-y-2 text-sm">
+                            <div>
+                              <span className="text-gray-600 dark:text-gray-400">Full Name: </span>
+                              <span className="text-gray-900 dark:text-white">{codDetails.fullName}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600 dark:text-gray-400">Alternative Phone: </span>
+                              <span className="text-gray-900 dark:text-white">{codDetails.alternativePhone}</span>
+                            </div>
+                            {codDetails.notes && (
+                              <div>
+                                <span className="text-gray-600 dark:text-gray-400">Special Instructions: </span>
+                                <span className="text-gray-900 dark:text-white">{codDetails.notes}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Mobile Banking Confirmation */}
+                  {paymentMethod === "mobile" && mobileBankingDetails && (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300 mb-2">
+                          <FiSmartphone className="w-4 h-4" />
+                          <span className="font-medium">
+                            {mobileBankingDetails.paymentMethod.charAt(0).toUpperCase() + mobileBankingDetails.paymentMethod.slice(1)} Payment Confirmed
+                          </span>
+                        </div>
+                        <p className="text-sm text-blue-700 dark:text-blue-400">
+                          Your payment of ৳{totalAmount} via {mobileBankingDetails.paymentMethod.toUpperCase()} is being processed.
+                        </p>
+                      </div>
+                      
+                      <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                        <h3 className="font-medium text-gray-900 dark:text-white mb-3">Payment Details:</h3>
+                        <div className="space-y-2 text-sm">
+                          <div>
+                            <span className="text-gray-600 dark:text-gray-400">Payment Method: </span>
+                            <span className="text-gray-900 dark:text-white font-medium">
+                              {mobileBankingDetails.paymentMethod.toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600 dark:text-gray-400">Your Number: </span>
+                            <span className="text-gray-900 dark:text-white">{mobileBankingDetails.senderNumber}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600 dark:text-gray-400">Transaction ID: </span>
+                            <span className="text-gray-900 dark:text-white font-mono">{mobileBankingDetails.transactionId}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600 dark:text-gray-400">Sent To: </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {mobileBankingDetails.paymentMethod === "bkash" ? "01700000000" : 
+                               mobileBankingDetails.paymentMethod === "nagad" ? "01800000000" : 
+                               "01900000000"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Payment Form for non-COD methods */}
+                  {paymentMethod !== "cod" && (
+                    <>
+                      {/* Admin Account Number (Read-only) */}
+                      {(fetchedAdminAccountNumber || adminAccountNumber) && (
                     <FormField label="Send Payment To">
                       <div className="flex items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                         <Tk_icon className="text-blue-600 dark:text-blue-400 mr-2" size={16} />
@@ -583,6 +721,9 @@ const OrderPaymentModal = ({
                     </div>
                   </FormField>
 
+                    </>
+                  )}
+
                   {/* Order Summary */}
                   {(totalAmount > 0 || shippingMethod) && (
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
@@ -650,10 +791,18 @@ const OrderPaymentModal = ({
                       {isSubmitting ? (
                         <>
                           <FiLoader className="animate-spin" size={16} />
-                          <span>Processing...</span>
+                          <span>
+                            {paymentMethod === "cod" ? "Placing Order..." : 
+                             paymentMethod === "mobile" ? "Confirming Payment..." : 
+                             "Processing..."}
+                          </span>
                         </>
                       ) : (
-                        <span>Submit Payment</span>
+                        <span>
+                          {paymentMethod === "cod" ? "Place Order" : 
+                           paymentMethod === "mobile" ? "Confirm Order" : 
+                           "Submit Payment"}
+                        </span>
                       )}
                     </button>
                   </div>

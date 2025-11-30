@@ -399,7 +399,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
               <BsQrCode size={20} className="text-[var(--color-text-primary)]" />
               <div className="text-xs leading-tight hidden xl:block">
                 <p className="text-[var(--color-text-secondary)]">Download the</p>
-                <p className="font-bold text-[var(--color-text-primary)]">AliExpress app</p>
+                <p className="font-bold text-[var(--color-text-primary)]">China Kroy App</p>
               </div>
             </div>
 
