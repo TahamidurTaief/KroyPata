@@ -19,17 +19,19 @@ export default function ConfirmationPage() {
     if (storedOrderData) {
       try {
         const parsedData = JSON.parse(storedOrderData);
+        console.log('Confirmation page - Order data:', parsedData);
         setOrderData(parsedData);
-        // Clear the data from sessionStorage after reading
-        sessionStorage.removeItem('orderConfirmation');
+        // Don't clear immediately - keep it for page refreshes
+        // sessionStorage.removeItem('orderConfirmation');
       } catch (error) {
         console.error('Error parsing order data:', error);
-        // Redirect to home if data is corrupted
-        router.push('/');
+        // Redirect to orders page instead of home if data is corrupted
+        setTimeout(() => router.push('/orders'), 2000);
       }
     } else {
-      // Redirect to home if no order data found
-      router.push('/');
+      console.log('No order confirmation data found');
+      // Redirect to orders page instead of home
+      setTimeout(() => router.push('/orders'), 2000);
     }
     
     setLoading(false);
@@ -92,7 +94,25 @@ export default function ConfirmationPage() {
   if (!orderData) {
     return (
       <ProtectedRoute pageName="the order confirmation page">
-        <ConfirmationSkeleton />
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 flex items-center justify-center">
+          <div className="max-w-md mx-auto px-4 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+              <FiPackage className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              No Order Data Found
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              The order confirmation data is not available. You'll be redirected to your orders page.
+            </p>
+            <button
+              onClick={() => router.push('/orders')}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            >
+              View My Orders
+            </button>
+          </div>
+        </div>
       </ProtectedRoute>
     );
   }
@@ -351,7 +371,7 @@ export default function ConfirmationPage() {
               className="flex-1 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center"
             >
               <FiHome className="mr-2" size={18} />
-              continue 
+              Continue Shopping
             </button>
           </motion.div>
 

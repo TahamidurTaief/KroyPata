@@ -50,28 +50,14 @@ const CartView = () => {
     }
   };
 
-  // Calculate shipping cost from analysis
-  const selectedShippingCost = useMemo(() => {
-    if (!shippingAnalysis?.available_shipping_methods?.length) return 0;
-    
-    // Check if free shipping applies
-    const subtotal = calculateCartTotal(cartItems);
-    const freeShippingRule = shippingAnalysis.free_shipping_rule;
-    
-    if (freeShippingRule && subtotal >= (freeShippingRule.threshold_amount || 0)) {
-      return 0;
-    }
-    
-    // Use the first (cheapest) shipping method as default
-    const cheapestMethod = shippingAnalysis.available_shipping_methods[0];
-    return parseFloat(cheapestMethod.calculated_price || cheapestMethod.base_price || 0);
-  }, [shippingAnalysis, cartItems]);
+  // Don't calculate shipping cost in cart page - only show product-based shipping methods
+  const selectedShippingCost = 0;
 
   // Calculations
   const totalsWithCoupon = useMemo(() => {
     const sub = calculateCartTotal(cartItems);
-    return calculateTotalsWithCoupon(sub, selectedShippingCost, appliedCoupon);
-  }, [cartItems, selectedShippingCost, appliedCoupon]);
+    return calculateTotalsWithCoupon(sub, 0, appliedCoupon); // No shipping cost in cart
+  }, [cartItems, appliedCoupon]);
 
   const minimumPurchaseValidations = useMemo(() => {
     return cartItems.map(item => ({
@@ -104,16 +90,16 @@ const CartView = () => {
             {/* 1. Cart Total (Yellow Card) - First */}
             <EnhancedCartTotals
               subtotal={totalsWithCoupon.originalSubtotal || totalsWithCoupon.subtotal}
-              shipping={selectedShippingCost}
+              shipping={0}
               appliedCoupon={appliedCoupon}
-              total={totalsWithCoupon.subtotal + selectedShippingCost}
+              total={totalsWithCoupon.subtotal}
               cartItems={cartItems}
               shippingAnalysis={shippingAnalysis}
             />
 
-            {/* 2. Calculated Shipping - Second */}
+            {/* 2. Product-Based Shipping Methods - Second */}
             <div className="rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm" style={{ backgroundColor: 'var(--cart-card-bg)', boxShadow: '0 1px 3px var(--cart-shadow)' }}>
-              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ color: 'var(--cart-text-primary)' }}>Calculated Shipping</h3>
+              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ color: 'var(--cart-text-primary)' }}>Available Shipping Methods</h3>
               <ShippingAnalysis
                 cartItems={cartItems}
                 cartTotal={totalsWithCoupon.subtotal}

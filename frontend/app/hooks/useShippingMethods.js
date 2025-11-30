@@ -13,7 +13,7 @@ const useShippingMethods = () => {
       setError(null);
       
   const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
-  const response = await fetch(`${API_BASE_URL}/api/shipping-methods/`);
+  const response = await fetch(`${API_BASE_URL}/api/orders/shipping-methods/`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -26,32 +26,8 @@ const useShippingMethods = () => {
       setShippingMethods(methods);
     } catch (err) {
       console.error('Error fetching shipping methods:', err);
-      
-      // Provide fallback shipping methods when API fails
-      const fallbackMethods = [
-        {
-          id: 'standard',
-          name: 'Standard Delivery',
-          title: 'Standard Delivery (3-5 days)',
-          price: '5.99',
-          description: 'Standard delivery within 3-5 business days.',
-          delivery_estimated_time: '3-5 business days',
-          base_price: 5.99
-        },
-        {
-          id: 'express',
-          name: 'Express Delivery',
-          title: 'Express Delivery (1-2 days)',
-          price: '12.99',
-          description: 'Fast delivery within 1-2 business days.',
-          delivery_estimated_time: '1-2 business days',
-          base_price: 12.99
-        }
-      ];
-      
-      console.log('🚚 Using fallback shipping methods');
-      setShippingMethods(fallbackMethods);
-      setError(null); // Don't show error when using fallbacks
+      setError(err.message || 'Failed to load shipping methods');
+      setShippingMethods([]);
     } finally {
       setLoading(false);
     }

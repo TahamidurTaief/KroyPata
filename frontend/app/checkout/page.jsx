@@ -123,6 +123,13 @@ const CheckoutContent = () => {
           zip_code: userDetails.zipCode,
           country: userDetails.country || 'Bangladesh'
         },
+        delivery_address: {
+          street_address: userDetails.address,
+          city: userDetails.city,
+          state: userDetails.state,
+          zip_code: userDetails.zipCode,
+          country: userDetails.country || 'Bangladesh'
+        },
         shipping_method: selectedShippingMethod?.id ? (typeof selectedShippingMethod.id === 'string' && selectedShippingMethod.id !== 'free' ? parseInt(selectedShippingMethod.id) : selectedShippingMethod.id) : null,
         customer_name: userDetails.name,
         customer_email: userDetails.email,
@@ -221,8 +228,9 @@ const CheckoutContent = () => {
       <div className="container mx-auto px-4 max-w-7xl">
         
         {/* Page Title */}
-        <div className="mb-10 text-center">
-           {/* Logo or Title could go here if not in Navbar */}
+        <div className="mb-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-2">Checkout</h1>
+          <p className="text-text-secondary">Complete your order details below</p>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8 items-start">

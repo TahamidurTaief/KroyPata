@@ -647,7 +647,8 @@ class Order(models.Model):
     payment_status = models.CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING, db_index=True)
     
     # Make shipping fields nullable for safe migration of existing data
-    shipping_address = models.ForeignKey(Address, on_delete=models.PROTECT, null=True, blank=True, help_text="Shipping address", db_index=True)
+    shipping_address = models.ForeignKey(Address, on_delete=models.PROTECT, null=True, blank=True, help_text="Shipping address", db_index=True, related_name='shipping_orders')
+    delivery_address = models.ForeignKey(Address, on_delete=models.PROTECT, null=True, blank=True, help_text="Delivery address", db_index=True, related_name='delivery_orders')
     shipping_method = models.ForeignKey(ShippingMethod, on_delete=models.PROTECT, null=True, blank=True, help_text="Shipping method", db_index=True)
     tracking_number = models.CharField(max_length=100, blank=True, null=True, help_text="Tracking number for order tracking")
     
@@ -736,9 +737,9 @@ class OrderPayment(models.Model):
         COD = 'cod', 'Cash on Delivery'
 
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')
-    admin_account_number = models.CharField(max_length=50, help_text="Required backend-set account number", blank=True, null=True)
-    sender_number = models.CharField(max_length=50, help_text="Required customer's payment number", blank=True, null=True)
-    transaction_id = models.CharField(max_length=100, help_text="Required transaction/Reference ID", blank=True, null=True)
+    admin_account_number = models.CharField(max_length=50, help_text="Admin's account number for receiving payment", blank=True, null=True)
+    sender_number = models.CharField(max_length=50, help_text="Customer's payment number", blank=True, null=True)
+    transaction_id = models.CharField(max_length=100, help_text="Transaction/Reference ID", blank=True, null=True)
     payment_method = models.CharField(max_length=10, choices=PaymentMethod.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -10,18 +10,34 @@ import {
   X,
   Truck,
   ListChecks,
+  FileText,
+  Clock,
+  MapPin,
+  Hash,
+  Layers,
+  ClipboardList,
+  Download,
+  CheckCircle,
+  Circle,
+  Phone,
+  Mail,
+  Home,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserOrders, getCurrentUserOrders } from '@/app/lib/api.js';
 import Tk_icon from '../Common/Tk_icon';
+import OrderPageSkeleton from './OrderPageSkeleton';
 
 export default function OrderListDisplay() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { isAuthenticated, openAuthModal, user } = useAuth();
+  const invoiceRef = useRef(null);
 
   useEffect(() => {
     let ignore = false;
@@ -40,7 +56,6 @@ export default function OrderListDisplay() {
         
         console.log('OrderListDisplay: Fetching orders for authenticated user');
         
-        // Try to fetch orders using user ID if available, otherwise use current user endpoint
         let data;
         if (user?.id) {
           console.log('OrderListDisplay: Using getUserOrders with user ID:', user.id);
@@ -53,19 +68,19 @@ export default function OrderListDisplay() {
         console.log('OrderListDisplay: Orders fetched:', data);
         
         if (!ignore) {
-          // Check if the response is an error object
           if (data && data.error) {
             console.error('OrderListDisplay: Error fetching orders:', data.error);
             setError(data.error);
             setOrders([]);
-            // If it's an authentication error, trigger auth modal and don't show error to user
             if (data.error.includes('Authentication required') || data.error.includes('login')) {
-              setError(null); // Clear error so user doesn't see it
+              setError(null);
               openAuthModal('login');
             }
           } else if (Array.isArray(data)) {
             console.log('OrderListDisplay: Setting orders:', data.length, 'orders');
-            setOrders(data);
+            // Sort orders by most recent first
+            const sortedOrders = data.sort((a, b) => new Date(b.ordered_at) - new Date(a.ordered_at));
+            setOrders(sortedOrders);
           } else {
             console.log('OrderListDisplay: Unexpected data format:', data);
             setOrders([]);
@@ -77,7 +92,6 @@ export default function OrderListDisplay() {
           setError(err.message || 'Failed to load orders');
           setOrders([]);
           
-          // If it's an authentication error, trigger login modal
           if (err.message && err.message.includes('Authentication')) {
             openAuthModal('login');
           }
@@ -87,13 +101,11 @@ export default function OrderListDisplay() {
       }
     }
     
-    // Add a small delay to ensure auth state is properly set
     const timeoutId = setTimeout(fetchOrders, 100);
     return () => { 
       ignore = true; 
       clearTimeout(timeoutId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user?.id, openAuthModal]);
 
   // Status color mapping using CSS custom properties
@@ -103,6 +115,159 @@ export default function OrderListDisplay() {
     SHIPPED: 'bg-[var(--color-status-shipped)]',
     DELIVERED: 'bg-[var(--color-status-delivered)]',
     CANCELLED: 'bg-[var(--color-status-cancelled)]',
+  };
+
+  // Invoice generation function - Simple and Dynamic
+  const generateInvoice = (order) => {
+    // Tk icon SVG
+    const tkIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 512 512" style="display: inline-block; vertical-align: middle; margin-right: 2px;"><path d="M198.4 72.3c7.9 11.6 15 30.3 15 57.9v89.6h23.9l40.1 40.9h-64v116c0 9.1 3.4 17.3 10.2 24.7s17.9 11.1 33.3 11.1c19.9 0 40.9-11.1 63.1-33.3 22.7-22.7 34.7-46 35.8-69.9l-10.2.9c-36.4 0-54.6-19.3-54.6-58 0-13.1 4.3-24.7 12.8-35 8.5-10.2 22.7-15.4 42.6-15.4 21 0 38.7 9.1 52.9 27.3 14.8 18.2 22.2 40.4 22.2 66.5 0 38.7-16.5 75.6-49.5 110.9-32.4 35.2-94.4 52.9-116 52.9-34.6 0-47.9-6.8-59.2-14.5-11.3-7.8-26.1-26.2-26.1-49.4V260.7h-40.9l-39.2-40.9h80.2v-81c0-18.1-18.1-28-29.9-29-7.2-.6-15.1 1.4-17.9 4.3-5.1-8.5-10-18.8-14.5-30.7 0 0 4-14.4 17.1-23 9-5.9 17.5-7.7 30.7-7.7 25.1-.1 36.7 11.7 42.1 19.6z" fill="currentColor" /></svg>`;
+    
+    const invoiceHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Invoice - ${order.order_number}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px 30px; color: #1f2937; background: #ffffff; }
+          .invoice-container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border: 1px solid #e5e7eb; }
+          
+          /* Header */
+          .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #2563eb; }
+          .company-logo { max-width: 150px; height: auto; margin-bottom: 10px; }
+          .company-info h1 { color: #1f2937; font-size: 24px; margin-bottom: 8px; font-weight: 700; }
+          .company-info p { color: #6b7280; font-size: 13px; line-height: 1.6; }
+          .invoice-info { text-align: right; }
+          .invoice-info h2 { color: #2563eb; font-size: 20px; margin-bottom: 12px; font-weight: 700; }
+          .invoice-meta { color: #374151; font-size: 13px; line-height: 1.8; }
+          .invoice-meta strong { color: #1f2937; font-weight: 600; }
+          
+          /* Status Badge */
+          .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; color: white; text-transform: uppercase; margin-top: 8px; }
+          .status-pending { background: #f59e0b; }
+          .status-processing { background: #2563eb; }
+          .status-shipped { background: #8b5cf6; }
+          .status-delivered { background: #10b981; }
+          .status-cancelled { background: #ef4444; }
+          
+          /* Order Info */
+          .order-info { margin-bottom: 30px; padding: 20px; background: #f9fafb; border-radius: 8px; border-left: 3px solid #2563eb; }
+          .order-info h3 { color: #1f2937; font-size: 14px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+          .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+          .info-label { color: #6b7280; font-weight: 500; }
+          .info-value { color: #1f2937; font-weight: 600; }
+          
+          /* Table */
+          table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+          thead { background: #2563eb; color: white; }
+          th { padding: 14px 12px; text-align: left; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px; }
+          td { padding: 14px 12px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #374151; }
+          tbody tr:last-child td { border-bottom: none; }
+          .item-name { font-weight: 600; color: #1f2937; }
+          .item-details { font-size: 12px; color: #6b7280; margin-top: 4px; }
+          
+          /* Totals */
+          .totals-section { margin-top: 20px; padding-top: 20px; border-top: 2px solid #2563eb; }
+          .total-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; }
+          .total-label { font-size: 16px; font-weight: 700; color: #1f2937; }
+          .total-amount { font-size: 24px; font-weight: 700; color: #2563eb; }
+          
+          /* Footer */
+          .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; }
+          .footer p { color: #6b7280; font-size: 12px; line-height: 1.6; }
+          .footer strong { color: #1f2937; }
+          
+          /* Print Styles */
+          @media print {
+            body { padding: 20px; background: white; }
+            .invoice-container { border: none; padding: 20px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-container">
+          <!-- Header -->
+          <div class="header">
+            <div class="company-info">
+              <img src="/img/logo_light.svg" alt="Logo" class="company-logo" onerror="this.src='/img/logo.png'" />
+              <p style="margin-top: 12px; font-size: 13px; color: #374151;">Email: support@icommerce.com</p>
+              <p style="font-size: 13px; color: #374151;">Phone: +880 1XXX-XXXXXX</p>
+              <p style="font-size: 13px; color: #374151;">Dhaka, Bangladesh</p>
+            </div>
+            <div class="invoice-info">
+              <h2>INVOICE</h2>
+              <div class="invoice-meta">
+                <div><strong>Order #:</strong> ${order.order_number}</div>
+                <div><strong>Date:</strong> ${format(new Date(order.ordered_at), 'PPP')}</div>
+                <div><strong>Time:</strong> ${format(new Date(order.ordered_at), 'p')}</div>
+              </div>
+              <div class="status-badge status-${order.status.toLowerCase()}">${order.status}</div>
+            </div>
+          </div>
+
+          <!-- Order Details - Compact Single Row -->
+          <div style="margin: 20px 0; padding: 15px 0; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+            <p style="margin: 0; color: #6b7280; font-size: 13px; line-height: 1.8;">
+              ${order.payment ? `<strong style="color: #1f2937;">Payment:</strong> ${order.payment.payment_method_display || order.payment.payment_method || 'N/A'}${order.payment.payment_method === 'cod' || order.payment.payment_method_display === 'Cash on Delivery' ? '' : (order.payment.admin_account_number ? ` (Admin: ${order.payment.admin_account_number})` : '') + (order.payment.sender_number ? ` • Sender: ${order.payment.sender_number}` : '') + (order.payment.transaction_id ? ` • TxID: ${order.payment.transaction_id}` : '')}` : ''}${order.shipping_method_name ? ` • <strong style="color: #1f2937;">Shipping:</strong> ${order.shipping_method_name}` : ''}${order.cash_on_delivery && order.cash_on_delivery.delivery_status ? ` • <strong style="color: #1f2937;">Delivery:</strong> ${order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}` : ''}${order.cash_on_delivery && order.cash_on_delivery.scheduled_delivery_date ? ` (${format(new Date(order.cash_on_delivery.scheduled_delivery_date), 'PP')})` : ''}${order.cash_on_delivery && order.cash_on_delivery.amount_to_collect ? ` • <strong style="color: #1f2937;">Collect:</strong> ${tkIconSvg}${parseFloat(order.cash_on_delivery.amount_to_collect).toFixed(2)}` : ''}${order.cash_on_delivery && order.cash_on_delivery.delivery_person_name ? ` • <strong style="color: #1f2937;">Team:</strong> ${order.cash_on_delivery.delivery_person_name}` : ''}
+            </p>
+          </div>
+
+          <!-- Items Table -->
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50%;">Item Description</th>
+                <th style="width: 15%; text-align: center;">Qty</th>
+                <th style="width: 17.5%; text-align: right;">Unit Price</th>
+                <th style="width: 17.5%; text-align: right;">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${order.items?.map(item => `
+                <tr>
+                  <td>
+                    <div class="item-name">${item.product_name || 'Product'}</div>
+                    ${item.color_name || item.size_name ? `
+                    <div class="item-details">
+                      ${item.color_name ? `Color: ${item.color_name}` : ''}
+                      ${item.color_name && item.size_name ? ' • ' : ''}
+                      ${item.size_name ? `Size: ${item.size_name}` : ''}
+                    </div>
+                    ` : ''}
+                  </td>
+                  <td style="text-align: center;">${item.quantity}</td>
+                  <td style="text-align: right;">${tkIconSvg}${parseFloat(item.unit_price).toFixed(2)}</td>
+                  <td style="text-align: right;">${tkIconSvg}${(parseFloat(item.unit_price) * item.quantity).toFixed(2)}</td>
+                </tr>
+              `).join('') || '<tr><td colspan="4" style="text-align: center; color: #9ca3af;">No items found</td></tr>'}
+            </tbody>
+          </table>
+
+          <!-- Totals -->
+          <div class="totals-section">
+            <div class="total-row">
+              <div class="total-label">TOTAL AMOUNT</div>
+              <div class="total-amount">${tkIconSvg}${parseFloat(order.total_amount).toFixed(2)}</div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="footer">
+            <p><strong>Thank you for your order!</strong></p>
+            <p>For any queries regarding this invoice, please contact us at <strong>support@icommerce.com</strong></p>
+            <p style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af;">
+              Developed by <strong style="color: #2563eb;">Tahamidur Taief</strong> • <a href="https://www.tahamidurtaief.com" style="color: #2563eb; text-decoration: none;">www.tahamidurtaief.com</a>
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(invoiceHTML);
+    printWindow.document.close();
   };
 
   // Order progress steps
@@ -250,65 +415,114 @@ export default function OrderListDisplay() {
 
   // Card for each order
   function OrderCard({ order }) {
+    const [timeElapsed, setTimeElapsed] = useState('');
+
+    useEffect(() => {
+      const updateElapsed = () => {
+        setTimeElapsed(formatDistanceToNow(new Date(order.ordered_at), { addSuffix: false }));
+      };
+      updateElapsed();
+      const interval = setInterval(updateElapsed, 60000);
+      return () => clearInterval(interval);
+    }, [order.ordered_at]);
+
+    const totalItems = order.items?.length || 0;
+    const totalQuantity = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    const modifiers = order.items ? new Set(order.items.map(item => item.product_name || item.product?.name)).size : 0;
+
+    const getStatusBadgeColor = (status) => {
+      const colors = {
+        'PENDING': 'bg-yellow-500',
+        'PROCESSING': 'bg-blue-500',
+        'SHIPPED': 'bg-purple-500',
+        'DELIVERED': 'bg-green-500',
+        'CANCELLED': 'bg-red-500',
+      };
+      return colors[status] || 'bg-gray-500';
+    };
+
+    const handleTrackOrder = () => {
+      setSelectedOrder(order);
+      if (window.innerWidth < 768) {
+        setIsMobileSidebarOpen(true);
+      }
+    };
+
     return (
       <motion.div
-        className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm"
-        whileHover={{ scale: 1.02, y: -4 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-shadow duration-300"
+        layout
+        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -50 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
-        {/* Order ID with modern styling */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 px-4 py-2 rounded-xl border border-blue-200/50 dark:border-blue-500/30">
-            <BadgeCheck size={20} className="text-blue-600 dark:text-blue-400" />
-            <span className="font-bold text-blue-700 dark:text-blue-300 text-sm tracking-wider">{order.order_number}</span>
-          </div>
-          <div className={`w-4 h-4 rounded-full ${statusColor[order.status] || 'bg-gray-400'} shadow-lg ring-2 ring-white dark:ring-slate-900`} />
-        </div>
-        
-        {/* Date with enhanced styling */}
-        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm mb-4">
-          <Calendar size={16} className="text-slate-500 dark:text-slate-400" />
-          <span>{format(new Date(order.ordered_at), 'PPpp')}</span>
-        </div>
-        
-        {/* Status with modern badge design */}
-        <div className="flex items-center gap-2 mb-4">
-          <Package size={16} className="text-slate-500 dark:text-slate-400" />
-          <span className={`px-4 py-1.5 rounded-full text-xs font-semibold text-white ${statusColor[order.status] || 'bg-gray-400'} shadow-md backdrop-blur-sm`}>
-            {order.status}
-          </span>
-        </div>
-        
-        {/* Total Amount with gradient background */}
-        {order.total_amount && (
-          <div className="bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-700 px-4 py-3 rounded-xl mb-4 border border-slate-200/50 dark:border-slate-600/50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
-                <Tk_icon size={16} />
-                <span>Total:</span>
-              </div>
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-lg"><Tk_icon size={16} className="inline mr-1" />{parseFloat(order.total_amount).toFixed(2)}</span>
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+              <FileText className="text-gray-600 dark:text-gray-300" size={20} />
+            </div>
+            <div>
+              <p className="font-bold text-lg text-gray-800 dark:text-white">{order.order_number}</p>
+              <span className={`text-xs font-semibold text-white px-2 py-1 rounded-full ${getStatusBadgeColor(order.status)}`}>
+                {order.status}
+              </span>
             </div>
           </div>
-        )}
-        
-        {/* Action buttons with improved design */}
-        <div className="flex gap-3 mt-4">
-          <button
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 text-sm font-medium group flex-1 justify-center"
-            onClick={() => setSelectedOrder(order)}
+        </div>
+
+        <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400 mb-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Calendar size={16} />
+              <span>Order time</span>
+            </div>
+            <span className="font-medium text-gray-800 dark:text-white">{format(new Date(order.ordered_at), 'd MMM, yy • h:mm a')}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Clock size={16} />
+              <span>Time elapsed</span>
+            </div>
+            <span className="font-medium text-gray-800 dark:text-white">{timeElapsed}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <MapPin size={16} />
+              <span>Location</span>
+            </div>
+            <span className="font-medium text-gray-800 dark:text-white">{order.shipping_address?.city || 'N/A'}</span>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 mb-4">
+          <div className="flex justify-around text-center">
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Items</p>
+              <p className="font-bold text-lg text-gray-800 dark:text-white">{totalItems}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Qty</p>
+              <p className="font-bold text-lg text-gray-800 dark:text-white">{totalQuantity}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Modifiers</p>
+              <p className="font-bold text-lg text-gray-800 dark:text-white">{modifiers}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+           <button
+            className="flex items-center justify-center gap-2 bg-[var(--color-button-primary)] hover:opacity-90 text-white px-4 py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 text-sm font-medium group"
+            onClick={handleTrackOrder}
           >
-            <div className="relative">
-              <Truck size={16} className="group-hover:animate-bounce" />
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--color-status-delivered)] rounded-full animate-pulse"></div>
-            </div>
+            <Truck size={16} className="group-hover:animate-bounce" />
             <span>Track Order</span>
           </button>
-          
           {order.tracking_number && (
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700">
-              <div className="w-2 h-2 bg-[var(--color-status-delivered)] rounded-full animate-pulse"></div>
-              <span className="font-mono text-slate-700 dark:text-slate-300">{order.tracking_number}</span>
+            <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+              Tracking ID: <span className="font-mono text-gray-700 dark:text-gray-300">{order.tracking_number}</span>
             </div>
           )}
         </div>
@@ -320,17 +534,17 @@ export default function OrderListDisplay() {
     return (
       <div className="min-h-screen bg-[var(--color-background)] text-text-primary py-8 px-2">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 text-center shadow-lg">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 text-center shadow-lg">
             <div className="mb-6">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Package className="text-blue-600 dark:text-blue-400" size={32} />
+              <div className="w-16 h-16 bg-[var(--color-button-primary)]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Package className="text-[var(--color-button-primary)]" size={32} />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-slate-100">Login Required</h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg mb-6">Please log in to view your orders</p>
+              <h2 className="text-2xl font-bold mb-2">Login Required</h2>
+              <p className="text-gray-600 dark:text-gray-400 text-lg mb-6">Please log in to view your orders</p>
             </div>
             <button
               onClick={() => openAuthModal('login')}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
+              className="bg-[var(--color-button-primary)] hover:opacity-90 text-white px-8 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
             >
               Login to Continue
             </button>
@@ -340,186 +554,27 @@ export default function OrderListDisplay() {
     );
   }
 
-  // UI rendering
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[var(--color-background)] text-text-primary py-8 px-2">
-        <div className="max-w-4xl mx-auto flex flex-col gap-10">
-          {/* Page Title Skeleton */}
-          <div className="text-center mb-8">
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mx-auto mb-2 animate-pulse relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-            </div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-64 mx-auto animate-pulse relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-            </div>
-          </div>
-
-          {/* Current Orders Section Skeleton */}
-          <div>
-            {/* Section Title */}
-            <div className="flex items-center mb-4">
-              <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded mr-2 animate-pulse relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-              </div>
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-36 animate-pulse relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-              </div>
-            </div>
-            
-            {/* Order Cards Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {[1, 2].map((item) => (
-                <div key={item} className="bg-[var(--color-second-bg)] rounded-lg p-4 border border-border shadow-sm">
-                  {/* Order Number */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Date */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-40 animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Status Badge */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Total Amount */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Track Button */}
-                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-28 animate-pulse relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Previous Orders Section Skeleton */}
-          <div>
-            {/* Section Title */}
-            <div className="flex items-center mb-4">
-              <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded mr-2 animate-pulse relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-              </div>
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-40 animate-pulse relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-              </div>
-            </div>
-            
-            {/* Order Cards Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="bg-[var(--color-second-bg)] rounded-lg p-4 border border-border shadow-sm">
-                  {/* Order Number */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Date */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-40 animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Status Badge */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Total Amount */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Track Button */}
-                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-28 animate-pulse relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite] transform -skew-x-12"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        
-        {/* Global shimmer animation styles */}
-        <style jsx global>{`
-          @keyframes shimmer {
-            0% {
-              transform: translateX(-100%) skewX(-12deg);
-            }
-            100% {
-              transform: translateX(200%) skewX(-12deg);
-            }
-          }
-        `}</style>
-      </div>
-    );
+    return <OrderPageSkeleton />;
   }
 
-  // Show error state if there's an error
   if (error) {
     return (
       <div className="min-h-screen bg-[var(--color-background)] text-text-primary py-8 px-2">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/30 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center shadow-lg">
+          <div className="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center shadow-lg">
             <div className="mb-6">
-              <div className="w-16 h-16 bg-[var(--color-status-cancelled)]/10 dark:bg-[var(--color-status-cancelled)]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <X className="text-red-600 dark:text-red-400" size={32} />
+              <div className="w-16 h-16 bg-[var(--color-status-cancelled)]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <X className="text-[var(--color-status-cancelled)]" size={32} />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-red-800 dark:text-red-200">Error Loading Orders</h2>
+              <h2 className="text-2xl font-bold mb-2 text-red-600 dark:text-red-400">Error Loading Orders</h2>
               <p className="text-red-600 dark:text-red-300 text-lg mb-6">{error}</p>
             </div>
             <div className="flex gap-4 justify-center">
               <button
-                className="bg-[var(--color-status-cancelled)] hover:bg-[var(--color-status-cancelled)]/90 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
+                className="bg-[var(--color-status-cancelled)] hover:opacity-90 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
                 onClick={() => {
                   setError(null);
-                  // Retry fetching orders
                   if (isAuthenticated && user?.id) {
                     setIsLoading(true);
                     getUserOrders(user.id).then(data => {
@@ -540,7 +595,7 @@ export default function OrderListDisplay() {
               </button>
               {error.includes('Authentication') && (
                 <button
-                  className="bg-[var(--color-button-primary)] hover:bg-[var(--color-button-primary)]/90 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
+                  className="bg-[var(--color-button-primary)] hover:opacity-90 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
                   onClick={() => openAuthModal('login')}
                 >
                   Login Again
@@ -553,231 +608,613 @@ export default function OrderListDisplay() {
     );
   }
 
-  // Only show orders for the logged-in user (if backend returns all orders, filter by user id)
-  // All orders fetched are already user-specific
-  const currentOrders = Array.isArray(orders)
-    ? orders.filter((o) => o.status === 'PENDING' || o.status === 'PROCESSING')
-    : [];
-  const previousOrders = Array.isArray(orders)
-    ? orders.filter((o) =>
-        o.status === 'SHIPPED' ||
-        o.status === 'DELIVERED' ||
-        o.status === 'CANCELLED')
-    : [];
+  const getFilteredOrders = () => {
+    if (!Array.isArray(orders)) return [];
+    
+    if (activeFilter === 'All') {
+      return orders;
+    }
+    
+    const filterMap = {
+      'Active': ['PENDING', 'PROCESSING'],
+      'New': ['PENDING'],
+      'Preparing': ['PROCESSING'],
+      'Pickup': ['SHIPPED'],
+      'Delivery': ['SHIPPED'],
+      'Done': ['DELIVERED'],
+    };
+    
+    const statuses = filterMap[activeFilter];
+    if (statuses) {
+      return orders.filter(order => statuses.includes(order.status));
+    }
+    
+    return orders.filter(order => order.status === activeFilter.toUpperCase());
+  };
 
-  return (
-    <div className="bg-[var(--color-background)] text-text-primary py-6">
-      <div className="w-full max-w-7xl mx-auto px-4 flex flex-col gap-10">
-        {/* Current Orders Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-xl">
-              <Truck size={24} className="text-blue-600 dark:text-blue-400" />
-            </div>
-            Current Orders
-            {currentOrders.length > 0 && (
-              <span className="bg-[var(--color-status-processing)] text-white text-sm px-3 py-1 rounded-full shadow-lg">
-                {currentOrders.length}
-              </span>
-            )}
-          </h2>
-          {currentOrders.length === 0 ? (
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 text-center shadow-lg">
-              <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-2xl inline-block mb-4">
-                <Truck className="text-blue-600 dark:text-blue-400" size={48} />
-              </div>
-              <h3 className="font-semibold text-lg mb-2 text-slate-900 dark:text-slate-100">No current orders</h3>
-              <p className="text-slate-600 dark:text-slate-400">You don't have any orders being processed or pending at the moment.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {currentOrders.map((order) => (
-                <OrderCard key={order.order_number} order={order} />
-              ))}
-            </div>
-          )}
+  const filteredOrders = getFilteredOrders();
+  const currentOrders = filteredOrders.filter((o) => o.status === 'PENDING' || o.status === 'PROCESSING');
+  const previousOrders = filteredOrders.filter((o) =>
+    o.status === 'SHIPPED' ||
+    o.status === 'DELIVERED' ||
+    o.status === 'CANCELLED'
+  );
+
+  // Filter bar component
+  const FilterBar = () => {
+    const filters = ['All', 'Active', 'New', 'Preparing', 'Pickup', 'Delivery', 'Done'];
+    
+    const getFilterCount = (filter) => {
+      if (filter === 'All') return orders.length;
+      
+      const filterMap = {
+        'Active': ['PENDING', 'PROCESSING'],
+        'New': ['PENDING'],
+        'Preparing': ['PROCESSING'],
+        'Pickup': ['SHIPPED'],
+        'Delivery': ['SHIPPED'],
+        'Done': ['DELIVERED'],
+      };
+      
+      const statuses = filterMap[filter];
+      if (statuses) {
+        return orders.filter(order => statuses.includes(order.status)).length;
+      }
+      
+      return orders.filter(order => order.status === filter.toUpperCase()).length;
+    };
+    
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8 sticky top-0 z-10"
+      >
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {filters.map((filter) => {
+              const isActive = activeFilter === filter;
+              const count = getFilterCount(filter);
+              
+              return (
+                <motion.button
+                  key={filter}
+                  onClick={() => setActiveFilter(filter)}
+                  className={`relative px-4 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap transition-all duration-300 ${
+                    isActive
+                      ? 'bg-[var(--color-button-primary)] text-white shadow-lg'
+                      : 'text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    {filter}
+                    {count > 0 && (
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      }`}>
+                        {count}
+                      </span>
+                    )}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
         </div>
+      </motion.div>
+    );
+  };
 
-        {/* Previous Orders Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-500/20 dark:to-emerald-500/20 rounded-xl">
-              <Package size={24} className="text-green-600 dark:text-green-400" />
+  // Order Details Panel Component
+  const OrderDetailsPanel = ({ order, onClose, onDownloadInvoice }) => (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden h-full flex flex-col">
+      {/* Header */}
+      <div className="bg-[var(--color-button-primary)] text-white p-6 flex-shrink-0">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <FileText size={24} />
             </div>
-            Order History
-            {previousOrders.length > 0 && (
-              <span className="bg-[var(--color-status-delivered)] text-white text-sm px-3 py-1 rounded-full shadow-lg">
-                {previousOrders.length}
-              </span>
-            )}
-          </h2>
-          {previousOrders.length === 0 ? (
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 text-center shadow-lg">
-              <div className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-500/20 dark:to-emerald-500/20 rounded-2xl inline-block mb-4">
-                <Package className="text-green-600 dark:text-green-400" size={48} />
-              </div>
-              <h3 className="font-semibold text-lg mb-2 text-slate-900 dark:text-slate-100">No order history</h3>
-              <p className="text-slate-600 dark:text-slate-400">Your previous orders will appear here once you complete some purchases.</p>
+            <div>
+              <h3 className="text-xl font-bold">{order.order_number}</h3>
+              <p className="text-sm opacity-90">{format(new Date(order.ordered_at), 'PPP')}</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {previousOrders.map((order) => (
-                <OrderCard key={order.order_number} order={order} />
-              ))}
-            </div>
-          )}
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-white/20 rounded-full transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <span className="bg-white/20 px-3 py-1.5 rounded-full text-sm font-semibold">
+            {order.status_display || order.status}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                generateInvoice(order);
+                setTimeout(() => {
+                  const printWindow = window.open('', '_blank');
+                  if (printWindow) printWindow.print();
+                }, 500);
+              }}
+              className="flex items-center gap-2 bg-white text-[var(--color-button-primary)] px-3 py-2 rounded-lg font-medium hover:bg-white/90 transition-all shadow-md text-sm"
+              title="Print Invoice"
+            >
+              <Download size={16} />
+              Print
+            </button>
+            <button
+              onClick={() => {
+                generateInvoice(order);
+                setTimeout(() => {
+                  const printWindow = window.open('', '_blank');
+                  if (printWindow) {
+                    printWindow.print();
+                    printWindow.onafterprint = () => printWindow.close();
+                  }
+                }, 500);
+              }}
+              className="flex items-center gap-2 bg-green-500 text-white px-3 py-2 rounded-lg font-medium hover:bg-green-600 transition-all shadow-md text-sm"
+              title="Download as PDF"
+            >
+              <FileText size={16} />
+              PDF
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Tracking Modal */}
-      <AnimatePresence>
-        {selectedOrder && (
+      {/* Scrollable Content */}
+      <div className="p-6 overflow-y-auto flex-1 space-y-6">
+        {/* Order Progress */}
+        <OrderProgressTracker status={order.status} />
+
+        {/* Customer Information */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4"
+        >
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <Phone size={18} className="text-[var(--color-button-primary)]" />
+            Customer Information
+          </h4>
+          <div className="space-y-2 text-sm">
+            {order.customer_name && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Name:</span>
+                <span className="font-medium text-gray-800 dark:text-white">{order.customer_name}</span>
+              </div>
+            )}
+            {order.customer_email && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Email:</span>
+                <span className="font-medium text-gray-800 dark:text-white">{order.customer_email}</span>
+              </div>
+            )}
+            {order.customer_phone && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Phone:</span>
+                <span className="font-medium text-gray-800 dark:text-white">{order.customer_phone}</span>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Order Details - Compact Single Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="py-3 border-t border-b border-gray-200 dark:border-gray-700"
+        >
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            {order.payment && (
+              <>
+                <span className="font-semibold text-gray-800 dark:text-white">Payment:</span>{' '}
+                {order.payment.payment_method_display || order.payment.payment_method}
+                {order.payment.payment_method !== 'cod' && order.payment.payment_method_display !== 'Cash on Delivery' && (
+                  <>
+                    {order.payment.admin_account_number && ` (Admin: ${order.payment.admin_account_number})`}
+                    {order.payment.sender_number && ` • Sender: ${order.payment.sender_number}`}
+                    {order.payment.transaction_id && ` • TxID: ${order.payment.transaction_id}`}
+                  </>
+                )}
+              </>
+            )}
+            {order.shipping_method_name && (
+              <>
+                {' • '}
+                <span className="font-semibold text-gray-800 dark:text-white">Shipping:</span>{' '}
+                {order.shipping_method_name}
+              </>
+            )}
+            {order.cash_on_delivery?.delivery_status && (
+              <>
+                {' • '}
+                <span className="font-semibold text-gray-800 dark:text-white">Delivery:</span>{' '}
+                {order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}
+                {order.cash_on_delivery.scheduled_delivery_date && ` (${format(new Date(order.cash_on_delivery.scheduled_delivery_date), 'PP')})`}
+              </>
+            )}
+            {order.cash_on_delivery?.amount_to_collect && (
+              <>
+                {' • '}
+                <span className="font-semibold text-gray-800 dark:text-white">Collect:</span>{' '}
+                <Tk_icon size={12} className="inline" />
+                {parseFloat(order.cash_on_delivery.amount_to_collect).toFixed(2)}
+              </>
+            )}
+            {order.cash_on_delivery?.delivery_person_name && (
+              <>
+                {' • '}
+                <span className="font-semibold text-gray-800 dark:text-white">Team:</span>{' '}
+                {order.cash_on_delivery.delivery_person_name}
+              </>
+            )}
+          </p>
+        </motion.div>
+
+        {/* Products */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <Package size={18} className="text-[var(--color-button-primary)]" />
+            Order Items
+          </h4>
+          <div className="space-y-3">
+            {order.items?.map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+              >
+                {item.product_image && (
+                  <div className="relative w-16 h-16 rounded border border-gray-200 dark:border-gray-600 bg-white flex-shrink-0 overflow-hidden">
+                    <Image
+                      src={item.product_image}
+                      alt={item.product_name}
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-800 dark:text-white">{item.product_name}</p>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 space-y-0.5">
+                    <p>Qty: {item.quantity}</p>
+                    {item.color_name && <p>Color: {item.color_name}</p>}
+                    {item.size_name && <p>Size: {item.size_name}</p>}
+                  </div>
+                </div>
+                <div className="text-sm font-semibold text-gray-800 dark:text-white flex-shrink-0">
+                  <Tk_icon size={14} className="inline mr-1" />
+                  {parseFloat(item.unit_price).toFixed(2)}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Total */}
+        {order.total_amount && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-[var(--color-button-primary)] text-white p-4 rounded-lg"
           >
-            {/* Backdrop */}
-            <motion.div
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedOrder(null)}
-            />
-            {/* Modal Content */}
-            <motion.div
-              className="relative z-10 bg-[var(--color-second-bg)] rounded-lg border border-border shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-              initial={{ scale: 0.9, opacity: 0, y: 40 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 40 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            >
-              {/* Modal Header - Fixed */}
-              <div className="flex-shrink-0 p-4 sm:p-6 border-b border-border">
-                <button
-                  className="absolute top-3 right-3 text-text-secondary hover:text-text-primary z-20 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  onClick={() => setSelectedOrder(null)}
-                  aria-label="Close"
-                >
-                  <X size={20} className="sm:w-6 sm:h-6" />
-                </button>
-                
-                {/* Header with Order ID and Status */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pr-8">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 p-2 rounded-lg flex-shrink-0">
-                      <BadgeCheck className="text-blue-600" size={20} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-bold text-blue-700 dark:text-blue-300 text-base sm:text-lg tracking-wider truncate">
-                        {selectedOrder.order_number}
-                      </div>
-                      <div className="flex items-center gap-2 text-text-secondary text-xs sm:text-sm">
-                        <Calendar size={12} />
-                        <span className="truncate">{format(new Date(selectedOrder.ordered_at), 'PPpp')}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-white ${statusColor[selectedOrder.status] || 'bg-gray-400'} shadow-lg flex-shrink-0 text-center`}>
-                    {selectedOrder.status}
-                  </div>
-                </div>
-
-                {/* Tracking Number */}
-                {selectedOrder.tracking_number && (
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-3 rounded-lg mt-4 border border-green-200 dark:border-green-800">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-green-700 dark:text-green-300">
-                      <div className="flex items-center gap-2">
-                        <Truck size={16} />
-                        <span className="font-medium">Tracking Number:</span>
-                      </div>
-                      <span className="font-mono bg-white dark:bg-gray-800 px-2 py-1 rounded text-green-800 dark:text-green-200 text-xs sm:text-sm break-all">
-                        {selectedOrder.tracking_number}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Modal Body - Scrollable */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-                {/* Order Progress Tracker */}
-                <OrderProgressTracker status={selectedOrder.status} />
-
-                {/* Products in this Order */}
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2 text-base sm:text-lg">
-                    <Package size={18} className="text-accent flex-shrink-0" /> 
-                    <span>Products</span>
-                  </h3>
-                  {selectedOrder.items && selectedOrder.items.length > 0 ? (
-                    <div className="space-y-3">
-                      {selectedOrder.items.map((item, idx) => (
-                        <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700">
-                          {item.product_image && (
-                            <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded border border-border bg-white flex-shrink-0 overflow-hidden">
-                              <Image
-                                src={item.product_image}
-                                alt={item.product_name}
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 640px) 48px, 64px"
-                              />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm sm:text-base text-text-primary truncate">{item.product_name}</div>
-                            <div className="text-xs sm:text-sm text-text-secondary mt-1 space-y-1">
-                              <div>Qty: {item.quantity}</div>
-                              {item.color_name && <div>Color: {item.color_name}</div>}
-                              {item.size_name && <div>Size: {item.size_name}</div>}
-                            </div>
-                          </div>
-                          <div className="text-sm sm:text-base font-semibold text-text-primary flex-shrink-0">
-                            <Tk_icon size={14} className="inline mr-1" />{parseFloat(item.unit_price).toFixed(2)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-text-secondary text-sm p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg text-center">
-                      No products found for this order.
-                    </div>
-                  )}
-                </div>
-
-                {/* Total Amount Display */}
-                {selectedOrder.total_amount && (
-                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-text-secondary">
-                        <Tk_icon size={16} className="flex-shrink-0" />
-                        <span className="font-medium text-sm sm:text-base">Order Total:</span>
-                      </div>
-                      <span className="font-bold text-text-primary text-lg sm:text-xl">
-                        <Tk_icon size={16} className="inline mr-1" />{parseFloat(selectedOrder.total_amount).toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tracking History */}
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2 text-base sm:text-lg">
-                    <ListChecks size={18} className="text-accent flex-shrink-0" /> 
-                    <span>Tracking History</span>
-                  </h3>
-                  <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                    <TrackingHistory updates={selectedOrder.updates || []} />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+            <div className="flex items-center justify-between">
+              <span className="font-medium">Order Total:</span>
+              <span className="font-bold text-xl">
+                <Tk_icon size={16} className="inline mr-1" />
+                {parseFloat(order.total_amount).toFixed(2)}
+              </span>
+            </div>
           </motion.div>
         )}
-      </AnimatePresence>
+
+        {/* Special Instructions */}
+        {(order.special_instructions || order.cod_details?.special_instructions) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+          >
+            <h4 className="font-semibold mb-2 flex items-center gap-2 text-blue-800 dark:text-blue-200">
+              <FileText size={18} />
+              Special Instructions
+            </h4>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              {order.special_instructions || order.cod_details?.special_instructions}
+            </p>
+          </motion.div>
+        )}
+
+        {/* Tracking History */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <ListChecks size={18} className="text-[var(--color-button-primary)]" />
+            Tracking History
+          </h4>
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+            <TrackingHistory updates={order.updates || []} />
+          </div>
+        </motion.div>
+
+        {/* Developer Credit */}
+        <div className="text-center text-xs text-gray-400 dark:text-gray-500 pt-4 border-t border-gray-200 dark:border-gray-700">
+          Developed by <span className="font-semibold text-[var(--color-button-primary)]">Tahamidur Taief</span> •{' '}
+          <a 
+            href="https://www.tahamidurtaief.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[var(--color-button-primary)] hover:underline"
+          >
+            www.tahamidurtaief.com
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="bg-[var(--color-background)] text-text-primary py-6 min-h-screen">
+      {/* Filter Bar */}
+      <div className="w-full max-w-7xl mx-auto px-4 mb-6">
+        <FilterBar />
+      </div>
+
+      {/* Main Content */}
+      {selectedOrder ? (
+        // Grid Layout when order is selected
+        <div className="w-full max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left: Order Cards - Show only 2 cards on desktop */}
+            <div className={`space-y-6 ${isMobileSidebarOpen ? 'hidden md:block' : 'block'}`}>
+              {activeFilter === 'All' ? (
+                <>
+                  {currentOrders.length > 0 && (
+                    <div>
+                      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <Truck size={20} className="text-[var(--color-button-primary)]" />
+                        Current Orders
+                        <span className="bg-[var(--color-status-processing)] text-white text-xs px-2 py-1 rounded-full">
+                          {currentOrders.length}
+                        </span>
+                      </h2>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <AnimatePresence mode="popLayout">
+                          {currentOrders.map((order) => (
+                            <OrderCard key={order.order_number} order={order} />
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  )}
+                  {previousOrders.length > 0 && (
+                    <div>
+                      <h2 className="text-xl font-bold mb-4 flex items-center gap-2 mt-6">
+                        <Package size={20} className="text-[var(--color-button-primary)]" />
+                        Order History
+                        <span className="bg-[var(--color-status-delivered)] text-white text-xs px-2 py-1 rounded-full">
+                          {previousOrders.length}
+                        </span>
+                      </h2>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <AnimatePresence mode="popLayout">
+                          {previousOrders.map((order) => (
+                            <OrderCard key={order.order_number} order={order} />
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div>
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Package size={20} className="text-[var(--color-button-primary)]" />
+                    {activeFilter} Orders
+                    {filteredOrders.length > 0 && (
+                      <span className="bg-[var(--color-button-primary)] text-white text-xs px-2 py-1 rounded-full">
+                        {filteredOrders.length}
+                      </span>
+                    )}
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <AnimatePresence mode="popLayout">
+                      {filteredOrders.map((order) => (
+                        <OrderCard key={order.order_number} order={order} />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Order Details (Desktop) */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              className="hidden md:block sticky top-4 h-[calc(100vh-8rem)]"
+            >
+              <OrderDetailsPanel
+                order={selectedOrder}
+                onClose={() => setSelectedOrder(null)}
+                onDownloadInvoice={() => generateInvoice(selectedOrder)}
+              />
+            </motion.div>
+          </div>
+
+          {/* Mobile Sidebar */}
+          <AnimatePresence>
+            {isMobileSidebarOpen && (
+              <motion.div
+                className="md:hidden fixed inset-0 z-50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {/* Backdrop */}
+                <motion.div
+                  className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => {
+                    setIsMobileSidebarOpen(false);
+                    setSelectedOrder(null);
+                  }}
+                />
+                
+                {/* Sidebar */}
+                <motion.div
+                  className="absolute right-0 top-0 bottom-0 w-full sm:w-96 bg-white dark:bg-gray-800 shadow-2xl overflow-hidden"
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                >
+                  <OrderDetailsPanel
+                    order={selectedOrder}
+                    onClose={() => {
+                      setIsMobileSidebarOpen(false);
+                      setSelectedOrder(null);
+                    }}
+                    onDownloadInvoice={() => generateInvoice(selectedOrder)}
+                  />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      ) : (
+        // Regular Grid View when no order is selected
+        <div className="w-full max-w-7xl mx-auto px-4">
+          {activeFilter === 'All' ? (
+            <>
+              {/* Current Orders */}
+              <div>
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                  <div className="p-2 bg-[var(--color-button-primary)]/10 rounded-xl">
+                    <Truck size={24} className="text-[var(--color-button-primary)]" />
+                  </div>
+                  Current Orders
+                  {currentOrders.length > 0 && (
+                    <span className="bg-[var(--color-status-processing)] text-white text-sm px-3 py-1 rounded-full shadow-lg">
+                      {currentOrders.length}
+                    </span>
+                  )}
+                </h2>
+                {currentOrders.length === 0 ? (
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 text-center shadow-lg">
+                    <div className="p-4 bg-[var(--color-button-primary)]/10 rounded-2xl inline-block mb-4">
+                      <Truck className="text-[var(--color-button-primary)]" size={48} />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">No current orders</h3>
+                    <p className="text-gray-600 dark:text-gray-400">You don't have any orders being processed or pending at the moment.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <AnimatePresence mode="popLayout">
+                      {currentOrders.map((order) => (
+                        <OrderCard key={order.order_number} order={order} />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
+
+              {/* Previous Orders */}
+              <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                  <div className="p-2 bg-[var(--color-status-delivered)]/10 rounded-xl">
+                    <Package size={24} className="text-[var(--color-status-delivered)]" />
+                  </div>
+                  Order History
+                  {previousOrders.length > 0 && (
+                    <span className="bg-[var(--color-status-delivered)] text-white text-sm px-3 py-1 rounded-full shadow-lg">
+                      {previousOrders.length}
+                    </span>
+                  )}
+                </h2>
+                {previousOrders.length === 0 ? (
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 text-center shadow-lg">
+                    <div className="p-4 bg-[var(--color-status-delivered)]/10 rounded-2xl inline-block mb-4">
+                      <Package className="text-[var(--color-status-delivered)]" size={48} />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">No order history</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Your previous orders will appear here once you complete some purchases.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <AnimatePresence mode="popLayout">
+                      {previousOrders.map((order) => (
+                        <OrderCard key={order.order_number} order={order} />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            /* Filtered Orders */
+            <div>
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <div className="p-2 bg-[var(--color-button-primary)]/10 rounded-xl">
+                  <Package size={24} className="text-[var(--color-button-primary)]" />
+                </div>
+                {activeFilter} Orders
+                {filteredOrders.length > 0 && (
+                  <span className="bg-[var(--color-button-primary)] text-white text-sm px-3 py-1 rounded-full shadow-lg">
+                    {filteredOrders.length}
+                  </span>
+                )}
+              </h2>
+              {filteredOrders.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 text-center shadow-lg"
+                >
+                  <div className="p-4 bg-[var(--color-button-primary)]/10 rounded-2xl inline-block mb-4">
+                    <Package className="text-[var(--color-button-primary)]" size={48} />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">No {activeFilter.toLowerCase()} orders</h3>
+                  <p className="text-gray-600 dark:text-gray-400">You don't have any orders in this category.</p>
+                </motion.div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <AnimatePresence mode="popLayout">
+                    {filteredOrders.map((order) => (
+                      <OrderCard key={order.order_number} order={order} />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

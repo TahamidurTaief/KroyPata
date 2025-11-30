@@ -330,26 +330,31 @@ class CashOnDeliveryAdmin(ModelAdmin):
     )
     readonly_fields = ('created_at', 'updated_at', 'payment_collected_at', 'actual_delivery_date')
     
+    # Unfold-style fieldsets with tabs
     fieldsets = (
         ('Order Information', {
-            'fields': ('order',)
+            'fields': ('order',),
+            'classes': ('tab',)
         }),
         ('Customer Contact Details', {
-            'fields': ('customer_full_name', 'alternative_phone', 'special_instructions')
+            'fields': ('customer_full_name', 'alternative_phone', 'special_instructions'),
+            'classes': ('tab',)
         }),
         ('Delivery Management', {
-            'fields': ('delivery_status', 'scheduled_delivery_date', 'actual_delivery_date', 'delivery_attempts')
+            'fields': ('delivery_status', 'scheduled_delivery_date', 'actual_delivery_date', 'delivery_attempts'),
+            'classes': ('tab',)
         }),
         ('Payment Collection', {
-            'fields': ('amount_to_collect', 'amount_collected', 'payment_collected_at')
+            'fields': ('amount_to_collect', 'amount_collected', 'payment_collected_at'),
+            'classes': ('tab',)
         }),
         ('Delivery Team Assignment', {
             'fields': ('delivery_person_name', 'delivery_person_phone'),
-            'classes': ('collapse',)
+            'classes': ('tab',)
         }),
         ('Delivery Notes & Tracking', {
             'fields': ('delivery_notes',),
-            'classes': ('collapse',)
+            'classes': ('tab',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

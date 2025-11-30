@@ -82,14 +82,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     coupon_code = serializers.CharField(max_length=50, required=False, write_only=True)
     payment_method = serializers.CharField(max_length=10, required=False, write_only=True)
     cod_details = serializers.DictField(required=False, write_only=True)
-    shipping_address = serializers.JSONField(write_only=True)  # Accept as JSON object
+    shipping_address = serializers.JSONField(write_only=True, required=False)  # Accept as JSON object
+    delivery_address = serializers.JSONField(write_only=True, required=False)  # Accept as JSON object for delivery
     shipping_method = serializers.IntegerField(write_only=True, required=False, allow_null=True)  # Allow null for free shipping
     
     class Meta:
         model = Order
         fields = [
             'customer_name', 'customer_email', 'customer_phone',
-            'shipping_address', 'shipping_method', 'items',
+            'shipping_address', 'delivery_address', 'shipping_method', 'items',
             'coupon_code', 'payment', 'payment_method', 'cod_details',
             'order_number', 'total_amount', 'cart_subtotal', 'status', 
             'payment_status', 'ordered_at'
@@ -105,6 +106,22 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def validate_shipping_address(self, value):
         """Validate shipping address data"""
         if isinstance(value, dict):
+            # Validate required fields
+            street_address = value.get('street_address') or value.get('address_line_1')
+            if not street_address:
+                raise serializers.ValidationError("Street address is required.")
+            if not value.get('city'):
+                raise serializers.ValidationError("City is required.")
+            if not value.get('state'):
+                raise serializers.ValidationError("State is required.")
+            zip_code = value.get('zip_code') or value.get('postal_code')
+            if not zip_code:
+                raise serializers.ValidationError("Zip code is required.")
+        return value
+    
+    def validate_delivery_address(self, value):
+        """Validate delivery address data"""
+        if value and isinstance(value, dict):
             # Validate required fields
             street_address = value.get('street_address') or value.get('address_line_1')
             if not street_address:
@@ -144,7 +161,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             coupon_code = validated_data.pop('coupon_code', None)
             payment_method = validated_data.pop('payment_method', None)
             cod_details = validated_data.pop('cod_details', None)
-            shipping_address_data = validated_data.pop('shipping_address')
+            shipping_address_data = validated_data.pop('shipping_address', None)
+            delivery_address_data = validated_data.pop('delivery_address', None)
             shipping_method_id = validated_data.pop('shipping_method')
             
             # Get user from request context if available
@@ -152,7 +170,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             user = request.user if request and request.user.is_authenticated else None
             
             # Create or get shipping address
-            if isinstance(shipping_address_data, dict):
+            shipping_address = None
+            if shipping_address_data and isinstance(shipping_address_data, dict):
                 street_address = shipping_address_data.get('street_address') or shipping_address_data.get('address_line_1', '')
                 zip_code = shipping_address_data.get('zip_code') or shipping_address_data.get('postal_code', '')
                 
@@ -165,8 +184,26 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     country=shipping_address_data.get('country', 'Bangladesh'),
                     is_default=False
                 )
-            else:
-                raise serializers.ValidationError("Invalid shipping address format.")
+            
+            # Create or get delivery address
+            delivery_address = None
+            if delivery_address_data and isinstance(delivery_address_data, dict):
+                street_address = delivery_address_data.get('street_address') or delivery_address_data.get('address_line_1', '')
+                zip_code = delivery_address_data.get('zip_code') or delivery_address_data.get('postal_code', '')
+                
+                delivery_address = Address.objects.create(
+                    user=user,
+                    address_line_1=street_address,
+                    city=delivery_address_data.get('city', ''),
+                    state=delivery_address_data.get('state', ''),
+                    postal_code=zip_code,
+                    country=delivery_address_data.get('country', 'Bangladesh'),
+                    is_default=False
+                )
+            
+            # If no delivery address provided, use shipping address as delivery address
+            if not delivery_address and shipping_address:
+                delivery_address = shipping_address
             
             # Get shipping method
             shipping_method = None
@@ -186,6 +223,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             
             # Add to validated_data
             validated_data['shipping_address'] = shipping_address
+            validated_data['delivery_address'] = delivery_address
             validated_data['shipping_method'] = shipping_method
             
             with transaction.atomic():
@@ -578,6 +616,20 @@ class OrderItemReadSerializer(serializers.ModelSerializer):
                     return first_image.image.url
         return None
 
+class CashOnDeliveryReadSerializer(serializers.ModelSerializer):
+    """Read-only serializer for COD details"""
+    delivery_status_display = serializers.CharField(source='get_delivery_status_display', read_only=True)
+    
+    class Meta:
+        model = CashOnDelivery
+        fields = [
+            'customer_full_name', 'alternative_phone', 'special_instructions',
+            'delivery_status', 'delivery_status_display', 'delivery_attempts',
+            'delivery_notes', 'amount_to_collect', 'amount_collected',
+            'payment_collected_at', 'delivery_person_name', 'delivery_person_phone',
+            'scheduled_delivery_date', 'actual_delivery_date', 'created_at', 'updated_at'
+        ]
+
 class OrderPaymentReadSerializer(serializers.ModelSerializer):
     """Read-only serializer for order payment"""
     payment_method_display = serializers.CharField(source='get_payment_method_display', read_only=True)
@@ -591,6 +643,7 @@ class OrderReadSerializer(serializers.ModelSerializer):
     """Read-only serializer for order details"""
     items = OrderItemReadSerializer(many=True, read_only=True)
     payment = OrderPaymentReadSerializer(read_only=True)
+    cash_on_delivery = CashOnDeliveryReadSerializer(read_only=True)
     updates = OrderUpdateSerializer(many=True, read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     payment_status_display = serializers.CharField(source='get_payment_status_display', read_only=True)
@@ -602,7 +655,7 @@ class OrderReadSerializer(serializers.ModelSerializer):
                  'status', 'status_display', 'payment_status', 'payment_status_display',
                  'customer_name', 'customer_email', 'customer_phone',
                  'shipping_address', 'shipping_method', 'shipping_method_name',
-                 'tracking_number', 'ordered_at', 'items', 'payment', 'updates']
+                 'tracking_number', 'ordered_at', 'items', 'payment', 'cash_on_delivery', 'updates']
 
 # Legacy serializers (keeping for backward compatibility)
 
@@ -735,6 +788,15 @@ class CouponSerializer(serializers.ModelSerializer):
             return obj.eligible_users.count()
         return None
 
+class CashOnDeliverySerializer(serializers.ModelSerializer):
+    """Serializer for Cash on Delivery details"""
+    delivery_status_display = serializers.CharField(source='get_delivery_status_display', read_only=True)
+    
+    class Meta:
+        model = CashOnDelivery
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at', 'payment_collected_at', 'actual_delivery_date']
+
 class CouponValidationSerializer(serializers.Serializer):
     """Serializer for validating coupon against cart items"""
     coupon_code = serializers.CharField(max_length=50)
@@ -783,13 +845,15 @@ class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     updates = OrderUpdateSerializer(many=True, read_only=True)
     payment = OrderPaymentSerializer(read_only=True)
+    cash_on_delivery = CashOnDeliveryReadSerializer(read_only=True)
     shipping_method = ShippingMethodSerializer(read_only=True)
     shipping_address = AddressSerializer(read_only=True)
+    delivery_address = AddressSerializer(read_only=True)
     
     class Meta:
         model = Order
         fields = [
             'id', 'order_number', 'total_amount', 'status', 'payment_status', 
-            'shipping_address', 'shipping_method', 'tracking_number', 
-            'ordered_at', 'items', 'updates', 'payment'
+            'shipping_address', 'delivery_address', 'shipping_method', 'tracking_number', 
+            'ordered_at', 'items', 'updates', 'payment', 'cash_on_delivery'
         ]
