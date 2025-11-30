@@ -13,7 +13,8 @@ export default function PaymentDetails({
   setQuantity, 
   isInCart, 
   handleAddToCart, 
-  handleRemoveFromCart 
+  handleRemoveFromCart,
+  handleBuyNow
 }) {
   const { user } = useAuth();
   const { isUsingWholesalePrice, minimumPurchase } = useWholesalePricingLogic(product);
@@ -105,23 +106,39 @@ export default function PaymentDetails({
         )}
       </div>
       
-      {/* Action Button */}
-      <button 
-        onClick={isInCart ? handleRemoveFromCart : handleAddToCart} 
-        disabled={!inStock || (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)} 
-        className={`mt-6 w-full font-semibold py-2 text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100
-          ${isInCart 
-            ? 'bg-red-500 text-white hover:bg-red-500' 
-            : 'bg-[var(--color-button-primary)] text-white hover:bg-[var(--color-button-primary)]/90'
-          }`}
-      >
-        {!inStock 
-          ? 'Out of Stock'
-          : (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)
-            ? `Need ${minimumPurchaseValidation.shortage} More Units`
-            : (isInCart ? 'Remove from Cart' : 'Add to Cart')
-        }
-      </button>
+      {/* Action Buttons */}
+      <div className="mt-6 space-y-3">
+        <button 
+          onClick={isInCart ? handleRemoveFromCart : handleAddToCart} 
+          disabled={!inStock || (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)} 
+          className={`w-full font-semibold py-2 text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100
+            ${isInCart 
+              ? 'bg-red-500 text-white hover:bg-red-500' 
+              : 'bg-[var(--color-button-primary)] text-white hover:bg-[var(--color-button-primary)]/90'
+            }`}
+        >
+          {!inStock 
+            ? 'Out of Stock'
+            : (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)
+              ? `Need ${minimumPurchaseValidation.shortage} More Units`
+              : (isInCart ? 'Remove from Cart' : 'Add to Cart')
+          }
+        </button>
+        
+        {/* Buy Now Button */}
+        <button 
+          onClick={handleBuyNow} 
+          disabled={!inStock || (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)} 
+          className="w-full font-semibold py-2 text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 bg-orange-500 text-white hover:bg-orange-600"
+        >
+          {!inStock 
+            ? 'Out of Stock'
+            : (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)
+              ? `Need ${minimumPurchaseValidation.shortage} More Units`
+              : 'Buy Now'
+          }
+        </button>
+      </div>
     </div>
   );
 }

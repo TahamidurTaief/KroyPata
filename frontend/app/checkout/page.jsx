@@ -21,10 +21,12 @@ const CheckoutContent = () => {
     cartItems, 
     orderTotals, 
     selectedShippingMethod,
-    setSelectedPaymentMethod
+    setSelectedPaymentMethod,
+    isBuyNowMode
   } = useCheckout();
   
   const { showModal } = useModal();
+  const { user } = useAuth();
   const router = useRouter();
   const [paymentMethodView, setPaymentMethodView] = useState("cod"); // Default to Cash on Delivery
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,6 +42,22 @@ const CheckoutContent = () => {
     senderNumber: "",
     adminAccountNumber: ""
   });
+
+  // Auto-fill user details from auth context on mount
+  useEffect(() => {
+    if (user) {
+      updateUserDetails({
+        name: user.name || user.username || '',
+        email: user.email || '',
+        phone: user.phone || user.phone_number || '',
+        address: user.address || '',
+        city: user.city || '',
+        state: user.state || '',
+        zipCode: user.zip_code || user.zipCode || '',
+        country: user.country || 'Bangladesh'
+      });
+    }
+  }, [user]);
 
   // Update selected payment method when mobile banking method changes
   useEffect(() => {
@@ -192,6 +210,11 @@ const CheckoutContent = () => {
       
       // Clear cart
       await clearCart();
+      
+      // Clear Buy Now item if in Buy Now mode
+      if (isBuyNowMode) {
+        sessionStorage.removeItem('buyNowItem');
+      }
       
       // Store order data in sessionStorage for confirmation page
       sessionStorage.setItem('orderConfirmation', JSON.stringify({

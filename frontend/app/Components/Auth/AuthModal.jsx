@@ -464,7 +464,10 @@ const AuthModal = () => {
 
 
               <motion.button
-                onClick={() => setWholesellerModalOpen(true)}
+                onClick={() => {
+                  closeAuthModal();
+                  window.location.href = '/wholesaler';
+                }}
                 className="w-full flex items-center justify-center gap-3 p-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
                 whileTap={{ scale: 0.98 }}
                 aria-label="Sign up as a wholeseller"
@@ -473,7 +476,7 @@ const AuthModal = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8zM8 14v4a2 2 0 002 2h4a2 2 0 002-2v-4" />
                 </svg>
                 <span className="font-semibold">
-                  Signup as Wholeseller
+                  Become a Wholesaler
                 </span>
               </motion.button>
 

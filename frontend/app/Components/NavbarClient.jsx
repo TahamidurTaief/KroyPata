@@ -413,59 +413,63 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
             </Link>
 
             {/* User Account Section - Updated Logic */}
-            <div 
-              className="flex items-center gap-2 cursor-pointer relative group"
-              ref={userRef}
-              onClick={() => {
-                if (isAuthenticated) {
-                    setUserDropdownOpen(!userDropdownOpen);
-                } else {
-                    openAuthModal('login');
-                }
-              }}
-            >
-              <CiUser size={28} className="text-[var(--color-text-primary)]" />
-              <div className="text-xs leading-tight group-hover:opacity-80 transition-opacity">
-                {/* Label: Welcome / Customer / Wholesaler */}
-                <p className={`${isWholesaler ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[var(--color-text-secondary)]'}`}>
-                    {getUserLabel()}
-                </p>
-                
-                {/* Name or Login Action */}
-                <p className="font-bold text-[var(--color-text-primary)] whitespace-nowrap">
-                  {isAuthenticated && user ? (user.name?.split(' ')[0] || 'User') : 'Sign in / Register'}
-                </p>
-              </div>
+            {isAuthenticated ? (
+              <div 
+                className="flex items-center gap-2 cursor-pointer relative group"
+                ref={userRef}
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+              >
+                <CiUser size={28} className="text-[var(--color-text-primary)]" />
+                <div className="text-xs leading-tight group-hover:opacity-80 transition-opacity">
+                  {/* Label: Welcome / Customer / Wholesaler */}
+                  <p className={`${isWholesaler ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[var(--color-text-secondary)]'}`}>
+                      {getUserLabel()}
+                  </p>
+                  
+                  {/* Name or Login Action */}
+                  <p className="font-bold text-[var(--color-text-primary)] whitespace-nowrap">
+                    {user.name?.split(' ')[0] || 'User'}
+                  </p>
+                </div>
               
-              {/* User Dropdown (Only when logged in) */}
-              <AnimatePresence>
-                {userDropdownOpen && isAuthenticated && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full right-0 mt-4 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-lg p-2 z-50"
-                  >
-                    <div className="px-3 py-2 border-b border-[var(--color-border)] mb-1">
-                        <p className="text-xs text-[var(--color-text-secondary)]">Signed in as</p>
-                        <p className="text-sm font-bold truncate">{user?.name}</p>
-                    </div>
-                    <Link href="/orders" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--color-muted-bg)] rounded-md text-[var(--color-text-primary)]" onClick={() => setUserDropdownOpen(false)}>
-                       <IoBagCheckOutline /> My Orders
-                    </Link>
-                    <button 
-                      onClick={() => {
-                        logout();
-                        setUserDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-red-50 text-red-500 rounded-md"
+                {/* User Dropdown (Only when logged in) */}
+                <AnimatePresence>
+                  {userDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full right-0 mt-4 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-lg p-2 z-50"
                     >
-                      <FiLogOut /> Logout
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                      <div className="px-3 py-2 border-b border-[var(--color-border)] mb-1">
+                          <p className="text-xs text-[var(--color-text-secondary)]">Signed in as</p>
+                          <p className="text-sm font-bold truncate">{user?.name}</p>
+                      </div>
+                      <Link href="/orders" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--color-muted-bg)] rounded-md text-[var(--color-text-primary)]" onClick={() => setUserDropdownOpen(false)}>
+                         <IoBagCheckOutline /> My Orders
+                      </Link>
+                      <button 
+                        onClick={() => {
+                          logout();
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-red-50 text-red-500 rounded-md"
+                      >
+                        <FiLogOut /> Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link href="/login" className="flex items-center gap-2 cursor-pointer group">
+                <CiUser size={28} className="text-[var(--color-text-primary)]" />
+                <div className="text-xs leading-tight group-hover:opacity-80 transition-opacity">
+                  <p className="text-[var(--color-text-secondary)]">Welcome</p>
+                  <p className="font-bold text-[var(--color-text-primary)] whitespace-nowrap">Sign in / Register</p>
+                </div>
+              </Link>
+            )}
 
             {/* Cart */}
             <Link href="/cart" className="flex items-center gap-2 cursor-pointer relative group">
@@ -705,13 +709,23 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                </div>
                <span className="text-[10px] font-medium">Cart</span>
             </Link>
-            <div 
-               onClick={() => isAuthenticated ? setMobileMenuOpen(true) : openAuthModal('login')}
-               className={`flex flex-col items-center gap-1 p-2 cursor-pointer ${mobileMenuOpen ? 'text-red-500' : 'text-[var(--color-text-secondary)]'}`}
-            >
-               <CiUser size={24} />
-               <span className="text-[10px] font-medium">Account</span>
-            </div>
+            {isAuthenticated ? (
+              <div 
+                onClick={() => setMobileMenuOpen(true)}
+                className={`flex flex-col items-center gap-1 p-2 cursor-pointer ${mobileMenuOpen ? 'text-red-500' : 'text-[var(--color-text-secondary)]'}`}
+              >
+                <CiUser size={24} />
+                <span className="text-[10px] font-medium">Account</span>
+              </div>
+            ) : (
+              <Link 
+                href="/login"
+                className={`flex flex-col items-center gap-1 p-2 ${pathname === '/login' || pathname === '/signup' ? 'text-red-500' : 'text-[var(--color-text-secondary)]'}`}
+              >
+                <CiUser size={24} />
+                <span className="text-[10px] font-medium">Account</span>
+              </Link>
+            )}
          </div>
       </div>
 

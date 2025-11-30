@@ -27,6 +27,30 @@ export const CheckoutProvider = ({ children }) => {
     updateCartItemQuantity: updateCartItemQuantityContext
   } = useCartContext();
 
+  // Buy Now state - check if user is in "Buy Now" mode
+  const [buyNowItem, setBuyNowItem] = useState(null);
+  const [isBuyNowMode, setIsBuyNowMode] = useState(false);
+
+  // Effect to check for Buy Now item from sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const buyNowData = sessionStorage.getItem('buyNowItem');
+      if (buyNowData) {
+        try {
+          const item = JSON.parse(buyNowData);
+          setBuyNowItem(item);
+          setIsBuyNowMode(true);
+          console.log('🛒 Buy Now mode activated:', item);
+        } catch (error) {
+          console.error('Error parsing buyNowItem:', error);
+        }
+      }
+    }
+  }, []);
+
+  // Determine which items to use (Buy Now item or cart items)
+  const effectiveCartItems = isBuyNowMode && buyNowItem ? [buyNowItem] : cartItems;
+
   // Shipping state
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
 
@@ -67,9 +91,9 @@ export const CheckoutProvider = ({ children }) => {
 
   // Calculate order totals
   const orderTotals = {
-    // Cart subtotal calculation
+    // Cart subtotal calculation - use effectiveCartItems instead of cartItems
     get subtotal() {
-      return cartItems.reduce((sum, item) => {
+      return effectiveCartItems.reduce((sum, item) => {
         const price = item.price || item.unit_price || 0;
         const quantity = item.quantity || 0;
         return sum + (price * quantity);
@@ -138,7 +162,17 @@ export const CheckoutProvider = ({ children }) => {
   // Clear cart after successful checkout
   const clearCartAfterCheckout = () => {
     console.log('🛒 Clearing cart after successful checkout');
-    clearCart();
+    
+    // If in Buy Now mode, clear the sessionStorage item
+    if (isBuyNowMode) {
+      sessionStorage.removeItem('buyNowItem');
+      setBuyNowItem(null);
+      setIsBuyNowMode(false);
+    } else {
+      // Normal cart checkout
+      clearCart();
+    }
+    
     // Reset checkout state
     setSelectedShippingMethod(null);
     setSelectedPaymentMethod(null);
@@ -169,17 +203,18 @@ export const CheckoutProvider = ({ children }) => {
 
   // Validation helpers
   const isShippingSelected = selectedShippingMethod !== null;
-  const isCartEmpty = cartItems.length === 0;
+  const isCartEmpty = effectiveCartItems.length === 0;
   const isUserDetailsComplete = Object.values(userDetails).every(value => value.trim() !== '');
 
   const contextValue = {
     // State
-    cartItems,
+    cartItems: effectiveCartItems, // Use effectiveCartItems to include Buy Now items
     selectedShippingMethod,
     userDetails,
     appliedCoupon,
     selectedPaymentMethod,
     mounted,
+    isBuyNowMode, // Expose Buy Now mode state
 
     // Calculated values
     orderTotals,

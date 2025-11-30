@@ -178,6 +178,65 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
       });
     }
   };
+
+  // Handler for Buy Now button
+  const handleBuyNow = () => {
+    // Check if user is logged in
+    if (!isAuthenticated) {
+      showError('Please login to continue', 'Login Required');
+      showModal({
+        status: 'error',
+        title: 'Login Required',
+        message: 'Please login to proceed with your purchase.',
+        primaryActionText: 'Login',
+        onPrimaryAction: () => { window.location.href = '/login'; },
+        secondaryActionText: 'Cancel'
+      });
+      return;
+    }
+
+    // Check minimum purchase requirements for wholesale users
+    const validation = validateMinimumPurchase(product, quantity, user);
+    
+    if (!validation.isValid && user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0) {
+      showError(validation.message, 'Minimum Order Not Met');
+      showModal({
+        status: 'error',
+        title: 'Minimum Order Required',
+        message: `${validation.message}\n\nPlease increase your quantity to at least ${validation.minimumRequired} units to proceed with wholesale pricing.`,
+        primaryActionText: 'OK'
+      });
+      return;
+    }
+
+    // Store the buy now product in sessionStorage
+    const buyNowItem = {
+      product_id: product.id,
+      productId: product.id,
+      id: product.id,
+      name: product.name,
+      price: user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0 
+        ? parseFloat(product.wholesale_price)
+        : parseFloat(product.discount_price) || parseFloat(product.price) || 0,
+      unit_price: user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0 
+        ? parseFloat(product.wholesale_price)
+        : parseFloat(product.discount_price) || parseFloat(product.price) || 0,
+      quantity: quantity,
+      image: product.thumbnail_url || product.image_url || product.image || '',
+      slug: product.slug,
+      stock: product.stock,
+      color_id: selectedColor?.id || null,
+      selectedColor: selectedColor,
+      size_id: selectedSize?.id || null,
+      selectedSize: selectedSize,
+      variantId: variantId
+    };
+
+    sessionStorage.setItem('buyNowItem', JSON.stringify(buyNowItem));
+    
+    // Navigate to checkout
+    window.location.href = '/checkout';
+  };
   
   // Memoize the list of all product images to prevent unnecessary recalculations
   const allImages = useMemo(() => 
@@ -227,6 +286,7 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
             isInCart={isInCart}
             handleAddToCart={handleAddToCart}
             handleRemoveFromCart={handleRemoveFromCart}
+            handleBuyNow={handleBuyNow}
           />
         </motion.div>
       </div>
