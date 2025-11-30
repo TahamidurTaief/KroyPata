@@ -118,7 +118,13 @@ export default function OrderListDisplay() {
   };
 
   // Invoice generation function - Simple and Dynamic
-  const generateInvoice = (order) => {
+  const generateInvoice = (order, downloadPDF = false) => {
+    // Validation
+    if (!order || !order.order_number) {
+      console.error('Invalid order data for invoice generation');
+      return;
+    }
+
     // Tk icon SVG
     const tkIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 512 512" style="display: inline-block; vertical-align: middle; margin-right: 2px;"><path d="M198.4 72.3c7.9 11.6 15 30.3 15 57.9v89.6h23.9l40.1 40.9h-64v116c0 9.1 3.4 17.3 10.2 24.7s17.9 11.1 33.3 11.1c19.9 0 40.9-11.1 63.1-33.3 22.7-22.7 34.7-46 35.8-69.9l-10.2.9c-36.4 0-54.6-19.3-54.6-58 0-13.1 4.3-24.7 12.8-35 8.5-10.2 22.7-15.4 42.6-15.4 21 0 38.7 9.1 52.9 27.3 14.8 18.2 22.2 40.4 22.2 66.5 0 38.7-16.5 75.6-49.5 110.9-32.4 35.2-94.4 52.9-116 52.9-34.6 0-47.9-6.8-59.2-14.5-11.3-7.8-26.1-26.2-26.1-49.4V260.7h-40.9l-39.2-40.9h80.2v-81c0-18.1-18.1-28-29.9-29-7.2-.6-15.1 1.4-17.9 4.3-5.1-8.5-10-18.8-14.5-30.7 0 0 4-14.4 17.1-23 9-5.9 17.5-7.7 30.7-7.7 25.1-.1 36.7 11.7 42.1 19.6z" fill="currentColor" /></svg>`;
     
@@ -135,7 +141,7 @@ export default function OrderListDisplay() {
           
           /* Header */
           .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #2563eb; }
-          .company-logo { max-width: 150px; height: auto; margin-bottom: 10px; }
+          .company-logo { width: 150px; height: auto; max-height: 60px; object-fit: contain; margin-bottom: 10px; }
           .company-info h1 { color: #1f2937; font-size: 24px; margin-bottom: 8px; font-weight: 700; }
           .company-info p { color: #6b7280; font-size: 13px; line-height: 1.6; }
           .invoice-info { text-align: right; }
@@ -190,7 +196,7 @@ export default function OrderListDisplay() {
           <!-- Header -->
           <div class="header">
             <div class="company-info">
-              <img src="/img/logo_light.svg" alt="Logo" class="company-logo" onerror="this.src='/img/logo.png'" />
+              <img src="/img/logo_light.svg" alt="Logo" class="company-logo" style="width: 150px; height: 60px; object-fit: contain;" />
               <p style="margin-top: 12px; font-size: 13px; color: #374151;">Email: support@icommerce.com</p>
               <p style="font-size: 13px; color: #374151;">Phone: +880 1XXX-XXXXXX</p>
               <p style="font-size: 13px; color: #374151;">Dhaka, Bangladesh</p>
@@ -198,18 +204,18 @@ export default function OrderListDisplay() {
             <div class="invoice-info">
               <h2>INVOICE</h2>
               <div class="invoice-meta">
-                <div><strong>Order #:</strong> ${order.order_number}</div>
-                <div><strong>Date:</strong> ${format(new Date(order.ordered_at), 'PPP')}</div>
-                <div><strong>Time:</strong> ${format(new Date(order.ordered_at), 'p')}</div>
+                <div><strong>Order #:</strong> ${order.order_number || 'N/A'}</div>
+                <div><strong>Date:</strong> ${order.ordered_at ? format(new Date(order.ordered_at), 'PPP') : 'N/A'}</div>
+                <div><strong>Time:</strong> ${order.ordered_at ? format(new Date(order.ordered_at), 'p') : 'N/A'}</div>
               </div>
-              <div class="status-badge status-${order.status.toLowerCase()}">${order.status}</div>
+              <div class="status-badge status-${(order.status || 'pending').toLowerCase()}">${order.status || 'PENDING'}</div>
             </div>
           </div>
 
-          <!-- Order Details - Compact Single Row -->
+          <!-- Order Details - Compact Format -->
           <div style="margin: 20px 0; padding: 15px 0; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
-            <p style="margin: 0; color: #6b7280; font-size: 13px; line-height: 1.8;">
-              ${order.payment ? `<strong style="color: #1f2937;">Payment:</strong> ${order.payment.payment_method_display || order.payment.payment_method || 'N/A'}${order.payment.payment_method === 'cod' || order.payment.payment_method_display === 'Cash on Delivery' ? '' : (order.payment.admin_account_number ? ` (Admin: ${order.payment.admin_account_number})` : '') + (order.payment.sender_number ? ` • Sender: ${order.payment.sender_number}` : '') + (order.payment.transaction_id ? ` • TxID: ${order.payment.transaction_id}` : '')}` : ''}${order.shipping_method_name ? ` • <strong style="color: #1f2937;">Shipping:</strong> ${order.shipping_method_name}` : ''}${order.cash_on_delivery && order.cash_on_delivery.delivery_status ? ` • <strong style="color: #1f2937;">Delivery:</strong> ${order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}` : ''}${order.cash_on_delivery && order.cash_on_delivery.scheduled_delivery_date ? ` (${format(new Date(order.cash_on_delivery.scheduled_delivery_date), 'PP')})` : ''}${order.cash_on_delivery && order.cash_on_delivery.amount_to_collect ? ` • <strong style="color: #1f2937;">Collect:</strong> ${tkIconSvg}${parseFloat(order.cash_on_delivery.amount_to_collect).toFixed(2)}` : ''}${order.cash_on_delivery && order.cash_on_delivery.delivery_person_name ? ` • <strong style="color: #1f2937;">Team:</strong> ${order.cash_on_delivery.delivery_person_name}` : ''}
+            <p style="margin: 0; color: #6b7280; font-size: 13px; line-height: 2;">
+              ${order.payment ? `<strong style="color: #1f2937;">Payment:</strong> ${order.payment.payment_method_display || order.payment.payment_method || 'N/A'}` : ''}${order.payment && order.payment.payment_method !== 'cod' && order.payment.payment_method_display !== 'Cash on Delivery' ? (order.payment.admin_account_number ? ` (Admin: ${order.payment.admin_account_number})` : '') + (order.payment.sender_number ? ` &nbsp;•&nbsp; Sender: ${order.payment.sender_number}` : '') + (order.payment.transaction_id ? ` &nbsp;•&nbsp; TxID: ${order.payment.transaction_id}` : '') : ''}${order.shipping_method_name ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Shipping:</strong> ${order.shipping_method_name}` : ''}<br/>${order.cash_on_delivery && order.cash_on_delivery.delivery_status ? `<strong style="color: #1f2937;">Delivery:</strong> ${order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}` : ''}${order.cash_on_delivery && order.cash_on_delivery.scheduled_delivery_date ? ` (${format(new Date(order.cash_on_delivery.scheduled_delivery_date), 'PP')})` : ''}${order.cash_on_delivery && order.cash_on_delivery.amount_to_collect ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Collect:</strong> ${tkIconSvg}${parseFloat(order.cash_on_delivery.amount_to_collect || 0).toFixed(2)}` : ''}${order.payment && (order.payment.payment_method === 'cod' || order.payment.payment_method_display === 'Cash on Delivery') ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Delivery Team:</strong> ${order.cash_on_delivery && order.cash_on_delivery.delivery_person_name ? order.cash_on_delivery.delivery_person_name + (order.cash_on_delivery.delivery_person_phone ? ' (' + order.cash_on_delivery.delivery_person_phone + ')' : '') : 'Not Declared'}` : ''}
             </p>
           </div>
 
@@ -224,7 +230,7 @@ export default function OrderListDisplay() {
               </tr>
             </thead>
             <tbody>
-              ${order.items?.map(item => `
+              ${order.items && Array.isArray(order.items) && order.items.length > 0 ? order.items.map(item => `
                 <tr>
                   <td>
                     <div class="item-name">${item.product_name || 'Product'}</div>
@@ -236,11 +242,11 @@ export default function OrderListDisplay() {
                     </div>
                     ` : ''}
                   </td>
-                  <td style="text-align: center;">${item.quantity}</td>
-                  <td style="text-align: right;">${tkIconSvg}${parseFloat(item.unit_price).toFixed(2)}</td>
-                  <td style="text-align: right;">${tkIconSvg}${(parseFloat(item.unit_price) * item.quantity).toFixed(2)}</td>
+                  <td style="text-align: center;">${item.quantity || 0}</td>
+                  <td style="text-align: right;">${tkIconSvg}${parseFloat(item.unit_price || 0).toFixed(2)}</td>
+                  <td style="text-align: right;">${tkIconSvg}${(parseFloat(item.unit_price || 0) * (item.quantity || 0)).toFixed(2)}</td>
                 </tr>
-              `).join('') || '<tr><td colspan="4" style="text-align: center; color: #9ca3af;">No items found</td></tr>'}
+              `).join('') : '<tr><td colspan="4" style="text-align: center; color: #9ca3af;">No items found</td></tr>'}
             </tbody>
           </table>
 
@@ -248,7 +254,7 @@ export default function OrderListDisplay() {
           <div class="totals-section">
             <div class="total-row">
               <div class="total-label">TOTAL AMOUNT</div>
-              <div class="total-amount">${tkIconSvg}${parseFloat(order.total_amount).toFixed(2)}</div>
+              <div class="total-amount">${tkIconSvg}${parseFloat(order.total_amount || 0).toFixed(2)}</div>
             </div>
           </div>
 
@@ -257,7 +263,7 @@ export default function OrderListDisplay() {
             <p><strong>Thank you for your order!</strong></p>
             <p>For any queries regarding this invoice, please contact us at <strong>support@icommerce.com</strong></p>
             <p style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af;">
-              Developed by <strong style="color: #2563eb;">Tahamidur Taief</strong> • <a href="https://www.tahamidurtaief.com" style="color: #2563eb; text-decoration: none;">www.tahamidurtaief.com</a>
+              Developed by <a href="https://www.exeyezone.com" target="_blank" style="color: #f43f5e; font-weight: 600; text-decoration: none;">exeyezone</a>
             </p>
           </div>
         </div>
@@ -266,8 +272,64 @@ export default function OrderListDisplay() {
     `;
 
     const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) {
+      console.error('Failed to open new window. Pop-up may be blocked.');
+      alert('Please allow pop-ups for this site to generate invoices.');
+      return;
+    }
+    
     printWindow.document.write(invoiceHTML);
     printWindow.document.close();
+    
+    if (downloadPDF) {
+      // Wait for content to load, then auto-download as PDF
+      printWindow.onload = function() {
+        printWindow.document.title = order.order_number;
+        
+        // Load html2pdf library dynamically
+        const script = printWindow.document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        script.onload = function() {
+          try {
+            const opt = {
+              margin: 10,
+              filename: `${order.order_number}.pdf`,
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, logging: false, useCORS: true },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            printWindow.html2pdf().set(opt).from(printWindow.document.body).save().then(() => {
+              setTimeout(() => printWindow.close(), 1000);
+            }).catch((err) => {
+              console.error('PDF generation failed:', err);
+              printWindow.close();
+            });
+          } catch (err) {
+            console.error('Error generating PDF:', err);
+            printWindow.close();
+          }
+        };
+        script.onerror = function() {
+          console.error('Failed to load html2pdf library');
+          printWindow.close();
+        };
+        printWindow.document.head.appendChild(script);
+      };
+    } else {
+      // For print button, wait for images to load then print
+      printWindow.onload = function() {
+        printWindow.document.title = order.order_number;
+        setTimeout(() => {
+          try {
+            printWindow.print();
+          } catch (err) {
+            console.error('Print failed:', err);
+          }
+        }, 500);
+      };
+    }
   };
 
   // Order progress steps
@@ -737,13 +799,7 @@ export default function OrderListDisplay() {
           </span>
           <div className="flex gap-2">
             <button
-              onClick={() => {
-                generateInvoice(order);
-                setTimeout(() => {
-                  const printWindow = window.open('', '_blank');
-                  if (printWindow) printWindow.print();
-                }, 500);
-              }}
+              onClick={() => generateInvoice(order, false)}
               className="flex items-center gap-2 bg-white text-[var(--color-button-primary)] px-3 py-2 rounded-lg font-medium hover:bg-white/90 transition-all shadow-md text-sm"
               title="Print Invoice"
             >
@@ -751,16 +807,7 @@ export default function OrderListDisplay() {
               Print
             </button>
             <button
-              onClick={() => {
-                generateInvoice(order);
-                setTimeout(() => {
-                  const printWindow = window.open('', '_blank');
-                  if (printWindow) {
-                    printWindow.print();
-                    printWindow.onafterprint = () => printWindow.close();
-                  }
-                }, 500);
-              }}
+              onClick={() => generateInvoice(order, true)}
               className="flex items-center gap-2 bg-green-500 text-white px-3 py-2 rounded-lg font-medium hover:bg-green-600 transition-all shadow-md text-sm"
               title="Download as PDF"
             >
@@ -808,57 +855,63 @@ export default function OrderListDisplay() {
           </div>
         </motion.div>
 
-        {/* Order Details - Compact Single Row */}
+        {/* Order Details - Compact Format */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="py-3 border-t border-b border-gray-200 dark:border-gray-700"
         >
-          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            {order.payment && (
-              <>
-                <span className="font-semibold text-gray-800 dark:text-white">Payment:</span>{' '}
-                {order.payment.payment_method_display || order.payment.payment_method}
-                {order.payment.payment_method !== 'cod' && order.payment.payment_method_display !== 'Cash on Delivery' && (
-                  <>
-                    {order.payment.admin_account_number && ` (Admin: ${order.payment.admin_account_number})`}
-                    {order.payment.sender_number && ` • Sender: ${order.payment.sender_number}`}
-                    {order.payment.transaction_id && ` • TxID: ${order.payment.transaction_id}`}
-                  </>
-                )}
-              </>
-            )}
-            {order.shipping_method_name && (
-              <>
-                {' • '}
-                <span className="font-semibold text-gray-800 dark:text-white">Shipping:</span>{' '}
-                {order.shipping_method_name}
-              </>
-            )}
-            {order.cash_on_delivery?.delivery_status && (
-              <>
-                {' • '}
-                <span className="font-semibold text-gray-800 dark:text-white">Delivery:</span>{' '}
-                {order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}
-                {order.cash_on_delivery.scheduled_delivery_date && ` (${format(new Date(order.cash_on_delivery.scheduled_delivery_date), 'PP')})`}
-              </>
-            )}
-            {order.cash_on_delivery?.amount_to_collect && (
-              <>
-                {' • '}
-                <span className="font-semibold text-gray-800 dark:text-white">Collect:</span>{' '}
-                <Tk_icon size={12} className="inline" />
-                {parseFloat(order.cash_on_delivery.amount_to_collect).toFixed(2)}
-              </>
-            )}
-            {order.cash_on_delivery?.delivery_person_name && (
-              <>
-                {' • '}
-                <span className="font-semibold text-gray-800 dark:text-white">Team:</span>{' '}
-                {order.cash_on_delivery.delivery_person_name}
-              </>
-            )}
-          </p>
+          <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed space-y-1">
+            <p>
+              {order.payment && (
+                <>
+                  <span className="font-semibold text-gray-800 dark:text-white">Payment:</span>{' '}
+                  {order.payment.payment_method_display || order.payment.payment_method}
+                  {order.payment.payment_method !== 'cod' && order.payment.payment_method_display !== 'Cash on Delivery' && (
+                    <>
+                      {order.payment.admin_account_number && ` (Admin: ${order.payment.admin_account_number})`}
+                      {order.payment.sender_number && ` • Sender: ${order.payment.sender_number}`}
+                      {order.payment.transaction_id && ` • TxID: ${order.payment.transaction_id}`}
+                    </>
+                  )}
+                </>
+              )}
+              {order.shipping_method_name && (
+                <>
+                  {' • '}
+                  <span className="font-semibold text-gray-800 dark:text-white">Shipping:</span>{' '}
+                  {order.shipping_method_name}
+                </>
+              )}
+            </p>
+            <p>
+              {order.cash_on_delivery?.delivery_status && (
+                <>
+                  <span className="font-semibold text-gray-800 dark:text-white">Delivery:</span>{' '}
+                  {order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}
+                  {order.cash_on_delivery.scheduled_delivery_date && ` (${format(new Date(order.cash_on_delivery.scheduled_delivery_date), 'PP')})`}
+                </>
+              )}
+              {order.cash_on_delivery?.amount_to_collect && (
+                <>
+                  {' • '}
+                  <span className="font-semibold text-gray-800 dark:text-white">Collect:</span>{' '}
+                  <Tk_icon size={12} className="inline" />
+                  {parseFloat(order.cash_on_delivery.amount_to_collect || 0).toFixed(2)}
+                </>
+              )}
+              {order.payment && (order.payment.payment_method === 'cod' || order.payment.payment_method_display === 'Cash on Delivery') && (
+                <>
+                  {' • '}
+                  <span className="font-semibold text-gray-800 dark:text-white">Delivery Team:</span>{' '}
+                  {order.cash_on_delivery?.delivery_person_name 
+                    ? `${order.cash_on_delivery.delivery_person_name}${order.cash_on_delivery.delivery_person_phone ? ` (${order.cash_on_delivery.delivery_person_phone})` : ''}`
+                    : 'Not Declared'
+                  }
+                </>
+              )}
+            </p>
+          </div>
         </motion.div>
 
         {/* Products */}
@@ -872,7 +925,8 @@ export default function OrderListDisplay() {
             Order Items
           </h4>
           <div className="space-y-3">
-            {order.items?.map((item, idx) => (
+            {order.items && Array.isArray(order.items) && order.items.length > 0 ? (
+              order.items.map((item, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, x: -20 }}
@@ -884,7 +938,7 @@ export default function OrderListDisplay() {
                   <div className="relative w-16 h-16 rounded border border-gray-200 dark:border-gray-600 bg-white flex-shrink-0 overflow-hidden">
                     <Image
                       src={item.product_image}
-                      alt={item.product_name}
+                      alt={item.product_name || 'Product'}
                       fill
                       className="object-cover"
                       sizes="64px"
@@ -892,19 +946,24 @@ export default function OrderListDisplay() {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-800 dark:text-white">{item.product_name}</p>
+                  <p className="font-medium text-gray-800 dark:text-white">{item.product_name || 'Product'}</p>
                   <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 space-y-0.5">
-                    <p>Qty: {item.quantity}</p>
+                    <p>Qty: {item.quantity || 0}</p>
                     {item.color_name && <p>Color: {item.color_name}</p>}
                     {item.size_name && <p>Size: {item.size_name}</p>}
                   </div>
                 </div>
                 <div className="text-sm font-semibold text-gray-800 dark:text-white flex-shrink-0">
                   <Tk_icon size={14} className="inline mr-1" />
-                  {parseFloat(item.unit_price).toFixed(2)}
+                  {parseFloat(item.unit_price || 0).toFixed(2)}
                 </div>
               </motion.div>
-            ))}
+            ))
+            ) : (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                No items found
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -920,7 +979,7 @@ export default function OrderListDisplay() {
               <span className="font-medium">Order Total:</span>
               <span className="font-bold text-xl">
                 <Tk_icon size={16} className="inline mr-1" />
-                {parseFloat(order.total_amount).toFixed(2)}
+                {parseFloat(order.total_amount || 0).toFixed(2)}
               </span>
             </div>
           </motion.div>
@@ -961,14 +1020,14 @@ export default function OrderListDisplay() {
 
         {/* Developer Credit */}
         <div className="text-center text-xs text-gray-400 dark:text-gray-500 pt-4 border-t border-gray-200 dark:border-gray-700">
-          Developed by <span className="font-semibold text-[var(--color-button-primary)]">Tahamidur Taief</span> •{' '}
+          Developed by{' '}
           <a 
-            href="https://www.tahamidurtaief.com" 
+            href="https://www.exeyezone.com" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-[var(--color-button-primary)] hover:underline"
+            className="font-semibold text-rose-500 hover:underline"
           >
-            www.tahamidurtaief.com
+            exeyezone
           </a>
         </div>
       </div>
