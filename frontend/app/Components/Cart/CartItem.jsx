@@ -36,49 +36,50 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
       {/* Mobile Layout (full width) - Visible only on mobile */}
       <div className="col-span-12 md:hidden">
         <div className="flex gap-3">
-          <div className="relative h-20 w-16 rounded-lg overflow-hidden flex-shrink-0" style={{ backgroundColor: 'var(--cart-card-border)' }}>
+          <div className="relative h-20 w-16 rounded-lg overflow-hidden flex-shrink-0" style={{ backgroundColor: 'var(--muted)' }}>
             <Image
               src={getImageSrc(item.thumbnail_url)}
               alt={item.name}
               fill
               className="object-cover"
               onError={() => setImageError(true)}
+              unoptimized={getImageSrc(item.thumbnail_url).includes('.svg')}
             />
           </div>
           <div className="flex-1 min-w-0">
-            <span className="text-xs uppercase tracking-wider font-medium mb-1 block" style={{ color: 'var(--cart-text-muted)' }}>
+            <span className="text-xs uppercase tracking-wider font-medium mb-1 block" style={{ color: 'var(--muted-foreground)' }}>
               {item.category || "Item"}
             </span>
-            <Link href={`/products/${item.slug}`} className="font-bold transition-colors line-clamp-2 text-sm block mb-2" style={{ color: 'var(--cart-text-primary)' }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--color-button-primary)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--cart-text-primary)'}
+            <Link href={`/products/${item.slug}`} className="font-bold transition-colors line-clamp-2 text-sm block mb-2" style={{ color: 'var(--foreground)' }}
+              onMouseEnter={(e) => e.target.style.color = 'var(--primary)'}
+              onMouseLeave={(e) => e.target.style.color = 'var(--foreground)'}
             >
               {item.name}
             </Link>
             
             {/* Mobile Price and Quantity Row */}
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold flex items-center text-sm" style={{ color: 'var(--cart-price-color)' }}>
+              <span className="font-bold flex items-center text-sm" style={{ color: 'var(--primary)' }}>
                 <Tk_icon size={14} className="mr-1" />
                 {item.price.toFixed(2)}
               </span>
               
-              <div className="flex items-center gap-2 rounded-lg px-2 py-1" style={{ backgroundColor: 'var(--cart-card-border)' }}>
+              <div className="flex items-center gap-2 rounded-lg px-2 py-1" style={{ backgroundColor: 'var(--muted)' }}>
                 <button
                   onClick={() => onUpdateQuantity(item.variantId, item.quantity - 1)}
                   disabled={item.quantity <= 1}
                   className="p-2 transition-colors disabled:opacity-30"
-                  style={{ color: 'var(--cart-text-muted)' }}
+                  style={{ color: 'var(--muted-foreground)' }}
                 >
                   <FiMinus size={12} />
                 </button>
-                <span className="text-sm font-semibold w-6 text-center" style={{ color: 'var(--cart-text-primary)' }}>
+                <span className="text-sm font-semibold w-6 text-center" style={{ color: 'var(--foreground)' }}>
                   {item.quantity}
                 </span>
                 <button
                   onClick={() => onUpdateQuantity(item.variantId, item.quantity + 1)}
                   className="p-2 transition-colors"
-                  style={{ color: 'var(--cart-text-muted)' }}
+                  style={{ color: 'var(--muted-foreground)' }}
                 >
                   <FiPlus size={12} />
                 </button>
@@ -87,7 +88,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
             
             {/* Mobile Total Price and Remove Row */}
             <div className="flex items-center justify-between">
-              <span className="font-bold flex items-center text-base" style={{ color: 'var(--cart-total-price-color)' }}>
+              <span className="font-bold flex items-center text-base" style={{ color: 'var(--primary)' }}>
                 <Tk_icon size={16} className="mr-1" />
                 {(item.price * item.quantity).toFixed(2)}
               </span>
@@ -95,19 +96,19 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
               <button
                 onClick={() => onRemoveItem(item.variantId)}
                 className="p-2 transition-colors"
-                style={{ color: 'var(--cart-text-muted)' }}
-                onMouseEnter={(e) => e.target.style.color = 'var(--cart-error-text)'}
-                onMouseLeave={(e) => e.target.style.color = 'var(--cart-text-muted)'}
+                style={{ color: 'var(--muted-foreground)' }}
+                onMouseEnter={(e) => e.target.style.color = '#ef4444'}
+                onMouseLeave={(e) => e.target.style.color = 'var(--muted-foreground)'}
               >
                 <FiTrash2 size={16} />
               </button>
             </div>
             
             {/* Mobile Product Details */}
-            <div className="flex flex-col gap-1 mt-2 text-xs" style={{ color: 'var(--cart-text-secondary)' }}>
+            <div className="flex flex-col gap-1 mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
               {item.selectedColor && (
                 <div className="flex items-center gap-2">
-                  <span style={{ color: 'var(--cart-text-muted)' }}>Color:</span>
+                  <span style={{ color: 'var(--muted-foreground)' }}>Color:</span>
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.selectedColor.hex_code }} />
                     {item.selectedColor.name}
@@ -115,7 +116,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
                 </div>
               )}
               {item.selectedSize && (
-                <div><span style={{ color: 'var(--cart-text-muted)' }}>Size:</span> {item.selectedSize.name}</div>
+                <div><span style={{ color: 'var(--muted-foreground)' }}>Size:</span> {item.selectedSize.name}</div>
               )}
             </div>
           </div>
@@ -126,29 +127,30 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
       <div className="hidden md:contents">
         {/* Product Column (Span 6) */}
         <div className="col-span-6 flex gap-4">
-          <div className="relative h-24 w-20 rounded-lg overflow-hidden flex-shrink-0" style={{ backgroundColor: 'var(--cart-card-border)' }}>
+          <div className="relative h-24 w-20 rounded-lg overflow-hidden flex-shrink-0" style={{ backgroundColor: 'var(--muted)' }}>
             <Image
               src={getImageSrc(item.thumbnail_url)}
               alt={item.name}
               fill
               className="object-cover"
               onError={() => setImageError(true)}
+              unoptimized={getImageSrc(item.thumbnail_url).includes('.svg')}
             />
           </div>
           <div className="flex flex-col justify-center min-w-0 flex-1">
-            <span className="text-xs uppercase tracking-wider font-medium mb-1" style={{ color: 'var(--cart-text-muted)' }}>
+            <span className="text-xs uppercase tracking-wider font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
               {item.category || "Item"}
             </span>
-            <Link href={`/products/${item.slug}`} className="font-bold transition-colors line-clamp-2 text-base" style={{ color: 'var(--cart-text-primary)' }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--color-button-primary)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--cart-text-primary)'}
+            <Link href={`/products/${item.slug}`} className="font-bold transition-colors line-clamp-2 text-base" style={{ color: 'var(--foreground)' }}
+              onMouseEnter={(e) => e.target.style.color = 'var(--primary)'}
+              onMouseLeave={(e) => e.target.style.color = 'var(--foreground)'}
             >
               {item.name}
             </Link>
-            <div className="flex flex-col gap-1 mt-2 text-xs" style={{ color: 'var(--cart-text-secondary)' }}>
+            <div className="flex flex-col gap-1 mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
               {item.selectedColor && (
                 <div className="flex items-center gap-2">
-                  <span style={{ color: 'var(--cart-text-muted)' }}>Color:</span>
+                  <span style={{ color: 'var(--muted-foreground)' }}>Color:</span>
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.selectedColor.hex_code }} />
                     {item.selectedColor.name}
@@ -156,7 +158,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
                 </div>
               )}
               {item.selectedSize && (
-                <div><span style={{ color: 'var(--cart-text-muted)' }}>Size:</span> {item.selectedSize.name}</div>
+                <div><span style={{ color: 'var(--muted-foreground)' }}>Size:</span> {item.selectedSize.name}</div>
               )}
             </div>
           </div>
@@ -164,7 +166,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
 
         {/* Price Column (Span 2) */}
         <div className="col-span-2 flex items-center justify-center">
-          <span className="font-bold flex items-center text-sm" style={{ color: 'var(--cart-price-color)' }}>
+          <span className="font-bold flex items-center text-sm" style={{ color: 'var(--primary)' }}>
             <Tk_icon size={14} className="mr-1" />
             {item.price.toFixed(2)}
           </span>
@@ -172,26 +174,26 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
 
         {/* Quantity Column (Span 2) */}
         <div className="col-span-2 flex items-center justify-center">
-          <div className="flex items-center gap-3 rounded-lg px-2 py-1" style={{ backgroundColor: 'var(--cart-card-border)' }}>
+          <div className="flex items-center gap-3 rounded-lg px-2 py-1" style={{ backgroundColor: 'var(--muted)' }}>
             <button
               onClick={() => onUpdateQuantity(item.variantId, item.quantity - 1)}
               disabled={item.quantity <= 1}
               className="p-1 transition-colors disabled:opacity-30"
-              style={{ color: 'var(--cart-text-muted)' }}
-              onMouseEnter={(e) => !e.disabled && (e.target.style.color = 'var(--cart-text-primary)')}
-              onMouseLeave={(e) => !e.disabled && (e.target.style.color = 'var(--cart-text-muted)')}
+              style={{ color: 'var(--muted-foreground)' }}
+              onMouseEnter={(e) => !e.disabled && (e.target.style.color = 'var(--foreground)')}
+              onMouseLeave={(e) => !e.disabled && (e.target.style.color = 'var(--muted-foreground)')}
             >
               <FiMinus size={12} />
             </button>
-            <span className="text-sm font-semibold w-4 text-center" style={{ color: 'var(--cart-text-primary)' }}>
+            <span className="text-sm font-semibold w-4 text-center" style={{ color: 'var(--foreground)' }}>
               {item.quantity}
             </span>
             <button
               onClick={() => onUpdateQuantity(item.variantId, item.quantity + 1)}
               className="p-1 transition-colors"
-              style={{ color: 'var(--cart-text-muted)' }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--cart-text-primary)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--cart-text-muted)'}
+              style={{ color: 'var(--muted-foreground)' }}
+              onMouseEnter={(e) => e.target.style.color = 'var(--foreground)'}
+              onMouseLeave={(e) => e.target.style.color = 'var(--muted-foreground)'}
             >
               <FiPlus size={12} />
             </button>
@@ -200,16 +202,16 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
 
         {/* Total Price Column (Span 2) */}
         <div className="col-span-2 flex items-center justify-center gap-4">
-          <span className="font-bold flex items-center text-lg" style={{ color: 'var(--cart-total-price-color)' }}>
+          <span className="font-bold flex items-center text-lg" style={{ color: 'var(--primary)' }}>
             <Tk_icon size={16} className="mr-1" />
             {(item.price * item.quantity).toFixed(2)}
           </span>
           <button
             onClick={() => onRemoveItem(item.variantId)}
             className="transition-colors flex items-center justify-center"
-            style={{ color: 'var(--cart-text-muted)' }}
-            onMouseEnter={(e) => e.target.style.color = 'var(--cart-error-text)'}
-            onMouseLeave={(e) => e.target.style.color = 'var(--cart-text-muted)'}
+            style={{ color: 'var(--muted-foreground)' }}
+            onMouseEnter={(e) => e.target.style.color = '#ef4444'}
+            onMouseLeave={(e) => e.target.style.color = 'var(--muted-foreground)'}
           >
             <FiTrash2 size={16} />
           </button>
@@ -218,7 +220,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }) => {
       
       {/* Validation Message Row */}
       {!minimumPurchaseValidation.isValid && (
-        <div className="col-span-12 mt-2 text-xs p-2 rounded" style={{ backgroundColor: 'var(--cart-error-bg)', color: 'var(--cart-error-text)' }}>
+        <div className="col-span-12 mt-2 text-xs p-2 rounded" style={{ backgroundColor: '#fef2f2', color: '#ef4444' }}>
           {minimumPurchaseValidation.message}
         </div>
       )}

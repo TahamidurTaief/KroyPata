@@ -160,7 +160,7 @@ const HorizontalBannerSlider = ({ banners = [] }) => {
           {displayBanners.length > 1 && isAutoPlaying && (
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
               <div 
-                className="h-full bg-gradient-to-r from-sky-500 via-blue-500 to-purple-500 transition-all duration-100 ease-linear"
+                className="h-full bg-[var(--primary)] transition-all duration-100 ease-linear"
                 style={{ 
                   width: `${((currentIndex + 1) / displayBanners.length) * 100}%`,
                   animation: isAutoPlaying ? 'progress 4s linear infinite' : 'none'
@@ -200,7 +200,7 @@ const BannerSlide = ({ banner, isActive }) => {
   const [imageError, setImageError] = useState(false);
   
   // Fallback gradient background if image fails to load
-  const fallbackBackground = "bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700";
+  const fallbackBackground = "bg-[var(--primary)]";
   
   // Handle empty or null values
   const displayTitle = banner.title || "Special Offer";
@@ -243,7 +243,7 @@ const BannerSlide = ({ banner, isActive }) => {
           {/* Call to Action Button */}
           <div className="flex justify-center shadow-2xl">
             <Link href={displayButtonLink} aria-label={`${displayButtonText} - ${displayTitle}`}>
-              <button className="group/btn bg-white hover:bg-gray-100 text-gray-900 font-semibold min-h-[44px] py-2 px-4 md:py-3 md:px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-white/50 focus:outline-none flex items-center justify-center gap-2">
+              <button className="group/btn bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-semibold min-h-[44px] py-2 px-4 md:py-3 md:px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-white/50 focus:outline-none flex items-center justify-center gap-2">
                 <span className="text-xs sm:text-sm md:text-base">{displayButtonText}</span>
                 <svg 
                   className="w-3 h-3 md:w-4 md:h-4 transition-transform duration-300 group-hover/btn:translate-x-1" 

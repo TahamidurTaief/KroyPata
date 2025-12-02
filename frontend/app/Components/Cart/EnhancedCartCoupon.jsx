@@ -12,9 +12,9 @@ const EnhancedCartCoupon = ({ onApplyCoupon, appliedCoupon, onCouponRemoved }) =
   };
 
   return (
-    <div className="rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm" style={{ backgroundColor: 'var(--cart-card-bg)', boxShadow: '0 1px 3px var(--cart-shadow)' }}>
-      <h3 className="text-base sm:text-lg font-bold mb-2" style={{ color: 'var(--cart-text-primary)' }}>Coupon Code</h3>
-      <p className="text-xs mb-3 sm:mb-4 leading-relaxed" style={{ color: 'var(--cart-text-secondary)' }}>
+    <div className="rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm" style={{ backgroundColor: 'var(--card)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      <h3 className="text-base sm:text-lg font-bold mb-2" style={{ color: 'var(--foreground)' }}>Coupon Code</h3>
+      <p className="text-xs mb-3 sm:mb-4 leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
         Apply a valid coupon code to get instant discounts on your order. Enter your code below and click apply to see the savings reflected in your cart total.
       </p>
 
@@ -27,19 +27,19 @@ const EnhancedCartCoupon = ({ onApplyCoupon, appliedCoupon, onCouponRemoved }) =
             placeholder="Coupon Code"
             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-full focus:outline-none text-xs sm:text-sm transition-colors"
             style={{ 
-              backgroundColor: 'var(--cart-input-bg)', 
-              color: 'var(--cart-text-primary)'
+              backgroundColor: 'var(--muted)', 
+              color: 'var(--foreground)'
             }}
-            onFocus={(e) => e.target.style.borderColor = 'var(--cart-input-focus)'}
-            onBlur={(e) => e.target.style.borderColor = 'var(--cart-input-border)'}
+            onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+            onBlur={(e) => e.target.style.borderColor = 'transparent'}
           />
           <button
             onClick={handleApply}
             disabled={!code.trim()}
             className="w-full font-bold py-2.5 sm:py-3 rounded-full transition-colors disabled:opacity-50 text-xs sm:text-sm"
             style={{ 
-              backgroundColor: 'var(--cart-button-primary)', 
-              color: 'var(--cart-card-bg)'
+              backgroundColor: 'var(--primary)', 
+              color: '#ffffff'
             }}
             onMouseEnter={(e) => !e.target.disabled && (e.target.style.opacity = '0.9')}
             onMouseLeave={(e) => !e.target.disabled && (e.target.style.opacity = '1')}
@@ -48,16 +48,16 @@ const EnhancedCartCoupon = ({ onApplyCoupon, appliedCoupon, onCouponRemoved }) =
           </button>
         </div>
       ) : (
-        <div className="rounded-2xl p-3 sm:p-4" style={{ backgroundColor: 'var(--cart-success-bg)' }}>
+        <div className="rounded-2xl p-3 sm:p-4" style={{ backgroundColor: '#f0fdf4' }}>
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-bold text-xs sm:text-sm" style={{ color: 'var(--cart-success-text)' }}>Coupon Applied</p>
-              <p className="text-xs" style={{ color: 'var(--cart-success-text)' }}>{appliedCoupon.code}</p>
+              <p className="font-bold text-xs sm:text-sm" style={{ color: '#16a34a' }}>Coupon Applied</p>
+              <p className="text-xs" style={{ color: '#16a34a' }}>{appliedCoupon.code}</p>
             </div>
             <button 
               onClick={onCouponRemoved}
               className="text-xs font-bold underline transition-colors"
-              style={{ color: 'var(--cart-error-text)' }}
+              style={{ color: '#ef4444' }}
               onMouseEnter={(e) => e.target.style.opacity = '0.8'}
               onMouseLeave={(e) => e.target.style.opacity = '1'}
             >

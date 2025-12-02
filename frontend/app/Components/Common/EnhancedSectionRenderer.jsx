@@ -54,8 +54,8 @@ const EnhancedSectionRenderer = ({ page = 'home', className = '' }) => {
     return (
       <div className={`sections-container ${className}`}>
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600 dark:text-gray-400">Loading sections...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
+          <span className="ml-3 text-[var(--muted-foreground)]">Loading sections...</span>
         </div>
       </div>
     );
@@ -96,7 +96,7 @@ const EnhancedSectionRenderer = ({ page = 'home', className = '' }) => {
           
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             {banner.discount_text && (
-              <div className="text-sm font-bold mb-1 text-yellow-300">
+              <div className="text-sm font-bold mb-1 text-[var(--accent)]">
                 {banner.discount_text}
               </div>
             )}
@@ -112,13 +112,13 @@ const EnhancedSectionRenderer = ({ page = 'home', className = '' }) => {
             )}
             {banner.button_url && (
               <Link href={banner.button_url}>
-                <button className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors">
+                <button className="bg-[var(--primary)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--primary)]/90 transition-colors">
                   {banner.button_text || 'Shop Now'}
                 </button>
               </Link>
             )}
             {banner.coupon_code && (
-              <div className="mt-2 text-xs bg-yellow-400 text-black px-2 py-1 rounded inline-block">
+              <div className="mt-2 text-xs bg-[var(--accent)] text-black px-2 py-1 rounded inline-block">
                 Code: {banner.coupon_code}
               </div>
             )}
@@ -177,12 +177,12 @@ const EnhancedSectionRenderer = ({ page = 'home', className = '' }) => {
         <div className="flex items-center justify-between mb-8">
           <div>
             {sectionData.show_title && section.title_display && (
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--foreground)]">
                 {section.title_display}
               </h2>
             )}
             {sectionData.show_subtitle && section.subtitle_display && (
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-[var(--muted-foreground)] mt-2">
                 {section.subtitle_display}
               </p>
             )}
@@ -191,7 +191,7 @@ const EnhancedSectionRenderer = ({ page = 'home', className = '' }) => {
           {sectionData.show_view_all && (
             <Link
               href={`/${section.section_type === 'category' ? 'categories' : 'products'}?section=${section.id}`}
-              className="group flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+              className="group flex items-center text-[var(--primary)] hover:text-[var(--primary)]/80 font-medium transition-colors"
             >
               <span>View All</span>
               <svg

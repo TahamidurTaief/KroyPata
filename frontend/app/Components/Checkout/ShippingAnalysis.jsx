@@ -174,7 +174,7 @@ export default function ShippingAnalysis({ cartItems, cartTotal, onAnalysisUpdat
 
   if (loading) {
     return (
-      <div className="text-xs sm:text-sm" style={{ color: 'var(--cart-text-secondary)' }}>
+      <div className="text-xs sm:text-sm" style={{ color: 'var(--muted-foreground)' }}>
         Calculating shipping options...
       </div>
     );
@@ -182,7 +182,7 @@ export default function ShippingAnalysis({ cartItems, cartTotal, onAnalysisUpdat
 
   if (error) {
     return (
-      <div className="text-xs sm:text-sm" style={{ color: 'var(--cart-error-text)' }}>
+      <div className="text-xs sm:text-sm text-red-500">
         Unable to analyze shipping: {error}
       </div>
     );
@@ -196,20 +196,20 @@ export default function ShippingAnalysis({ cartItems, cartTotal, onAnalysisUpdat
     <div className="space-y-4">
       {/* Cart Weight and Quantity Summary */}
       {analysisData.cart_analysis && (
-        <div className="rounded-lg p-3 text-xs" style={{ backgroundColor: 'var(--cart-card-border)', border: '1px solid var(--cart-card-border)' }}>
+        <div className="rounded-lg p-3 text-xs" style={{ backgroundColor: 'var(--muted)', border: '1px solid var(--border)' }}>
           <div className="flex justify-between items-center flex-wrap gap-2">
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-              <span style={{ color: 'var(--cart-text-secondary)' }}>
-                Items: <span className="font-semibold" style={{ color: 'var(--cart-text-primary)' }}>{analysisData.cart_analysis.total_quantity}</span>
+              <span style={{ color: 'var(--muted-foreground)' }}>
+                Items: <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{analysisData.cart_analysis.total_quantity}</span>
               </span>
               {analysisData.cart_analysis.total_weight && (
-                <span style={{ color: 'var(--cart-text-secondary)' }}>
-                  Weight: <span className="font-semibold" style={{ color: 'var(--cart-text-primary)' }}>{parseFloat(analysisData.cart_analysis.total_weight).toFixed(2)} kg</span>
+                <span style={{ color: 'var(--muted-foreground)' }}>
+                  Weight: <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{parseFloat(analysisData.cart_analysis.total_weight).toFixed(2)} kg</span>
                 </span>
               )}
             </div>
             {analysisData.cart_analysis.pricing_method_used && (
-              <span className="px-2 py-1 text-[10px] rounded" style={{ backgroundColor: 'var(--cart-muted-bg)', color: 'var(--cart-text-secondary)' }}>
+              <span className="px-2 py-1 text-[10px] rounded" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
                 {analysisData.cart_analysis.pricing_method_used} pricing
               </span>
             )}
@@ -237,18 +237,18 @@ export default function ShippingAnalysis({ cartItems, cartTotal, onAnalysisUpdat
 
       {/* Additional shipping info */}
       {missingProducts.length > 0 && (
-        <div className="rounded-lg p-3 text-xs" style={{ backgroundColor: 'var(--cart-warning-bg)', border: '1px solid var(--cart-warning-border)', color: 'var(--cart-warning-text)' }}>
+        <div className="rounded-lg p-3 text-xs bg-yellow-500/10 border border-yellow-500/20 text-yellow-600">
           Some items were removed or unavailable (IDs: {missingProducts.slice(0,3).join(', ')}{missingProducts.length>3?'…':''}). Please refresh cart.
         </div>
       )}
 
       {shippingMethods.length > 0 && (
-        <div className="rounded-lg p-3 sm:p-4 space-y-3" style={{ backgroundColor: 'var(--cart-card-border)', border: '1px solid var(--cart-card-border)' }}>
+        <div className="rounded-lg p-3 sm:p-4 space-y-3" style={{ backgroundColor: 'var(--muted)', border: '1px solid var(--border)' }}>
           <div className="flex items-center justify-between">
-            <h4 className="text-xs sm:text-sm font-semibold tracking-wide" style={{ color: 'var(--cart-text-primary)' }}>
+            <h4 className="text-xs sm:text-sm font-semibold tracking-wide" style={{ color: 'var(--foreground)' }}>
               Available Shipping Methods
             </h4>
-            <span className="text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: 'var(--cart-muted-bg)', color: 'var(--cart-text-secondary)' }}>
+            <span className="text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
               {shippingMethods.length}
             </span>
           </div>
@@ -261,26 +261,26 @@ export default function ShippingAnalysis({ cartItems, cartTotal, onAnalysisUpdat
                   key={m.id}
                   className="group relative overflow-hidden rounded-md px-2 sm:px-3 py-2 flex items-center justify-between text-xs transition-colors"
                   style={{ 
-                    backgroundColor: 'var(--cart-input-bg)', 
-                    border: '1px solid var(--cart-input-border)' 
+                    backgroundColor: 'var(--background)', 
+                    border: '1px solid var(--border)' 
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--cart-card-border)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--cart-input-bg)'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--muted)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--background)'}
                 >
                   <div className="flex items-center gap-1 sm:gap-2 min-w-0">
-                    <span className="font-medium truncate" style={{ color: 'var(--cart-text-primary)' }}>{m.name}</span>
+                    <span className="font-medium truncate" style={{ color: 'var(--foreground)' }}>{m.name}</span>
                     {m.tier_applied && (
-                      <span className="px-1.5 py-0.5 text-[10px] rounded" style={{ backgroundColor: 'var(--cart-success-bg)', color: 'var(--cart-success-text)' }}>
+                      <span className="px-1.5 py-0.5 text-[10px] rounded bg-green-500/10 text-green-500">
                         Tier
                       </span>
                     )}
                     {m.is_free_shipping_rule && (
-                      <span className="px-1.5 py-0.5 text-[10px] rounded" style={{ backgroundColor: 'var(--cart-success-bg)', color: 'var(--cart-success-text)' }}>
+                      <span className="px-1.5 py-0.5 text-[10px] rounded bg-green-500/10 text-green-500">
                         Free Rule
                       </span>
                     )}
                   </div>
-                  <div className="font-semibold tabular-nums" style={{ color: isFree ? 'var(--cart-success-text)' : 'var(--cart-text-primary)' }}>
+                  <div className="font-semibold tabular-nums" style={{ color: isFree ? '#16a34a' : 'var(--foreground)' }}>
                     {isFree ? 'FREE' : <><Tk_icon className="mr-1" size={14} />{price.toFixed(2)}</>}
                   </div>
                 </li>

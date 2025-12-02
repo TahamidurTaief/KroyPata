@@ -1,6 +1,8 @@
 "use client";
-import { Star, Check } from "lucide-react";
+import { Badge, Star, Check } from "lucide-react";
 import Tk_icon from "../Common/Tk_icon";
+import { useRouter } from "next/navigation";
+import { FiArrowRight } from "react-icons/fi";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { WholesalePricingDisplay, useWholesalePricingLogic } from "../Common/WholesalePricingNew";
 import { FaStore, FaBox } from 'react-icons/fa';
@@ -9,6 +11,7 @@ import { FaStore, FaBox } from 'react-icons/fa';
 // and variant selectors (color, size).
 export default function ProductInfo({ product, selectedColor, setSelectedColor, selectedSize, setSelectedSize }) {
   const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
   
   // Debug the product data
   console.log('🔍 ProductInfo Debug:', {
@@ -44,14 +47,14 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Breadcrumbs for navigation context */}
-      <nav className="text-sm lato text-[var(--color-text-secondary)]">
+      <nav className="text-sm lato text-[var(--muted-foreground)]">
         <span>Home / </span>
         <span>{product.sub_category?.category?.name || 'Product'} / </span>
-        <span className="text-[var(--color-text-primary)] lato font-medium">{product.name}</span>
+        <span className="text-[var(--foreground)] lato font-medium">{product.name}</span>
       </nav>
       
       {/* Main product title */}
-      <h1 className="text-xl lg:text-3xl font-semibold text-[var(--color-foreground)] leading-tight">{product.name}</h1>
+      <h1 className="text-xl lg:text-3xl font-semibold text-[var(--foreground)] leading-tight">{product.name}</h1>
 
       {/* Rating and Shop Info */}
       <div className="flex items-center gap-4 text-sm">
@@ -62,7 +65,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
           <span className="text-muted-foreground ml-1">({reviewCount} reviews)</span>
         </div>
         <div className="h-4"></div>
-        <span className="text-muted-foreground">Shop: <span className="font-medium text-primary">{product.shop?.name}</span></span>
+        <span className="text-[var(--muted-foreground)]">Shop: <span className="font-medium text-[var(--primary)]">{product.shop?.name}</span></span>
       </div>
 
       {/* Enhanced pricing section with wholesale logic */}
@@ -78,10 +81,10 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
         
         {/* Wholesale benefits notice */}
         {isUsingWholesalePrice && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+          <div className="bg-[var(--primary)]/10 p-4 rounded-lg border border-[var(--primary)]/20">
             <div className="flex items-start gap-2">
-              <FaStore className="text-blue-600 dark:text-blue-400 text-lg mt-0.5" />
-              <div className="text-sm text-blue-800 dark:text-blue-200">
+              <FaStore className="text-[var(--primary)] text-lg mt-0.5" />
+              <div className="text-sm text-[var(--primary)]">
                 <span className="font-medium">Wholesale Benefits:</span> 
                 <ul className="mt-1 text-xs space-y-1">
                   <li>• Special bulk pricing for your business</li>
@@ -91,9 +94,9 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
                 </ul>
                 {/* Minimum order requirement */}
                 {minimumPurchase > 1 && (
-                  <div className="mt-2 p-2 bg-orange-100 dark:bg-orange-900/30 rounded border-l-4 border-orange-400">
-                    <div className="flex items-center gap-1 text-orange-800 dark:text-orange-200">
-                      <FaBox className="text-orange-600" size={14} />
+                  <div className="mt-2 p-2 bg-orange-500/10 rounded border-l-4 border-orange-500/50">
+                    <div className="flex items-center gap-1 text-orange-500">
+                      <FaBox className="text-orange-500" size={14} />
                       <span className="text-xs font-medium">
                         Minimum Order: {minimumPurchase} units required for wholesale pricing
                       </span>
@@ -107,13 +110,13 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
         
         {/* Not available for wholesale notice */}
         {showWholesaleUnavailable && (
-          <div className="bg-gray-50 dark:bg-gray-900/20 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="bg-[var(--muted)] p-4 rounded-lg border border-[var(--border)]">
             <div className="flex items-start gap-2">
-              <span className="text-gray-600 dark:text-gray-400 text-lg">⚠️</span>
-              <div className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-[var(--muted-foreground)] text-lg">⚠️</span>
+              <div className="text-sm text-[var(--foreground)]">
                 <span className="font-medium">Wholesale Notice:</span> 
                 This product is not available for wholesale pricing. Regular pricing applies.
-                <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                <div className="mt-1 text-xs text-[var(--muted-foreground)]">
                   Contact support for custom bulk pricing inquiries.
                 </div>
               </div>
@@ -128,8 +131,8 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-muted-foreground">Stock:</span>
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span className={`font-medium ${product.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+            <div className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-[#22c55e]' : 'bg-red-500'}`}></div>
+            <span className={`font-medium ${product.stock > 0 ? 'text-[#16a34a]' : 'text-red-500'}`}>
               {product.stock > 0 ? `${product.stock} items available` : 'Out of stock'}
             </span>
           </div>
@@ -137,14 +140,25 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
       </div>
 
       {/* Short description */}
-      <p className="text-muted-foreground text-base leading-relaxed line-clamp-3" dangerouslySetInnerHTML={{ __html: product.description || "No description available." }} />
+      <p className="text-[var(--muted-foreground)] text-base leading-relaxed line-clamp-3" dangerouslySetInnerHTML={{ __html: product.description || "No description available." }} />
+
+      {/* See More Button for Landing Page */}
+      {product.enable_landing_page && (
+        <button
+          onClick={() => router.push(`/products/landing/${product.slug}`)}
+          className="inline-flex items-center gap-2 text-[var(--primary)] hover:text-[var(--primary)]/80 font-medium text-sm transition-all group mt-2"
+        >
+          See More Details
+          <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+        </button>
+      )}
 
       <div className="my-4"></div>
 
       {/* Color Selector */}
       {product.colors?.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-semibold text-lg">Color: <span className="font-normal text-muted-foreground">{selectedColor?.name || 'N/A'}</span></h3>
+          <h3 className="font-semibold text-lg">Color: <span className="font-normal text-[var(--muted-foreground)]">{selectedColor?.name || 'N/A'}</span></h3>
           <div className="flex flex-wrap gap-3">
             {product.colors.map((color) => (
               <button 
@@ -152,8 +166,8 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
                 onClick={() => setSelectedColor(color)} 
                 className={`w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center
                   ${selectedColor?.id === color.id 
-                    ? 'ring-1 ring-offset-2 ring-primary border-transparent' 
-                    : 'border-border hover:border-primary/50'
+                    ? 'ring-1 ring-offset-2 ring-[var(--primary)] border-transparent' 
+                    : 'border-[var(--color-border)] hover:border-[var(--primary)]/50'
                   }`} 
                 style={{ backgroundColor: color.hex_code }} 
                 title={color.name}
@@ -168,7 +182,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
       {/* Size Selector */}
       {product.sizes?.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-semibold text-lg">Size: <span className="font-normal text-muted-foreground">{selectedSize?.name || 'N/A'}</span></h3>
+          <h3 className="font-semibold text-lg">Size: <span className="font-normal text-[var(--muted-foreground)]">{selectedSize?.name || 'N/A'}</span></h3>
           <div className="flex flex-wrap gap-3">
             {product.sizes.map((size) => (
               <button 
@@ -176,8 +190,8 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
                 onClick={() => setSelectedSize(size)} 
                 className={`px-3 py-1 rounded-sm lato border-2 font-medium transition-all text-base
                   ${selectedSize?.id === size.id 
-                    ? 'bg-primary text-primary-foreground border-primary' 
-                    : 'border-border bg-[var(--color-surface)] hover:bg-[var(--color-second-bg)] hover:border-primary/50'
+                    ? 'bg-[var(--primary)] text-white border-[var(--primary)]' 
+                    : 'border-[var(--color-border)] bg-[var(--card)] hover:bg-[var(--muted)] hover:border-[var(--primary)]/50'
                   }`}
               >
                 {size.name}

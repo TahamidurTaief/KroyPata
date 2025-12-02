@@ -67,14 +67,14 @@ const CategoryBasedSection = () => {
   }, [router]);
 
   return (
-    <section className="w-full bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-slate-900 py-8 md:py-12 lg:py-16">
+    <section className="w-full bg-[var(--color-second-bg)] py-8 md:py-12 lg:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6 md:mb-8 lg:mb-10 text-center">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
-            Featured <span className="text-sky-500">Collections</span>
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--foreground)]">
+            Featured <span className="text-[var(--primary)]">Collections</span>
           </h2>
-          <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="mt-1 md:mt-2 text-sm md:text-base text-[var(--muted-foreground)] max-w-2xl mx-auto">
             Discover our top categories with curated products
           </p>
         </div>
@@ -83,7 +83,7 @@ const CategoryBasedSection = () => {
         <div className="space-y-8 md:space-y-12 lg:space-y-16">
           {loading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)]"></div>
             </div>
           ) : (
             categories.map((category, index) => (
@@ -161,8 +161,8 @@ const CategoryProductCarousel = ({ category, products, verticalBanner, index, on
           whileHover={{ x: 5 }}
           className="group flex items-center gap-2 md:gap-3"
         >
-          <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white transition-colors">
-            <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 bg-clip-text text-transparent group-hover:from-sky-600 group-hover:via-blue-600 group-hover:to-indigo-600">
+          <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-[var(--foreground)] transition-colors">
+            <span className="text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">
               {category.name}'s
             </span>
             <span className="ml-2">products</span>
@@ -170,7 +170,7 @@ const CategoryProductCarousel = ({ category, products, verticalBanner, index, on
           <motion.span
             initial={{ x: 0, opacity: 0 }}
             whileHover={{ x: 5, opacity: 1 }}
-            className="text-sky-500 dark:text-sky-400 text-xl md:text-2xl font-bold"
+            className="text-[var(--primary)] text-xl md:text-2xl font-bold"
           >
             →
           </motion.span>
@@ -186,8 +186,8 @@ const CategoryProductCarousel = ({ category, products, verticalBanner, index, on
               disabled={!canScrollLeft}
               className={`p-2 rounded-full transition-all shadow-md ${
                 canScrollLeft
-                  ? "bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-700"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700"
+                  ? "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
+                  : "bg-[var(--muted)] text-[var(--muted-foreground)] cursor-not-allowed"
               }`}
               aria-label="Scroll left"
             >
@@ -200,8 +200,8 @@ const CategoryProductCarousel = ({ category, products, verticalBanner, index, on
               disabled={!canScrollRight}
               className={`p-2 rounded-full transition-all shadow-md ${
                 canScrollRight
-                  ? "bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-700"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700"
+                  ? "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90"
+                  : "bg-[var(--muted)] text-[var(--muted-foreground)] cursor-not-allowed"
               }`}
               aria-label="Scroll right"
             >
@@ -237,7 +237,7 @@ const CategoryProductCarousel = ({ category, products, verticalBanner, index, on
               </div>
             ))
           ) : (
-            <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="col-span-full text-center py-12 text-[var(--muted-foreground)]">
               <p className="text-base md:text-lg">No products available in this category</p>
             </div>
           )}
@@ -250,7 +250,7 @@ const CategoryProductCarousel = ({ category, products, verticalBanner, index, on
           {Array.from({ length: Math.min(5, Math.ceil(products.length / 2)) }).map((_, idx) => (
             <div
               key={idx}
-              className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700"
+              className="w-1.5 h-1.5 rounded-full bg-[var(--color-border)]"
             />
           ))}
         </div>
@@ -300,7 +300,7 @@ const VerticalBannerCard = ({ banner, placeholderUrl }) => {
           <div className="text-white">
             <h4 className="font-bold text-lg mb-1">{banner.title}</h4>
             {banner.discount_text && (
-              <p className="text-sm font-semibold text-yellow-400">{banner.discount_text}</p>
+              <p className="text-sm font-semibold text-[var(--accent)]">{banner.discount_text}</p>
             )}
           </div>
         </div>

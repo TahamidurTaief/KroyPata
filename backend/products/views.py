@@ -4,9 +4,12 @@ from rest_framework import viewsets, permissions
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Product, Category, SubCategory, Color, Brand, Size
+from rest_framework.decorators import action
+from .models import Product, Category, SubCategory, Color, Brand, Size, LandingPageOrder
 from django.db.models import Count
-from .serializers import ProductSerializer, CategorySerializer, SubCategorySerializer, ColorSerializer, BrandSerializer, SizeSerializer
+from .serializers import (ProductSerializer, CategorySerializer, SubCategorySerializer, 
+                          ColorSerializer, BrandSerializer, SizeSerializer,
+                          LandingPageOrderSerializer, LandingPageOrderListSerializer)
 from .permissions import IsShopOwnerOrReadOnly
 from .filters import ProductFilter
 
@@ -332,3 +335,98 @@ class SizeViewSet(viewsets.ReadOnlyModelViewSet):
                 {"error": f"Internal server error: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class LandingPageOrderViewSet(viewsets.ModelViewSet):
+    """ViewSet for landing page orders"""
+    queryset = LandingPageOrder.objects.select_related(
+        'product',
+        'product__shop',
+        'product__brand',
+        'user'
+    ).order_by('-created_at')
+    permission_classes = [permissions.AllowAny]
+    pagination_class = StandardResultsSetPagination
+    
+    def get_serializer_class(self):
+        """Use different serializers for different actions"""
+        if self.action == 'create':
+            return LandingPageOrderSerializer
+        return LandingPageOrderListSerializer
+    
+    def get_queryset(self):
+        """Filter orders based on user authentication"""
+        queryset = super().get_queryset()
+        
+        # If user is authenticated, they can see their own orders
+        if self.request.user and self.request.user.is_authenticated:
+            if self.request.user.is_staff or self.request.user.is_superuser:
+                # Staff can see all orders
+                return queryset
+            else:
+                # Regular users can only see their own orders
+                return queryset.filter(user=self.request.user)
+        
+        # Unauthenticated users cannot list orders (but can create)
+        return queryset.none()
+    
+    def create(self, request, *args, **kwargs):
+        """Create a new landing page order"""
+        try:
+            logger.info(f"LandingPageOrderViewSet.create called with data: {request.data}")
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            
+            logger.info(f"Successfully created landing page order: {serializer.data['order_number']}")
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error in LandingPageOrderViewSet.create: {str(e)}", exc_info=True)
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    def list(self, request, *args, **kwargs):
+        """List landing page orders"""
+        try:
+            logger.info(f"LandingPageOrderViewSet.list called")
+            response = super().list(request, *args, **kwargs)
+            logger.info(f"Successfully returned landing page orders")
+            return response
+        except Exception as e:
+            logger.error(f"Error in LandingPageOrderViewSet.list: {str(e)}", exc_info=True)
+            return Response(
+                {"error": f"Internal server error: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def retrieve(self, request, *args, **kwargs):
+        """Retrieve a specific landing page order"""
+        try:
+            logger.info(f"LandingPageOrderViewSet.retrieve called with id: {kwargs.get('pk')}")
+            
+            # Check permission for non-staff users
+            instance = self.get_object()
+            if not (request.user.is_staff or request.user.is_superuser):
+                if not request.user.is_authenticated or instance.user != request.user:
+                    return Response(
+                        {"error": "You do not have permission to view this order."}, 
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            
+            serializer = self.get_serializer(instance)
+            logger.info(f"Successfully retrieved landing page order: {instance.order_number}")
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error in LandingPageOrderViewSet.retrieve: {str(e)}", exc_info=True)
+            return Response(
+                {"error": f"Internal server error: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def get_serializer_context(self):
+        """Add request to serializer context"""
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context

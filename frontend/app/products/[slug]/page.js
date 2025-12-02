@@ -187,7 +187,7 @@ export default async function ProductDetailPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       
-      <div className="product-detail-page container mx-auto px-4 py-8 md:py-12 bg-[var(--color-background)] text-foreground min-h-[calc(100vh-126px)] overflow-auto">
+      <div className="product-detail-page container mx-auto px-4 py-8 md:py-12 bg-[var(--background)] text-[var(--foreground)] min-h-[calc(100vh-126px)] overflow-auto">
         <Suspense fallback={<Loading />}>
           <ProductDetailPageClient product={product} />
         </Suspense>

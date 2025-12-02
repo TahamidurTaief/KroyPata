@@ -23,11 +23,86 @@ import {
   Mail,
   Home,
 } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserOrders, getCurrentUserOrders } from '@/app/lib/api.js';
 import Tk_icon from '../Common/Tk_icon';
 import OrderPageSkeleton from './OrderPageSkeleton';
+
+// Safe date formatting functions
+const formatDate = (date, formatStr = 'PPP') => {
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return 'Invalid Date';
+    
+    // Simple date formatting
+    if (formatStr === 'PPP') {
+      return d.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } else if (formatStr === 'PP') {
+      return d.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    } else if (formatStr === 'PPpp') {
+      return d.toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } else if (formatStr === 'p') {
+      return d.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true
+      });
+    } else if (formatStr === 'd MMM, yy • h:mm a') {
+      const day = d.getDate();
+      const month = d.toLocaleDateString('en-US', { month: 'short' });
+      const year = d.getFullYear().toString().slice(-2);
+      const time = d.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true
+      });
+      return `${day} ${month}, ${year} • ${time}`;
+    }
+    
+    return d.toLocaleDateString();
+  } catch (error) {
+    console.error('Date formatting error:', error);
+    return 'Invalid Date';
+  }
+};
+
+const formatDistanceToNowSafe = (date) => {
+  try {
+    const now = new Date();
+    const past = new Date(date);
+    if (isNaN(past.getTime())) return 'recently';
+    
+    const diffMs = now - past;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''}`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''}`;
+    if (diffDays < 30) return `${diffDays} day${diffDays > 1 ? 's' : ''}`;
+    const diffMonths = Math.floor(diffDays / 30);
+    return `${diffMonths} month${diffMonths > 1 ? 's' : ''}`;
+  } catch (error) {
+    console.error('Distance calculation error:', error);
+    return 'recently';
+  }
+};
 
 export default function OrderListDisplay() {
   const [orders, setOrders] = useState([]);
@@ -205,8 +280,8 @@ export default function OrderListDisplay() {
               <h2>INVOICE</h2>
               <div class="invoice-meta">
                 <div><strong>Order #:</strong> ${order.order_number || 'N/A'}</div>
-                <div><strong>Date:</strong> ${order.ordered_at ? format(new Date(order.ordered_at), 'PPP') : 'N/A'}</div>
-                <div><strong>Time:</strong> ${order.ordered_at ? format(new Date(order.ordered_at), 'p') : 'N/A'}</div>
+                <div><strong>Date:</strong> ${order.ordered_at ? formatDate(order.ordered_at, 'PPP') : 'N/A'}</div>
+                <div><strong>Time:</strong> ${order.ordered_at ? formatDate(order.ordered_at, 'p') : 'N/A'}</div>
               </div>
               <div class="status-badge status-${(order.status || 'pending').toLowerCase()}">${order.status || 'PENDING'}</div>
             </div>
@@ -215,7 +290,7 @@ export default function OrderListDisplay() {
           <!-- Order Details - Compact Format -->
           <div style="margin: 20px 0; padding: 15px 0; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
             <p style="margin: 0; color: #6b7280; font-size: 13px; line-height: 2;">
-              ${order.payment ? `<strong style="color: #1f2937;">Payment:</strong> ${order.payment.payment_method_display || order.payment.payment_method || 'N/A'}` : ''}${order.payment && order.payment.payment_method !== 'cod' && order.payment.payment_method_display !== 'Cash on Delivery' ? (order.payment.admin_account_number ? ` (Admin: ${order.payment.admin_account_number})` : '') + (order.payment.sender_number ? ` &nbsp;•&nbsp; Sender: ${order.payment.sender_number}` : '') + (order.payment.transaction_id ? ` &nbsp;•&nbsp; TxID: ${order.payment.transaction_id}` : '') : ''}${order.shipping_method_name ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Shipping:</strong> ${order.shipping_method_name}` : ''}<br/>${order.cash_on_delivery && order.cash_on_delivery.delivery_status ? `<strong style="color: #1f2937;">Delivery:</strong> ${order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}` : ''}${order.cash_on_delivery && order.cash_on_delivery.scheduled_delivery_date ? ` (${format(new Date(order.cash_on_delivery.scheduled_delivery_date), 'PP')})` : ''}${order.cash_on_delivery && order.cash_on_delivery.amount_to_collect ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Collect:</strong> ${tkIconSvg}${parseFloat(order.cash_on_delivery.amount_to_collect || 0).toFixed(2)}` : ''}${order.payment && (order.payment.payment_method === 'cod' || order.payment.payment_method_display === 'Cash on Delivery') ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Delivery Team:</strong> ${order.cash_on_delivery && order.cash_on_delivery.delivery_person_name ? order.cash_on_delivery.delivery_person_name + (order.cash_on_delivery.delivery_person_phone ? ' (' + order.cash_on_delivery.delivery_person_phone + ')' : '') : 'Not Declared'}` : ''}
+              ${order.payment ? `<strong style="color: #1f2937;">Payment:</strong> ${order.payment.payment_method_display || order.payment.payment_method || 'N/A'}` : ''}${order.payment && order.payment.payment_method !== 'cod' && order.payment.payment_method_display !== 'Cash on Delivery' ? (order.payment.admin_account_number ? ` (Admin: ${order.payment.admin_account_number})` : '') + (order.payment.sender_number ? ` &nbsp;•&nbsp; Sender: ${order.payment.sender_number}` : '') + (order.payment.transaction_id ? ` &nbsp;•&nbsp; TxID: ${order.payment.transaction_id}` : '') : ''}${order.shipping_method_name ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Shipping:</strong> ${order.shipping_method_name}` : ''}<br/>${order.cash_on_delivery && order.cash_on_delivery.delivery_status ? `<strong style="color: #1f2937;">Delivery:</strong> ${order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}` : ''}${order.cash_on_delivery && order.cash_on_delivery.scheduled_delivery_date ? ` (${formatDate(order.cash_on_delivery.scheduled_delivery_date, 'PP')})` : ''}${order.cash_on_delivery && order.cash_on_delivery.amount_to_collect ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Collect:</strong> ${tkIconSvg}${parseFloat(order.cash_on_delivery.amount_to_collect || 0).toFixed(2)}` : ''}${order.payment && (order.payment.payment_method === 'cod' || order.payment.payment_method_display === 'Cash on Delivery') ? ` &nbsp;•&nbsp; <strong style="color: #1f2937;">Delivery Team:</strong> ${order.cash_on_delivery && order.cash_on_delivery.delivery_person_name ? order.cash_on_delivery.delivery_person_name + (order.cash_on_delivery.delivery_person_phone ? ' (' + order.cash_on_delivery.delivery_person_phone + ')' : '') : 'Not Declared'}` : ''}
             </p>
           </div>
 
@@ -456,7 +531,7 @@ export default function OrderListDisplay() {
                   {update.status}
                 </div>
                 <div className="text-xs sm:text-sm text-text-secondary mt-1">
-                  {format(new Date(update.timestamp), 'PPpp')}
+                  {formatDate(update.timestamp, 'PPpp')}
                 </div>
                 {update.notes && (
                   <div className="text-xs sm:text-sm text-text-secondary mt-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded border-l-2 border-accent/30">
@@ -481,7 +556,7 @@ export default function OrderListDisplay() {
 
     useEffect(() => {
       const updateElapsed = () => {
-        setTimeElapsed(formatDistanceToNow(new Date(order.ordered_at), { addSuffix: false }));
+        setTimeElapsed(formatDistanceToNowSafe(order.ordered_at));
       };
       updateElapsed();
       const interval = setInterval(updateElapsed, 60000);
@@ -539,7 +614,7 @@ export default function OrderListDisplay() {
               <Calendar size={16} />
               <span>Order time</span>
             </div>
-            <span className="font-medium text-gray-800 dark:text-white">{format(new Date(order.ordered_at), 'd MMM, yy • h:mm a')}</span>
+            <span className="font-medium text-gray-800 dark:text-white">{formatDate(order.ordered_at, 'd MMM, yy • h:mm a')}</span>
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -782,7 +857,7 @@ export default function OrderListDisplay() {
             </div>
             <div>
               <h3 className="text-xl font-bold">{order.order_number}</h3>
-              <p className="text-sm opacity-90">{format(new Date(order.ordered_at), 'PPP')}</p>
+              <p className="text-sm opacity-90">{formatDate(order.ordered_at, 'PPP')}</p>
             </div>
           </div>
           <button
@@ -889,7 +964,7 @@ export default function OrderListDisplay() {
                 <>
                   <span className="font-semibold text-gray-800 dark:text-white">Delivery:</span>{' '}
                   {order.cash_on_delivery.delivery_status_display || order.cash_on_delivery.delivery_status}
-                  {order.cash_on_delivery.scheduled_delivery_date && ` (${format(new Date(order.cash_on_delivery.scheduled_delivery_date), 'PP')})`}
+                  {order.cash_on_delivery.scheduled_delivery_date && ` (${formatDate(order.cash_on_delivery.scheduled_delivery_date, 'PP')})`}
                 </>
               )}
               {order.cash_on_delivery?.amount_to_collect && (
@@ -942,6 +1017,7 @@ export default function OrderListDisplay() {
                       fill
                       className="object-cover"
                       sizes="64px"
+                      unoptimized={item.product_image.includes('.svg')}
                     />
                   </div>
                 )}

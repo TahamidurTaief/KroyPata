@@ -19,8 +19,8 @@ const FilteredProduct = ({ productData, isLoading }) => {
           ) : (
             // Show a message if no products are found after loading
             <div className="col-span-full text-center py-10">
-              <h3 className="text-xl font-semibold text-[var(--color-text-primary)]">No Products Found</h3>
-              <p className="text-[var(--color-text-secondary)]">Try adjusting your filters.</p>
+              <h3 className="text-xl font-semibold text-[var(--foreground)]">No Products Found</h3>
+              <p className="text-[var(--muted-foreground)]">Try adjusting your filters.</p>
             </div>
           )}
         </div>

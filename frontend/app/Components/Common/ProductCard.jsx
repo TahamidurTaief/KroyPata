@@ -97,11 +97,11 @@ const ProductCard = ({ productData }) => {
   return (
     <Link href={productUrl} passHref className="h-full block">
       <motion.div
-        className="group relative bg-[var(--color-surface)] p-2.5 rounded-[28px] shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col border border-white/50 dark:border-gray-700"
+        className="group relative bg-[var(--card)] p-2.5 rounded-[28px] shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col border border-[var(--border)]"
         whileHover={{ y: -8 }}
       >
         {/* 1. Image Section */}
-        <div className="relative aspect-[4/4.5] w-full overflow-hidden rounded-[24px] bg-gray-50 dark:bg-gray-800 mb-3">
+        <div className="relative aspect-[4/4.5] w-full overflow-hidden rounded-[24px] bg-[var(--muted)] mb-3">
           <Image
             src={getImageSrc(productData?.thumbnail_url)}
             alt={productData?.name || 'Product Image'}
@@ -159,13 +159,13 @@ const ProductCard = ({ productData }) => {
         <div className="px-1 flex-grow flex flex-col min-h-0">
           {/* Category Badge */}
           {productData?.sub_category?.name && (
-            <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full mb-1.5 w-fit">
+            <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] bg-[var(--muted)] px-2 py-0.5 rounded-full mb-1.5 w-fit">
               {productData.sub_category.name}
             </span>
           )}
 
           {/* Title */}
-          <h3 className="text-sm font-semibold text-[var(--color-text-primary)] leading-snug mb-2 line-clamp-2 group-hover:text-[var(--color-button-primary)] transition-colors">
+          <h3 className="text-sm font-semibold text-[var(--foreground)] leading-snug mb-2 line-clamp-2 group-hover:text-[var(--primary)] transition-colors">
             {productData?.name}
           </h3>
           
@@ -178,17 +178,17 @@ const ProductCard = ({ productData }) => {
                 productData?.wholesale_price && parseFloat(productData.wholesale_price) > 0 ? (
                   <>
                     {/* Minimum Quantity Badge */}
-                    <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-accent-orange)] mb-0.5">
+                    <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--primary)] mb-0.5">
                       Min: {minimumPurchase} pcs
                     </div>
                     
                     {/* Wholesale Price */}
                     <div className="flex items-center gap-1 mb-0.5">
-                      <Tk_icon size={16} className="text-blue-600 dark:text-blue-400" />
-                      <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      <Tk_icon size={16} className="text-[var(--primary)]" />
+                      <span className="text-lg font-bold text-[var(--primary)]">
                         {parseFloat(productData.wholesale_price).toFixed(2)}
                       </span>
-                      <span className="text-[9px] font-semibold text-blue-600 dark:text-blue-400 ml-0.5">
+                      <span className="text-[9px] font-semibold text-[var(--primary)] ml-0.5">
                         WSL
                       </span>
                     </div>
@@ -197,14 +197,14 @@ const ProductCard = ({ productData }) => {
                     <div className="flex items-center gap-2">
                       {productData?.price && (
                         <div className="flex items-center gap-0.5">
-                          <Tk_icon size={11} className="text-gray-400" />
-                          <span className="text-[11px] text-gray-400 line-through">
+                          <Tk_icon size={11} className="text-[var(--muted-foreground)]" />
+                          <span className="text-[11px] text-[var(--muted-foreground)] line-through">
                             {parseFloat(productData.price).toFixed(2)}
                           </span>
                         </div>
                       )}
                       {productData?.price && parseFloat(productData.price) > parseFloat(productData.wholesale_price) && (
-                        <span className="text-[9px] font-bold text-green-600 dark:text-green-400">
+                        <span className="text-[9px] font-bold text-[#16a34a]">
                           Save {Math.round(((parseFloat(productData.price) - parseFloat(productData.wholesale_price)) / parseFloat(productData.price)) * 100)}%
                         </span>
                       )}
@@ -213,14 +213,14 @@ const ProductCard = ({ productData }) => {
                 ) : (
                   // No wholesale price available
                   <>
-                    <div className="text-[9px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 mb-0.5">
+                    <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--destructive)] mb-0.5">
                       Wholesale not allowed
                     </div>
                     
                     {/* Show regular price */}
                     <div className="flex items-center gap-1 mb-0.5">
-                      <Tk_icon size={16} className="text-[var(--color-text-primary)]" />
-                      <span className="text-lg font-bold text-[var(--color-text-primary)]">
+                      <Tk_icon size={16} className="text-[var(--foreground)]" />
+                      <span className="text-lg font-bold text-[var(--foreground)]">
                         {productData?.discount_price 
                           ? parseFloat(productData.discount_price).toFixed(2)
                           : parseFloat(productData?.price || 0).toFixed(2)
@@ -231,8 +231,8 @@ const ProductCard = ({ productData }) => {
                     {/* Regular Price (if discount available) */}
                     {productData?.discount_price && productData?.price && (
                       <div className="flex items-center gap-0.5">
-                        <Tk_icon size={11} className="text-gray-400" />
-                        <span className="text-[11px] text-gray-400 line-through">
+                        <Tk_icon size={11} className="text-[var(--muted-foreground)]" />
+                        <span className="text-[11px] text-[var(--muted-foreground)] line-through">
                           {parseFloat(productData.price).toFixed(2)}
                         </span>
                       </div>
@@ -244,8 +244,8 @@ const ProductCard = ({ productData }) => {
                 <>
                   {/* Sale Price or Regular Price */}
                   <div className="flex items-center gap-1 mb-0.5">
-                    <Tk_icon size={16} className="text-[var(--color-text-primary)]" />
-                    <span className="text-lg font-bold text-[var(--color-text-primary)]">
+                    <Tk_icon size={16} className="text-[var(--foreground)]" />
+                    <span className="text-lg font-bold text-[var(--foreground)]">
                       {productData?.discount_price 
                         ? parseFloat(productData.discount_price).toFixed(2)
                         : parseFloat(productData?.price || 0).toFixed(2)
@@ -258,13 +258,13 @@ const ProductCard = ({ productData }) => {
                     {productData?.discount_price && productData?.price && (
                       <>
                         <div className="flex items-center gap-0.5">
-                          <Tk_icon size={11} className="text-gray-400" />
-                          <span className="text-[11px] text-gray-400 line-through">
+                          <Tk_icon size={11} className="text-[var(--muted-foreground)]" />
+                          <span className="text-[11px] text-[var(--muted-foreground)] line-through">
                             {parseFloat(productData.price).toFixed(2)}
                           </span>
                         </div>
                         {parseFloat(productData.price) > parseFloat(productData.discount_price) && (
-                          <span className="text-[9px] font-bold text-green-600 dark:text-green-400">
+                          <span className="text-[9px] font-bold text-[#16a34a]">
                             Save {Math.round(((parseFloat(productData.price) - parseFloat(productData.discount_price)) / parseFloat(productData.price)) * 100)}%
                           </span>
                         )}
@@ -284,8 +284,8 @@ const ProductCard = ({ productData }) => {
                 w-full px-3 py-2 rounded-full font-semibold text-sm shadow-lg transition-all duration-300
                 flex items-center justify-center gap-1.5 whitespace-nowrap
                 ${inStock 
-                  ? 'bg-[#1f2937] dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-200 hover:shadow-xl' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700'
+                  ? 'bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 hover:shadow-xl' 
+                  : 'bg-[var(--muted)] text-[var(--muted-foreground)] cursor-not-allowed'
                 }
               `}
               aria-label="Add to cart"

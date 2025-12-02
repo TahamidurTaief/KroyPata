@@ -132,14 +132,14 @@ const NotificationModal = ({
         >
           <motion.div
             ref={modalRef}
-            className="bg-[var(--color-second-bg)] rounded-xl max-w-sm w-full shadow-2xl relative p-8 text-center"
+            className="bg-[var(--card)] rounded-xl max-w-sm w-full shadow-2xl relative p-8 text-center"
             variants={modalVariants}
             onClick={(e) => e.stopPropagation()}
           >
             <button
               ref={closeButtonRef}
               onClick={onClose}
-              className="absolute top-4 right-4 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+              className="absolute top-4 right-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
               aria-label="Close notification modal"
             >
               <FiX size={24} aria-hidden="true" />
@@ -158,17 +158,17 @@ const NotificationModal = ({
               >
                 {icons[status]}
               </motion.div>
-              <h2 id="notification-title" className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
+              <h2 id="notification-title" className="text-2xl font-bold text-[var(--foreground)] mb-2">
                 {title}
               </h2>
-              <p id="notification-message" className="text-[var(--color-text-secondary)] mb-6">
+              <p id="notification-message" className="text-[var(--muted-foreground)] mb-6">
                 {message}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 w-full">
                 {secondaryActionText && (
                   <button
                     onClick={onSecondaryAction || onClose}
-                    className="w-full text-center px-6 py-3 bg-[var(--color-border)] text-[var(--color-text-primary)] font-bold rounded-lg hover:opacity-80 transition-opacity"
+                    className="w-full text-center px-6 py-3 bg-[var(--color-border)] text-[var(--foreground)] font-bold rounded-lg hover:opacity-80 transition-opacity"
                   >
                     {secondaryActionText}
                   </button>

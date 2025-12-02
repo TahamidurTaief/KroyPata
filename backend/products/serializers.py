@@ -113,7 +113,8 @@ class ProductSerializer(serializers.ModelSerializer):
             'price', 'discount_price', 'wholesale_price', 'minimum_purchase', 'affiliate_commission_rate', 'stock', 'is_active',
             'weight', 'length', 'width', 'height',  # Added physical properties for shipping
             'thumbnail_url', 'specifications', 'additional_images',
-            'colors', 'sizes', 'reviews', 'rating', 'review_count'
+            'colors', 'sizes', 'reviews', 'rating', 'review_count',
+            'enable_landing_page', 'landing_features', 'landing_how_to_use', 'landing_why_choose'  # Landing page fields
         ]
         
     def get_thumbnail_url(self, obj):
@@ -182,3 +183,112 @@ class ProductSerializer(serializers.ModelSerializer):
             data.pop('affiliate_commission_rate', None)
         
         return data
+
+
+class LandingPageOrderSerializer(serializers.ModelSerializer):
+    """Serializer for creating landing page orders"""
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_slug = serializers.CharField(source='product.slug', read_only=True)
+    
+    class Meta:
+        model = LandingPageOrder
+        fields = [
+            'id', 'order_number', 'product', 'product_name', 'product_slug',
+            'quantity', 'unit_price', 'total_price',
+            'full_name', 'email', 'phone', 'detailed_address',
+            'is_wholesaler', 'user', 'status',
+            'customer_notes', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'order_number', 'total_price', 'created_at', 'updated_at', 'user', 'is_wholesaler', 'unit_price']
+    
+    def validate(self, data):
+        """Validate order data"""
+        product = data.get('product')
+        quantity = data.get('quantity', 1)
+        
+        # Check if product is active
+        if not product.is_active:
+            raise serializers.ValidationError("This product is not available for purchase.")
+        
+        # Check if product has landing page enabled
+        if not product.enable_landing_page:
+            raise serializers.ValidationError("This product does not have a landing page enabled.")
+        
+        # Check stock
+        if quantity > product.stock:
+            raise serializers.ValidationError(f"Only {product.stock} items available in stock.")
+        
+        # Get user from context if available
+        request = self.context.get('request')
+        user = None
+        is_wholesaler = False
+        
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            user = request.user
+            if user.user_type == 'WHOLESALER':
+                # Check if wholesaler is approved
+                try:
+                    if hasattr(user, 'wholesaler_profile'):
+                        if user.wholesaler_profile.approval_status == 'APPROVED':
+                            is_wholesaler = True
+                except:
+                    pass
+        
+        # Validate minimum purchase for wholesalers
+        if is_wholesaler:
+            minimum_purchase = product.minimum_purchase or 1
+            if quantity < minimum_purchase:
+                raise serializers.ValidationError(
+                    f"Wholesale orders require a minimum purchase of {minimum_purchase} items."
+                )
+            
+            # Set wholesale price
+            if product.wholesale_price and product.wholesale_price >= 1:
+                data['unit_price'] = product.wholesale_price
+                data['is_wholesaler'] = True
+            else:
+                raise serializers.ValidationError("Wholesale price is not available for this product.")
+        else:
+            # For regular customers, use discount price if available, otherwise regular price
+            if product.discount_price and product.discount_price > 0:
+                data['unit_price'] = product.discount_price
+            else:
+                data['unit_price'] = product.price
+            data['is_wholesaler'] = False
+        
+        # Store user in data if available
+        if user:
+            data['user'] = user
+        
+        return data
+    
+    def create(self, validated_data):
+        """Create landing page order"""
+        # The unit_price, is_wholesaler, and user are already set in validate()
+        order = LandingPageOrder.objects.create(**validated_data)
+        return order
+
+
+class LandingPageOrderListSerializer(serializers.ModelSerializer):
+    """Serializer for listing landing page orders"""
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_thumbnail = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    
+    class Meta:
+        model = LandingPageOrder
+        fields = [
+            'id', 'order_number', 'product_name', 'product_thumbnail',
+            'quantity', 'unit_price', 'total_price',
+            'full_name', 'email', 'phone',
+            'is_wholesaler', 'status', 'status_display',
+            'created_at', 'updated_at'
+        ]
+    
+    def get_product_thumbnail(self, obj):
+        request = self.context.get('request')
+        if obj.product.thumbnail and hasattr(obj.product.thumbnail, 'url'):
+            if request:
+                return request.build_absolute_uri(obj.product.thumbnail.url)
+            return obj.product.thumbnail.url
+        return None

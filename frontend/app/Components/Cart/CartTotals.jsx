@@ -28,12 +28,12 @@ const CartTotals = ({
       {/* Subtotal */}
       <div className="flex justify-between items-center text-lg">
         <div className="flex items-center gap-2">
-          <Tk_icon className="text-[var(--color-text-secondary)]" size={16} />
-          <span className="text-[var(--color-text-secondary)]">
+          <Tk_icon className="text-[var(--muted-foreground)]" size={16} />
+          <span className="text-[var(--muted-foreground)]">
             {isWholesaler && hasWholesaleItems ? 'Wholesale Subtotal' : 'Cart Subtotal'}
           </span>
         </div>
-        <span className="font-semibold text-[var(--color-text-primary)]">
+        <span className="font-semibold text-[var(--foreground)]">
           <Tk_icon className="mr-1" size={16} />{subtotal.toFixed(2)}
         </span>
       </div>
@@ -68,15 +68,15 @@ const CartTotals = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <FiTruck className={`w-4 h-4 ${hasShippingSelected ? 'text-blue-600' : 'text-[var(--color-text-secondary)]'}`} />
-              <span className="text-[var(--color-text-secondary)]">
+              <FiTruck className={`w-4 h-4 ${hasShippingSelected ? 'text-blue-600' : 'text-[var(--muted-foreground)]'}`} />
+              <span className="text-[var(--muted-foreground)]">
                 {shippingMethodName || "Shipping"}
               </span>
             </div>
             <div className="text-right">
               {hasShippingSelected ? (
                 <motion.span 
-                  className={`font-semibold ${isShippingFree ? 'text-green-600' : 'text-[var(--color-text-primary)]'}`}
+                  className={`font-semibold ${isShippingFree ? 'text-green-600' : 'text-[var(--foreground)]'}`}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.2 }}
@@ -84,7 +84,7 @@ const CartTotals = ({
                   {isShippingFree ? "Free" : <><Tk_icon className="mr-1" size={16} />{shipping.toFixed(2)}</>}
                 </motion.span>
               ) : (
-                <span className="text-[var(--color-text-secondary)] text-sm italic">
+                <span className="text-[var(--muted-foreground)] text-sm italic">
                   Select method
                 </span>
               )}
@@ -120,7 +120,7 @@ const CartTotals = ({
         >
           <div className="flex items-center gap-2">
             <FiTag className="text-green-600 w-4 h-4" />
-            <span className="text-[var(--color-text-secondary)]">Discount</span>
+            <span className="text-[var(--muted-foreground)]">Discount</span>
           </div>
           <span className="font-semibold text-green-600">
             -<Tk_icon className="mr-1" size={16} />{discount.toFixed(2)}
@@ -133,15 +133,15 @@ const CartTotals = ({
 
       {/* Grand Total */}
       <motion.div 
-        className="flex justify-between items-center text-2xl font-bold bg-[var(--color-second-bg)] p-4 rounded-lg border border-[var(--color-border)]"
+        className="flex justify-between items-center text-2xl font-bold bg-[var(--card)] p-4 rounded-lg border border-[var(--color-border)]"
         key={total} // Force re-render on total change
         initial={{ scale: 0.98 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.2 }}
       >
-        <span className="text-[var(--color-text-primary)]">Grand Total</span>
+        <span className="text-[var(--foreground)]">Grand Total</span>
         <motion.span 
-          className="text-[var(--color-button-primary)]"
+          className="text-[var(--primary)]"
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.3, type: "spring" }}
@@ -153,7 +153,7 @@ const CartTotals = ({
       {/* Shipping Method Info */}
       {hasShippingSelected && selectedShippingMethod?.description && (
         <motion.div 
-          className="text-sm text-[var(--color-text-secondary)] bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800"
+          className="text-sm text-[var(--muted-foreground)] bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           transition={{ duration: 0.3 }}

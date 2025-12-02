@@ -31,7 +31,7 @@ const ThemeToggle = () => {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />;
+  if (!mounted) return <div className="w-6 h-6 rounded-full bg-[var(--muted)] animate-pulse" />;
 
   const toggleTheme = () => {
     const currentTheme = resolvedTheme || theme || "dark";
@@ -41,13 +41,13 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      className="p-1.5 rounded-full hover:bg-[var(--muted)] transition-colors"
       aria-label="Toggle theme"
     >
       {resolvedTheme === "dark" ? (
         <BsMoon className="text-lg text-yellow-400" />
       ) : (
-        <BsSun className="text-lg text-gray-600" />
+        <BsSun className="text-lg text-[var(--muted-foreground)]" />
       )}
     </button>
   );
@@ -107,12 +107,12 @@ const CategoryDropdown = ({ isOpen, categories, onClose }) => {
           exit={{ opacity: 0, y: 10 }}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className="absolute top-full left-0 mt-2 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-lg z-50 max-h-[70vh] overflow-visible flex"
+          className="absolute top-full left-0 mt-2 bg-[var(--card)] border border-[var(--border)] shadow-xl rounded-lg z-50 max-h-[70vh] overflow-visible flex"
         >
           {/* Categories Column */}
-          <div className="w-64 overflow-y-auto py-2 border-r border-[var(--color-border)]">
+          <div className="w-64 overflow-y-auto py-2 border-r border-[var(--border)]">
             {categories.length === 0 ? (
-              <div className="px-4 py-2 text-sm text-gray-500">No categories found</div>
+              <div className="px-4 py-2 text-sm text-[var(--muted-foreground)]">No categories found</div>
             ) : (
               <ul>
                 {categories.map((cat, idx) => {
@@ -126,8 +126,8 @@ const CategoryDropdown = ({ isOpen, categories, onClose }) => {
                     >
                       <Link
                         href={`/categories?category=${encodeURIComponent(cat.slug || cat.name)}`}
-                        className={`px-4 py-2.5 text-sm transition-colors text-[var(--color-text-primary)] flex items-center justify-between gap-3 group ${
-                          isHovered ? 'bg-[var(--color-muted-bg)]' : 'hover:bg-[var(--color-muted-bg)]'
+                        className={`px-4 py-2.5 text-sm transition-colors text-[var(--foreground)] flex items-center justify-between gap-3 group ${
+                          isHovered ? 'bg-[var(--muted)]' : 'hover:bg-[var(--muted)]'
                         }`}
                         onClick={onClose}
                       >
@@ -135,12 +135,12 @@ const CategoryDropdown = ({ isOpen, categories, onClose }) => {
                           {cat.image_url || cat.image ? (
                             <Image src={cat.image_url || cat.image} width={20} height={20} alt={cat.name} className="rounded-full object-cover w-5 h-5" />
                           ) : (
-                            <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700" />
+                            <div className="w-5 h-5 rounded-full bg-[var(--muted)]" />
                           )}
                           <span className="flex-1">{cat.name}</span>
                         </div>
                         {hasSubcategories && (
-                          <IoIosArrowDown size={14} className="transform -rotate-90 text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors" />
+                          <IoIosArrowDown size={14} className="transform -rotate-90 text-[var(--muted-foreground)] group-hover:text-[var(--foreground)] transition-colors" />
                         )}
                       </Link>
                     </li>
@@ -160,26 +160,26 @@ const CategoryDropdown = ({ isOpen, categories, onClose }) => {
                 transition={{ duration: 0.15 }}
                 className="w-64 overflow-y-auto py-2 px-2"
               >
-                <div className="px-3 py-2 mb-2 border-b border-[var(--color-border)]">
-                  <p className="text-xs text-[var(--color-text-secondary)] uppercase tracking-wide font-medium">
+                <div className="px-3 py-2 mb-2 border-b border-[var(--border)]">
+                  <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide font-medium">
                     {hoveredCategory.name}
                   </p>
                 </div>
                 {hoveredCategory.subcategories.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-gray-500">No subcategories</div>
+                  <div className="px-3 py-2 text-sm text-[var(--muted-foreground)]">No subcategories</div>
                 ) : (
                   <div className="space-y-1">
                     {hoveredCategory.subcategories.map((sub, idx) => (
                       <Link
                         key={sub.id || idx}
                         href={`/categories?category=${encodeURIComponent(hoveredCategory.slug || hoveredCategory.name)}&subcategory=${encodeURIComponent(sub.slug || sub.name)}`}
-                        className="px-3 py-2 text-sm hover:bg-[var(--color-muted-bg)] rounded-md transition-colors text-[var(--color-text-primary)] flex items-center gap-2"
+                        className="px-3 py-2 text-sm hover:bg-[var(--muted)] rounded-md transition-colors text-[var(--foreground)] flex items-center gap-2"
                         onClick={onClose}
                       >
                         {sub.image_url || sub.image ? (
                           <Image src={sub.image_url || sub.image} width={16} height={16} alt={sub.name} className="rounded object-cover w-4 h-4" />
                         ) : (
-                          <div className="w-1 h-1 rounded-full bg-[var(--color-text-secondary)]" />
+                          <div className="w-1 h-1 rounded-full bg-[var(--muted-foreground)]" />
                         )}
                         {sub.name}
                       </Link>
@@ -364,7 +364,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
   return (
     <>
       {/* ==================== DESKTOP HEADER ==================== */}
-      <header className="hidden lg:block w-full bg-[var(--color-surface)] z-50 border-b border-[var(--color-border)]">
+      <header className="hidden lg:block w-full bg-[var(--card)] z-50 border-b border-[var(--border)]">
         
         {/* TOP ROW */}
         <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-6">
@@ -378,6 +378,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
               height={40}
               className="h-10 w-auto object-contain"
               priority
+              unoptimized
             />
           </Link>
 
@@ -396,19 +397,19 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
             
             {/* App Download */}
             <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-              <BsQrCode size={20} className="text-[var(--color-text-primary)]" />
+              <BsQrCode size={20} className="text-[var(--foreground)]" />
               <div className="text-xs leading-tight hidden xl:block">
-                <p className="text-[var(--color-text-secondary)]">Download the</p>
-                <p className="font-bold text-[var(--color-text-primary)]">China Kroy App</p>
+                <p className="text-[var(--muted-foreground)]">Download the</p>
+                <p className="font-bold text-[var(--foreground)]">China Kroy App</p>
               </div>
             </div>
 
             {/* SHOP ICON (Replaced Flag) */}
             <Link href="/products" className="flex items-center gap-2 cursor-pointer group">
-              <CiShop size={28} className="text-[var(--color-text-primary)]" />
+              <CiShop size={28} className="text-[var(--foreground)]" />
               <div className="text-xs leading-tight group-hover:opacity-80 transition-opacity">
-                <p className="text-[var(--color-text-secondary)]">Browse</p>
-                <p className="font-bold text-[var(--color-text-primary)]">Shop</p>
+                <p className="text-[var(--muted-foreground)]">Browse</p>
+                <p className="font-bold text-[var(--foreground)]">Shop</p>
               </div>
             </Link>
 
@@ -419,15 +420,15 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                 ref={userRef}
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
               >
-                <CiUser size={28} className="text-[var(--color-text-primary)]" />
+                <CiUser size={28} className="text-[var(--foreground)]" />
                 <div className="text-xs leading-tight group-hover:opacity-80 transition-opacity">
                   {/* Label: Welcome / Customer / Wholesaler */}
-                  <p className={`${isWholesaler ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[var(--color-text-secondary)]'}`}>
+                  <p className={`${isWholesaler ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[var(--muted-foreground)]'}`}>
                       {getUserLabel()}
                   </p>
                   
                   {/* Name or Login Action */}
-                  <p className="font-bold text-[var(--color-text-primary)] whitespace-nowrap">
+                  <p className="font-bold text-[var(--foreground)] whitespace-nowrap">
                     {user.name?.split(' ')[0] || 'User'}
                   </p>
                 </div>
@@ -439,13 +440,13 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full right-0 mt-4 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-lg p-2 z-50"
+                      className="absolute top-full right-0 mt-4 w-48 bg-[var(--card)] border border-[var(--border)] shadow-xl rounded-lg p-2 z-50"
                     >
-                      <div className="px-3 py-2 border-b border-[var(--color-border)] mb-1">
-                          <p className="text-xs text-[var(--color-text-secondary)]">Signed in as</p>
+                      <div className="px-3 py-2 border-b border-[var(--border)] mb-1">
+                          <p className="text-xs text-[var(--muted-foreground)]">Signed in as</p>
                           <p className="text-sm font-bold truncate">{user?.name}</p>
                       </div>
-                      <Link href="/orders" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--color-muted-bg)] rounded-md text-[var(--color-text-primary)]" onClick={() => setUserDropdownOpen(false)}>
+                      <Link href="/orders" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--muted)] rounded-md text-[var(--foreground)]" onClick={() => setUserDropdownOpen(false)}>
                          <IoBagCheckOutline /> My Orders
                       </Link>
                       <button 
@@ -463,10 +464,10 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
               </div>
             ) : (
               <Link href="/login" className="flex items-center gap-2 cursor-pointer group">
-                <CiUser size={28} className="text-[var(--color-text-primary)]" />
+                <CiUser size={28} className="text-[var(--foreground)]" />
                 <div className="text-xs leading-tight group-hover:opacity-80 transition-opacity">
-                  <p className="text-[var(--color-text-secondary)]">Welcome</p>
-                  <p className="font-bold text-[var(--color-text-primary)] whitespace-nowrap">Sign in / Register</p>
+                  <p className="text-[var(--muted-foreground)]">Welcome</p>
+                  <p className="font-bold text-[var(--foreground)] whitespace-nowrap">Sign in / Register</p>
                 </div>
               </Link>
             )}
@@ -474,15 +475,15 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
             {/* Cart */}
             <Link href="/cart" className="flex items-center gap-2 cursor-pointer relative group">
               <div className="relative">
-                <CiShoppingCart size={30} className="text-[var(--color-text-primary)]" />
+                <CiShoppingCart size={30} className="text-[var(--foreground)]" />
                 {cartMounted && cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-[var(--color-surface)]">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-[var(--card)]">
                     {cartCount}
                   </span>
                 )}
               </div>
               <div className="flex flex-col text-xs group-hover:opacity-80 transition-opacity">
-                 <span className="font-bold text-[var(--color-text-primary)]">Cart</span>
+                 <span className="font-bold text-[var(--foreground)]">Cart</span>
               </div>
             </Link>
             
@@ -493,7 +494,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
         </div>
 
         {/* BOTTOM ROW */}
-        <div className="border-t border-[var(--color-border)]">
+        <div className="border-t border-[var(--border)]">
           <div ref={navContainerRef} className="container mx-auto px-4 flex items-center h-12 gap-6">
             
             {/* All Categories Pill Button - Hover Activated */}
@@ -513,7 +514,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
               }}
             >
               <button 
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition-colors ${allCatsOpen ? 'bg-black text-white' : 'bg-[var(--color-muted-bg)] hover:bg-gray-300 dark:hover:bg-gray-700 text-[var(--color-text-primary)]'}`}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition-colors ${allCatsOpen ? 'bg-black text-white' : 'bg-[var(--muted)] hover:bg-[var(--muted)]/80 text-[var(--foreground)]'}`}
               >
                 <IoMdMenu size={20} />
                 <span className="text-sm font-medium">All Categories</span>
@@ -541,7 +542,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                   className={`text-sm font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap group ${
                     offer.badge_text 
                       ? 'text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400' 
-                      : 'text-[var(--color-text-primary)] hover:text-[var(--color-text-secondary)]'
+                      : 'text-[var(--foreground)] hover:text-[var(--muted-foreground)]'
                   }`}
                 >
                   {/* Icon */}
@@ -568,7 +569,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                 <div className="relative" ref={moreDropdownRef}>
                   <button
                     onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
-                    className="flex items-center gap-1 text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-text-secondary)] transition-colors"
+                    className="flex items-center gap-1 text-sm font-medium text-[var(--foreground)] hover:text-[var(--muted-foreground)] transition-colors"
                   >
                     More 
                     <IoIosArrowDown className={`transition-transform duration-300 ${moreDropdownOpen ? 'rotate-180' : ''}`} />
@@ -580,7 +581,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full right-0 mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-lg z-50 max-h-[70vh] overflow-y-auto py-2"
+                        className="absolute top-full right-0 mt-2 w-64 bg-[var(--card)] border border-[var(--border)] shadow-xl rounded-lg z-50 max-h-[70vh] overflow-y-auto py-2"
                       >
                         {overflowOffers.map((offer, idx) => (
                           <Link
@@ -588,7 +589,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                             href={offer.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block px-4 py-2.5 text-sm hover:bg-[var(--color-muted-bg)] transition-colors text-[var(--color-text-primary)]"
+                            className="block px-4 py-2.5 text-sm hover:bg-[var(--muted)] transition-colors text-[var(--foreground)]"
                             onClick={() => setMoreDropdownOpen(false)}
                           >
                             <div className="flex items-center justify-between gap-2">
@@ -603,7 +604,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                               )}
                             </div>
                             {offer.description && (
-                              <p className="text-xs text-[var(--color-text-secondary)] mt-1 line-clamp-1">
+                              <p className="text-xs text-[var(--muted-foreground)] mt-1 line-clamp-1">
                                 {offer.description}
                               </p>
                             )}
@@ -621,13 +622,13 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
       </header>
 
       {/* ==================== MOBILE HEADER ==================== */}
-      <header className={`lg:hidden sticky top-0 z-50 bg-[var(--color-surface)] transition-all duration-200 ${isScrolled ? 'shadow-md' : ''}`}>
+      <header className={`lg:hidden sticky top-0 z-50 bg-[var(--card)] transition-all duration-200 ${isScrolled ? 'shadow-md' : ''}`}>
         <div className="px-4 py-3 flex items-center justify-between gap-4">
           
           {/* Mobile Hamburger */}
           <button 
             onClick={() => setMobileSidebarOpen(true)}
-            className="p-2 -ml-2 text-[var(--color-text-primary)]"
+            className="p-2 -ml-2 text-[var(--foreground)]"
           >
             <IoMdMenu size={26} />
           </button>
@@ -644,7 +645,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
 
           {/* Mobile Cart */}
           <Link href="/cart" className="relative p-2 -mr-2">
-             <CiShoppingCart size={26} className="text-[var(--color-text-primary)]" />
+             <CiShoppingCart size={26} className="text-[var(--foreground)]" />
              {cartMounted && cartCount > 0 && (
                 <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
                   {cartCount}
@@ -665,7 +666,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                  className={`flex-shrink-0 text-xs font-medium flex items-center gap-1.5 transition-colors ${
                    offer.badge_text 
                      ? 'text-red-600 dark:text-red-500' 
-                     : 'text-[var(--color-text-primary)]'
+                     : 'text-[var(--foreground)]'
                  }`}
                >
                  {offer.icon_class && <i className={offer.icon_class} style={{ fontSize: '11px' }} />}
@@ -679,7 +680,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
              ))
            ) : (
              initialCategories.slice(0, 6).map((cat, i) => (
-               <Link key={i} href={`/categories?category=${cat.slug}`} className="flex-shrink-0 text-xs text-[var(--color-text-primary)] font-medium whitespace-nowrap">
+               <Link key={i} href={`/categories?category=${cat.slug}`} className="flex-shrink-0 text-xs text-[var(--foreground)] font-medium whitespace-nowrap">
                  {cat.name}
                </Link>
              ))
@@ -691,16 +692,16 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
       
       {/* Mobile Bottom Nav */}
       <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
-         <div className="bg-[var(--color-surface)] border-t border-[var(--color-border)] pb-safe pt-2 px-6 flex justify-between items-end shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-            <Link href="/" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' ? 'text-red-500' : 'text-[var(--color-text-secondary)]'}`}>
+         <div className="bg-[var(--card)] border-t border-[var(--border)] pb-safe pt-2 px-6 flex justify-between items-end shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+            <Link href="/" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' ? 'text-red-500' : 'text-[var(--muted-foreground)]'}`}>
                <RiHome2Line size={24} />
                <span className="text-[10px] font-medium">Home</span>
             </Link>
-            <Link href="/categories" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/categories' ? 'text-red-500' : 'text-[var(--color-text-secondary)]'}`}>
+            <Link href="/categories" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/categories' ? 'text-red-500' : 'text-[var(--muted-foreground)]'}`}>
                <IoMdMenu size={24} />
                <span className="text-[10px] font-medium">Category</span>
             </Link>
-            <Link href="/cart" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/cart' ? 'text-red-500' : 'text-[var(--color-text-secondary)]'}`}>
+            <Link href="/cart" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/cart' ? 'text-red-500' : 'text-[var(--muted-foreground)]'}`}>
                <div className="relative">
                   <CiShoppingCart size={24} />
                   {cartMounted && cartCount > 0 && (
@@ -712,7 +713,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
             {isAuthenticated ? (
               <div 
                 onClick={() => setMobileMenuOpen(true)}
-                className={`flex flex-col items-center gap-1 p-2 cursor-pointer ${mobileMenuOpen ? 'text-red-500' : 'text-[var(--color-text-secondary)]'}`}
+                className={`flex flex-col items-center gap-1 p-2 cursor-pointer ${mobileMenuOpen ? 'text-red-500' : 'text-[var(--muted-foreground)]'}`}
               >
                 <CiUser size={24} />
                 <span className="text-[10px] font-medium">Account</span>
@@ -720,7 +721,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
             ) : (
               <Link 
                 href="/login"
-                className={`flex flex-col items-center gap-1 p-2 ${pathname === '/login' || pathname === '/signup' ? 'text-red-500' : 'text-[var(--color-text-secondary)]'}`}
+                className={`flex flex-col items-center gap-1 p-2 ${pathname === '/login' || pathname === '/signup' ? 'text-red-500' : 'text-[var(--muted-foreground)]'}`}
               >
                 <CiUser size={24} />
                 <span className="text-[10px] font-medium">Account</span>

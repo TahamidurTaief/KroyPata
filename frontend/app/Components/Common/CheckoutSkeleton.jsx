@@ -10,7 +10,7 @@ import {
 
 export default function CheckoutSkeleton() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-[var(--background)]">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header Skeleton */}
         <div className="text-center mb-8">
@@ -24,7 +24,7 @@ export default function CheckoutSkeleton() {
           <div className="space-y-6">
             
             {/* Shipping Address Card */}
-            <SkeletonCard className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <SkeletonCard className="bg-[var(--card)] rounded-2xl shadow-lg border border-[var(--border)]">
               <div className="flex items-center mb-6">
                 <SkeletonBox className="w-8 h-8 rounded-lg mr-3" />
                 <SkeletonBox className="h-6 w-40 rounded-lg" />
@@ -81,7 +81,7 @@ export default function CheckoutSkeleton() {
             </SkeletonCard>
 
             {/* Shipping Method Card */}
-            <SkeletonCard className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <SkeletonCard className="bg-[var(--card)] rounded-2xl shadow-lg border border-[var(--border)]">
               <div className="flex items-center mb-6">
                 <SkeletonBox className="w-8 h-8 rounded-lg mr-3" />
                 <SkeletonBox className="h-6 w-36 rounded-lg" />
@@ -92,7 +92,7 @@ export default function CheckoutSkeleton() {
                 {[1, 2, 3].map((item) => (
                   <div 
                     key={item} 
-                    className="border-2 border-gray-200 dark:border-gray-600 rounded-2xl p-6 hover:border-blue-300 transition-colors duration-200"
+                    className="border-2 border-[var(--border)] rounded-2xl p-6 hover:border-[var(--primary)] transition-colors duration-200"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4 flex-1">
@@ -119,7 +119,7 @@ export default function CheckoutSkeleton() {
             </SkeletonCard>
 
             {/* Coupon Card */}
-            <SkeletonCard className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <SkeletonCard className="bg-[var(--card)] rounded-2xl shadow-lg border border-[var(--border)]">
               <div className="flex items-center mb-4">
                 <SkeletonBox className="w-8 h-8 rounded-lg mr-3" />
                 <SkeletonBox className="h-6 w-32 rounded-lg" />
@@ -135,7 +135,7 @@ export default function CheckoutSkeleton() {
 
           {/* RIGHT COLUMN - Order Summary */}
           <div className="lg:sticky lg:top-6 lg:self-start">
-            <SkeletonCard className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <SkeletonCard className="bg-[var(--card)] rounded-2xl shadow-lg border border-[var(--border)]">
               {/* Summary Header */}
               <div className="flex items-center mb-6">
                 <SkeletonBox className="w-8 h-8 rounded-lg mr-3" />
@@ -147,7 +147,7 @@ export default function CheckoutSkeleton() {
                 {[1, 2, 3].map((item) => (
                   <div 
                     key={item} 
-                    className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                    className="flex items-center space-x-4 p-4 rounded-xl bg-[var(--muted)] border border-[var(--border)]"
                   >
                     {/* Product Image */}
                     <SkeletonBox className="w-16 h-16 rounded-xl flex-shrink-0" />
@@ -164,7 +164,7 @@ export default function CheckoutSkeleton() {
 
                     {/* Quantity & Actions */}
                     <div className="flex items-center space-x-3 flex-shrink-0">
-                      <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-1">
+                      <div className="flex items-center space-x-2 bg-[var(--card)] rounded-lg border border-[var(--border)] p-1">
                         <SkeletonBox className="w-8 h-8 rounded-md" />
                         <SkeletonBox className="w-8 h-6 rounded" />
                         <SkeletonBox className="w-8 h-8 rounded-md" />
@@ -176,7 +176,7 @@ export default function CheckoutSkeleton() {
               </div>
 
               {/* Price Breakdown */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-3">
+              <div className="border-t border-[var(--border)] pt-6 space-y-3">
                 <div className="flex justify-between items-center">
                   <SkeletonBox className="h-5 w-16 rounded" />
                   <SkeletonBox className="h-5 w-20 rounded" />
@@ -191,7 +191,7 @@ export default function CheckoutSkeleton() {
                 </div>
                 
                 {/* Total */}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+                <div className="border-t border-[var(--border)] pt-3">
                   <div className="flex justify-between items-center">
                     <SkeletonBox className="h-6 w-12 rounded" />
                     <SkeletonBox className="h-6 w-24 rounded" />

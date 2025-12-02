@@ -12,9 +12,9 @@ export const SkeletonBox = ({
   ...props 
 }) => {
   const variantClasses = {
-    default: "bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700",
-    light: "bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800",
-    card: "bg-gradient-to-r from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800"
+    default: "bg-gradient-to-r from-[var(--muted)] via-[var(--card)] to-[var(--muted)]",
+    light: "bg-gradient-to-r from-[var(--muted)] via-[var(--card)] to-[var(--muted)]",
+    card: "bg-gradient-to-r from-[var(--card)] via-[var(--muted)] to-[var(--card)]"
   };
 
   const animationClasses = {
@@ -114,7 +114,7 @@ export const SkeletonCard = ({
   showFooter = false,
   children
 }) => (
-  <div className={`bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}>
+  <div className={`bg-[var(--card)] rounded-xl p-6 border border-[var(--border)] shadow-sm ${className}`}>
     {showHeader && (
       <div className="flex items-center space-x-3 mb-4">
         <SkeletonAvatar size="sm" variant={variant} animation={animation} />
@@ -133,7 +133,7 @@ export const SkeletonCard = ({
     )}
     
     {showFooter && (
-      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex justify-between items-center mt-4 pt-4 border-t border-[var(--border)]">
         <SkeletonButton size="sm" variant={variant} animation={animation} />
         <SkeletonBox className="h-6 w-16" variant={variant} animation={animation} />
       </div>
@@ -170,7 +170,7 @@ export const SkeletonProductCard = ({
   showPrice = true,
   showRating = true
 }) => (
-  <div className={`bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200 ${className}`}>
+  <div className={`bg-[var(--card)] rounded-xl overflow-hidden border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow duration-200 ${className}`}>
     {/* Product Image */}
     <SkeletonBox className="h-48 w-full" variant={variant} animation={animation} />
     
@@ -210,7 +210,7 @@ export const SkeletonList = ({
 }) => (
   <div className={`space-y-3 ${className}`}>
     {Array.from({ length: items }, (_, i) => (
-      <div key={i} className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-400 transition-colors duration-200">
+      <div key={i} className="flex items-center space-x-3 p-3 bg-[var(--card)] rounded-lg border border-[var(--border)] hover:border-[var(--primary)] transition-colors duration-200">
         {showAvatar && <SkeletonAvatar size="md" variant={variant} animation={animation} />}
         <div className="flex-1">
           <SkeletonBox className="h-4 w-32 mb-2" variant={variant} animation={animation} />
@@ -231,9 +231,9 @@ export const SkeletonTable = ({
   animation = "wave",
   showHeader = true
 }) => (
-  <div className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden ${className}`}>
+  <div className={`bg-[var(--card)] rounded-xl border border-[var(--border)] overflow-hidden ${className}`}>
     {showHeader && (
-      <div className="border-b border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-750">
+      <div className="border-b border-[var(--border)] p-4 bg-[var(--muted)]">
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
           {Array.from({ length: columns }, (_, i) => (
             <SkeletonBox key={i} className="h-4 w-20" variant={variant} animation={animation} />
@@ -242,9 +242,9 @@ export const SkeletonTable = ({
       </div>
     )}
     
-    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+    <div className="divide-y divide-[var(--border)]">
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-150">
+        <div key={i} className="p-4 hover:bg-[var(--muted)] transition-colors duration-150">
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
             {Array.from({ length: columns }, (_, j) => (
               <SkeletonBox key={j} className="h-4 w-full" variant={variant} animation={animation} />
@@ -264,9 +264,9 @@ export const SkeletonPage = ({
   showSidebar = false,
   animation = "wave"
 }) => (
-  <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${className}`}>
+  <div className={`min-h-screen bg-[var(--background)] ${className}`}>
     {showHeader && (
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+      <div className="bg-[var(--card)] border-b border-[var(--border)] p-4">
         <div className="container mx-auto">
           <SkeletonBox className="h-8 w-48" animation={animation} />
         </div>

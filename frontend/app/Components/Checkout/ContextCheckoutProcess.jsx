@@ -150,7 +150,7 @@ const ContextCheckoutProcess = () => {
           {/* Left Column - Forms */}
           <div className="lg:col-span-2 space-y-8">
             {/* Delivery Details Form */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6">
               <CheckoutForm
                 formData={userDetails}
                 onFormChange={updateUserDetails}
@@ -158,7 +158,7 @@ const ContextCheckoutProcess = () => {
             </div>
 
             {/* Shipping Method Selection */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6">
               <ContextShippingMethodSelector 
                 title="Choose Delivery Method"
               />
@@ -175,7 +175,7 @@ const ContextCheckoutProcess = () => {
               />
 
               {/* Coupon Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6">
                 <CartCoupon 
                   onApplyCoupon={handleApplyCoupon} 
                   appliedCoupon={appliedCoupon} 
@@ -184,7 +184,7 @@ const ContextCheckoutProcess = () => {
               </div>
 
               {/* Payment Methods Preview */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6">
                 <PaymentMethods 
                   selectedMethod={selectedPaymentMethod} 
                   onSelect={handlePaymentSelection} 
@@ -198,18 +198,18 @@ const ContextCheckoutProcess = () => {
 
     if (pathname === "/confirmation") {
       return (
-        <div className="text-center bg-white dark:bg-gray-800 p-10 rounded-xl border border-gray-200 dark:border-gray-700 max-w-2xl mx-auto shadow-lg">
+        <div className="text-center bg-[var(--card)] p-10 rounded-xl border border-[var(--border)] max-w-2xl mx-auto shadow-lg">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, type: "spring" }}
           >
-            <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Thank You!</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">Your order has been placed successfully.</p>
+            <CheckCircle className="mx-auto text-[#22c55e] mb-4" size={64} />
+            <h1 className="text-4xl font-bold text-[var(--foreground)] mb-4">Thank You!</h1>
+            <p className="text-lg text-[var(--muted-foreground)] mb-8">Your order has been placed successfully.</p>
             <Link href="/products" passHref>
               <motion.button
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+                className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-bold py-3 px-8 rounded-lg transition-colors"
                 whileTap={{ scale: 0.98 }}
                 whileHover={{ scale: 1.05 }}
               >

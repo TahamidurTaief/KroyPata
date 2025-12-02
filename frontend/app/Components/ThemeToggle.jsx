@@ -25,8 +25,8 @@ export const ThemeToggle = () => {
       onClick={toggleTheme}
       className="relative flex items-center justify-center w-9 h-9 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
       style={{
-        backgroundColor: "var(--color-muted-foreground)",
-        color: "var(--color-text-secondary)",
+        backgroundColor: "var(--muted)",
+        color: "var(--muted-foreground)",
       }}
       aria-label="Toggle theme"
     >

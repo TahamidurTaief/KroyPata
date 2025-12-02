@@ -35,7 +35,7 @@ const SubcategoryModal = ({ category, position, onClose }) => {
       {/* Modal */}
       <div
         ref={modalRef}
-        className="fixed z-50 bg-[var(--color-second-bg)] rounded-lg shadow-2xl border border-[var(--color-border)] max-w-md w-full animate-slide-up"
+        className="fixed z-50 bg-[var(--card)] rounded-lg shadow-2xl border border-[var(--color-border)] max-w-md w-full animate-slide-up"
         style={{
           left: `${Math.min(position.x, window.innerWidth - 400)}px`,
           top: `${position.y + 8}px`,
@@ -45,19 +45,19 @@ const SubcategoryModal = ({ category, position, onClose }) => {
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
           <div>
-            <h3 className="font-bold text-lg text-[var(--color-text-primary)]">
+            <h3 className="font-bold text-lg text-[var(--foreground)]">
               {category.name}
             </h3>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+            <p className="text-xs text-[var(--muted-foreground)] mt-1">
               {category.subcategories.length} subcategories available
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-1 rounded-full hover:bg-[var(--muted)] transition-colors"
             aria-label="Close modal"
           >
-            <X className="w-5 h-5 text-[var(--color-text-secondary)]" />
+            <X className="w-5 h-5 text-[var(--muted-foreground)]" />
           </button>
         </div>
 
@@ -71,10 +71,10 @@ const SubcategoryModal = ({ category, position, onClose }) => {
                 className="group block"
                 onClick={onClose}
               >
-                <div className="bg-[var(--color-background)] rounded-lg p-3 border border-[var(--color-border)] hover:border-[var(--color-button-primary)] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="bg-[var(--background)] rounded-lg p-3 border border-[var(--color-border)] hover:border-[var(--primary)] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                   {/* Subcategory Image */}
                   {subcategory.image && (
-                    <div className="relative w-full h-20 mb-2 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <div className="relative w-full h-20 mb-2 rounded overflow-hidden bg-[var(--muted)]">
                       <img
                         src={subcategory.image}
                         alt={subcategory.name}
@@ -85,13 +85,13 @@ const SubcategoryModal = ({ category, position, onClose }) => {
                   )}
 
                   {/* Subcategory Name */}
-                  <h4 className="font-medium text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-button-primary)] transition-colors line-clamp-2 text-center">
+                  <h4 className="font-medium text-sm text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors line-clamp-2 text-center">
                     {subcategory.name}
                   </h4>
 
                   {/* Product Count if available */}
                   {subcategory.product_count !== undefined && (
-                    <p className="text-xs text-[var(--color-text-secondary)] text-center mt-1">
+                    <p className="text-xs text-[var(--muted-foreground)] text-center mt-1">
                       {subcategory.product_count} products
                     </p>
                   )}
@@ -102,10 +102,10 @@ const SubcategoryModal = ({ category, position, onClose }) => {
         </div>
 
         {/* Footer with View All Link */}
-        <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-background)]">
+        <div className="p-3 border-t border-[var(--color-border)] bg-[var(--background)]">
           <Link
             href={`/categories/${category.slug}`}
-            className="block text-center py-2 px-4 bg-[var(--color-button-primary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium text-sm"
+            className="block text-center py-2 px-4 bg-[var(--primary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium text-sm"
             onClick={onClose}
           >
             View All in {category.name}

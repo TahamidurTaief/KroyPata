@@ -54,13 +54,13 @@ export const WholesalerPriceDisplay = memo(({
   if (!hasValidWholesalePrice) {
     return (
       <div className={className}>
-        <div className={`${config.badge} font-bold uppercase tracking-wider text-red-600 dark:text-red-400 mb-1`}>
+        <div className={`${config.badge} font-bold uppercase tracking-wider text-red-600 mb-1`}>
           Wholesale Not Available
         </div>
         <PriceDisplay 
           price={retailPrice} 
           iconSize={config.icon}
-          className={`${config.text} font-bold text-[var(--color-text-primary)]`}
+          className={`${config.text} font-bold text-[var(--foreground)]`}
         />
       </div>
     );
@@ -73,7 +73,7 @@ export const WholesalerPriceDisplay = memo(({
   return (
     <div className={className}>
       {/* Minimum Quantity Badge */}
-      <div className={`${config.badge} font-bold uppercase tracking-wider text-[var(--color-accent-orange)] mb-1`}>
+      <div className={`${config.badge} font-bold uppercase tracking-wider text-[var(--primary)] mb-1`}>
         Min: {minimumPurchase} pcs
       </div>
       
@@ -81,10 +81,10 @@ export const WholesalerPriceDisplay = memo(({
       <PriceDisplay 
         price={wholesalePrice}
         iconSize={config.icon}
-        iconClassName="text-blue-600 dark:text-blue-400"
-        className={`${config.text} font-bold text-blue-600 dark:text-blue-400 mb-1`}
+        iconClassName="text-[var(--primary)]"
+        className={`${config.text} font-bold text-[var(--primary)] mb-1`}
       />
-      <span className={`${config.badge} text-blue-600 dark:text-blue-400 ml-1 font-semibold`}>WSL</span>
+      <span className={`${config.badge} text-[var(--primary)] ml-1 font-semibold`}>WSL</span>
       
       {/* Retail Price & Savings */}
       <div className="flex items-center gap-2 mt-1">
@@ -92,12 +92,12 @@ export const WholesalerPriceDisplay = memo(({
           <PriceDisplay 
             price={retailPrice}
             iconSize={10}
-            iconClassName="text-gray-400"
-            className="text-xs text-gray-400 line-through"
+            iconClassName="text-[var(--muted-foreground)]"
+            className="text-xs text-[var(--muted-foreground)] line-through"
           />
         )}
         {savings > 0 && (
-          <span className={`${config.badge} font-bold text-green-600 dark:text-green-400`}>
+          <span className={`${config.badge} font-bold text-[#16a34a]`}>
             Save {savings}%
           </span>
         )}
@@ -137,7 +137,7 @@ export const RegularPriceDisplay = memo(({
       <PriceDisplay 
         price={displayPrice}
         iconSize={config.icon}
-        className={`${config.text} font-bold text-[var(--color-text-primary)] mb-1`}
+        className={`${config.text} font-bold text-[var(--foreground)] mb-1`}
       />
       
       {/* Original Price & Savings */}
@@ -146,11 +146,11 @@ export const RegularPriceDisplay = memo(({
           <PriceDisplay 
             price={price}
             iconSize={10}
-            iconClassName="text-gray-400"
-            className="text-xs text-gray-400 line-through"
+            iconClassName="text-[var(--muted-foreground)]"
+            className="text-xs text-[var(--muted-foreground)] line-through"
           />
           {savings > 0 && (
-            <span className={`${config.badge} font-bold text-green-600 dark:text-green-400`}>
+            <span className={`${config.badge} font-bold text-[#16a34a]`}>
               Save {savings}%
             </span>
           )}

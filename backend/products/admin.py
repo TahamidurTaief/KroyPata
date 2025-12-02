@@ -49,8 +49,8 @@ class ProductAdditionalImageInline(TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(ModelAdmin):
-    list_display = ('name', 'brand', 'shop', 'sub_category', 'shipping_category', 'price', 'wholesale_price', 'minimum_purchase', 'stock', 'is_active')
-    list_filter = ('is_active', 'brand', 'shop', 'sub_category', 'shipping_category', 'colors', 'sizes')
+    list_display = ('name', 'brand', 'shop', 'sub_category', 'shipping_category', 'price', 'wholesale_price', 'minimum_purchase', 'stock', 'is_active', 'enable_landing_page')
+    list_filter = ('is_active', 'enable_landing_page', 'brand', 'shop', 'sub_category', 'shipping_category', 'colors', 'sizes')
     search_fields = ('name', 'slug', 'brand__name')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductSpecificationInline, ProductAdditionalImageInline]
@@ -66,6 +66,10 @@ class ProductAdmin(ModelAdmin):
         ('Pricing & Stock', {
             'fields': ('price', 'discount_price', 'wholesale_price', 'minimum_purchase', 'affiliate_commission_rate', 'stock', 'is_active')
         }),
+        ('Landing Page Settings', {
+            'fields': ('enable_landing_page', 'landing_features', 'landing_how_to_use', 'landing_why_choose'),
+            'classes': ('collapse',)
+        }),
         ('Physical Properties', {
             'fields': ('weight', 'length', 'width', 'height'),
             'classes': ('collapse',)
@@ -76,20 +80,29 @@ class ProductAdmin(ModelAdmin):
         }),
     )
 
-
-@admin.register(CategoryMinimumOrderQuantity)
-class CategoryMinimumOrderQuantityAdmin(ModelAdmin):
-    list_display = ('category', 'minimum_quantity', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'updated_at')
-    search_fields = ('category__name',)
-    readonly_fields = ('created_at', 'updated_at')
+@admin.register(LandingPageOrder)
+class LandingPageOrderAdmin(ModelAdmin):
+    list_display = ('order_number', 'full_name', 'product', 'quantity', 'total_price', 'is_wholesaler', 'status', 'created_at')
+    list_filter = ('status', 'is_wholesaler', 'created_at')
+    search_fields = ('order_number', 'full_name', 'email', 'phone', 'product__name')
+    readonly_fields = ('order_number', 'created_at', 'updated_at', 'total_price')
     
     fieldsets = (
-        ('Wholesale Rules', {
-            'fields': ('category', 'minimum_quantity')
+        ('Order Information', {
+            'fields': ('order_number', 'status', 'created_at', 'updated_at')
         }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
+        ('Product Details', {
+            'fields': ('product', 'quantity', 'unit_price', 'total_price', 'is_wholesaler')
+        }),
+        ('Customer Information', {
+            'fields': ('full_name', 'email', 'phone', 'detailed_address', 'user')
+        }),
+        ('Notes', {
+            'fields': ('customer_notes', 'admin_notes'),
             'classes': ('collapse',)
         }),
     )
+    
+    def has_add_permission(self, request):
+        # Prevent adding orders from admin (orders should come from landing page)
+        return False

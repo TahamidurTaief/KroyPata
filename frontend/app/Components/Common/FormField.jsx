@@ -23,7 +23,7 @@ const FormField = ({
     <motion.div variants={formFieldVariants} className={colSpan}>
       <label
         htmlFor={id}
-        className="block mb-2 text-sm font-medium text-[var(--color-text-secondary)]"
+        className="block mb-2 text-sm font-medium text-[var(--muted-foreground)]"
       >
         {label} {required && <span className="text-red-500">*</span>}
       </label>
@@ -36,7 +36,7 @@ const FormField = ({
           name={id}
           value={value}
           onChange={onChange}
-          className="block w-full p-3 border border-[var(--color-border)] rounded-lg bg-[var(--color-second-bg)] text-[var(--color-text-primary)] focus:ring-2 focus:ring-[var(--color-button-primary)] transition-shadow"
+          className="block w-full p-3 border border-[var(--color-border)] rounded-lg bg-[var(--muted)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)] transition-shadow"
           placeholder={placeholder}
           required={required}
         />

@@ -9,24 +9,19 @@ const AllCategoryComponents = ({ id, title, icon, isSelected, onClick }) => {
       className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 border
         ${
           isSelected
-            ? "border-[var(--color-primary)]"
-            : "hover:bg-[var(--color-muted-bg)] hover:bg-opacity-30 border-transparent"
+            ? "border-[var(--primary)] bg-[var(--primary)]/10"
+            : "hover:bg-[var(--muted)] hover:bg-opacity-30 border-transparent"
         }`}
-      style={{
-        backgroundColor: isSelected
-          ? "rgba(var(--color-primary-rgb), 0.1)"
-          : "transparent",
-      }}
     >
-      <div className="relative w-10 h-10 rounded-full overflow-hidden border border-[var(--color-border)] bg-gradient-to-br from-white via-yellow-50 to-yellow-100 dark:from-slate-700 dark:via-slate-800 dark:to-slate-900">
+      <div className="relative w-10 h-10 rounded-full overflow-hidden border border-[var(--color-border)] bg-[var(--muted)]">
         {icon ? (
           <Image src={icon} alt={title} fill className="object-cover" />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-[10px] text-gray-400">No Img</div>
+          <div className="absolute inset-0 flex items-center justify-center text-[10px] text-[var(--muted-foreground)]">No Img</div>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-[var(--color-text-primary)] truncate">
+        <h3 className="font-medium text-[var(--foreground)] truncate">
           {title}
         </h3>
         {/* Optional: you can include description if available */}
@@ -37,7 +32,7 @@ const AllCategoryComponents = ({ id, title, icon, isSelected, onClick }) => {
       <div
         className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
           isSelected
-            ? "bg-[var(--color-primary)] border-[var(--color-primary)]"
+            ? "bg-[var(--primary)] border-[var(--primary)]"
             : "border-[var(--color-border)]"
         }`}
       >

@@ -13,13 +13,13 @@ const CategorySkeleton = () => {
           key={index}
           className="flex-shrink-0 w-[180px]"
         >
-          <div className="bg-[var(--color-second-bg)] rounded-lg overflow-hidden border border-[var(--color-border)]">
+          <div className="bg-[var(--card)] rounded-lg overflow-hidden border border-[var(--color-border)]">
             {/* Image skeleton */}
-            <div className="w-full h-32 bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div className="w-full h-32 bg-[var(--muted)] animate-pulse"></div>
             {/* Title skeleton */}
             <div className="p-3 space-y-2">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div className="h-3 w-2/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto"></div>
+              <div className="h-4 bg-[var(--muted)] rounded animate-pulse"></div>
+              <div className="h-3 w-2/3 bg-[var(--muted)] rounded animate-pulse mx-auto"></div>
             </div>
           </div>
         </div>
@@ -112,15 +112,15 @@ const CategoryCarousel = () => {
   }
 
   return (
-    <section className="w-full py-8 bg-[var(--color-background)]">
+    <section className="w-full py-8 bg-[var(--background)]">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+            <h2 className="text-2xl md:text-3xl font-bold text-[var(--foreground)] mb-1">
               Shop by Category
             </h2>
-            <p className="text-sm text-[var(--color-text-secondary)]">
+            <p className="text-sm text-[var(--muted-foreground)]">
               Explore our wide range of product categories
             </p>
           </div>
@@ -129,14 +129,14 @@ const CategoryCarousel = () => {
           <div className="flex gap-2">
             <button
               onClick={() => scroll("left")}
-              className="p-2 rounded-full bg-[var(--color-second-bg)] border border-[var(--color-border)] hover:bg-[var(--color-button-primary)] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
+              className="p-2 rounded-full bg-[var(--card)] border border-[var(--color-border)] hover:bg-[var(--primary)] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => scroll("right")}
-              className="p-2 rounded-full bg-[var(--color-second-bg)] border border-[var(--color-border)] hover:bg-[var(--color-button-primary)] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
+              className="p-2 rounded-full bg-[var(--card)] border border-[var(--color-border)] hover:bg-[var(--primary)] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
               aria-label="Scroll right"
             >
               <ChevronRight className="w-5 h-5" />
@@ -161,9 +161,9 @@ const CategoryCarousel = () => {
                 onMouseLeave={handleMouseLeave}
                 className="flex-shrink-0 w-[180px] group cursor-pointer"
               >
-                <div className="bg-[var(--color-second-bg)] rounded-lg overflow-hidden border border-[var(--color-border)] transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div className="bg-[var(--card)] rounded-lg overflow-hidden border border-[var(--color-border)] transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                   {/* Category Image */}
-                  <div className="relative w-full h-32 bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                  <div className="relative w-full h-32 bg-[var(--card)] overflow-hidden">
                     {category.image ? (
                       <img
                         src={category.image}
@@ -172,8 +172,8 @@ const CategoryCarousel = () => {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
-                        <span className="text-3xl font-bold text-gray-400 dark:text-gray-600">
+                      <div className="w-full h-full flex items-center justify-center bg-[var(--muted)]">
+                        <span className="text-3xl font-bold text-[var(--muted-foreground)]">
                           {category.name.charAt(0)}
                         </span>
                       </div>
@@ -185,11 +185,11 @@ const CategoryCarousel = () => {
 
                   {/* Category Name */}
                   <div className="p-3 text-center">
-                    <h3 className="font-semibold text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-button-primary)] transition-colors duration-300 line-clamp-2">
+                    <h3 className="font-semibold text-sm text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors duration-300 line-clamp-2">
                       {category.name}
                     </h3>
                     {category.subcategories && category.subcategories.length > 0 && (
-                      <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                      <p className="text-xs text-[var(--muted-foreground)] mt-1">
                         {category.subcategories.length} subcategories
                       </p>
                     )}
@@ -203,7 +203,7 @@ const CategoryCarousel = () => {
         {/* Show message if no categories */}
         {!loading && categories.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-[var(--color-text-secondary)]">
+            <p className="text-[var(--muted-foreground)]">
               No categories available at the moment.
             </p>
           </div>

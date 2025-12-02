@@ -7,22 +7,11 @@ import { getCategories, getColors, getShippingCategories, getBrands, getSubCateg
 const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
   // Enhanced theme handling with proper fallbacks and state management
   const [mounted, setMounted] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState(null);
   
   // Handle theme changes and mount state
   useEffect(() => {
     setMounted(true);
-    setCurrentTheme(theme);
   }, []);
-  
-  useEffect(() => {
-    if (mounted) {
-      setCurrentTheme(theme);
-    }
-  }, [theme, mounted]);
-  
-  // Use currentTheme for consistent theming
-  const isDark = currentTheme === "dark";
   
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -179,23 +168,23 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
   const displayedShippingCategories = showAllShippingCategories ? shippingCategories : shippingCategories.slice(0, 5);
 
   // Prevent hydration mismatch with enhanced loading state
-  if (!mounted || currentTheme === null) {
+  if (!mounted) {
     return (
-      <div className="w-full md:w-72 rounded-xl shadow-sm border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-t-xl">
+      <div className="w-full md:w-72 rounded-xl shadow-sm border bg-[var(--card)] border-[var(--border)] transition-all duration-300">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--border)] bg-[var(--muted)] rounded-t-xl">
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <h2 className="text-xl font-raleway font-bold text-gray-900 dark:text-white tracking-wide">Filters</h2>
+            <Filter className="w-5 h-5 text-[var(--muted-foreground)]" />
+            <h2 className="text-xl font-raleway font-bold text-[var(--foreground)] tracking-wide">Filters</h2>
           </div>
-          <div className="w-16 h-6 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+          <div className="w-16 h-6 bg-[var(--muted)] rounded animate-pulse" />
         </div>
         <div className="overflow-y-auto px-6 py-6 space-y-8 flex-1">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="space-y-4">
-              <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-24 animate-pulse" />
+              <div className="h-6 bg-[var(--muted)] rounded w-24 animate-pulse" />
               <div className="space-y-3 pl-2">
                 {[...Array(3)].map((_, j) => (
-                  <div key={j} className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+                  <div key={j} className="h-4 bg-[var(--muted)] rounded animate-pulse" />
                 ))}
               </div>
             </div>
@@ -206,31 +195,17 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
   }
 
   return (
-    <div className={`w-full md:w-72 xl:w-80 rounded-xl shadow-lg border transition-all duration-300 ${
-      isDark 
-        ? "bg-gray-800 border-gray-700 shadow-gray-900/20" 
-        : "bg-white border-gray-200 shadow-gray-100/50"
-    }`}>
-      <div className={`flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 border-b transition-all duration-300 ${
-        isDark 
-          ? "border-gray-700 bg-gradient-to-r from-gray-900 to-gray-800" 
-          : "border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100"
-      } rounded-t-xl`}>
+    <div className="w-full md:w-72 xl:w-80 rounded-xl border transition-all duration-300 bg-[var(--card)] border-[var(--border)] shadow-sm">
+      <div className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 border-b transition-all duration-300 border-[var(--border)] bg-[var(--muted)] rounded-t-xl">
         <div className="flex items-center gap-2">
-          <Filter className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-300 ${isDark ? "text-blue-400" : "text-blue-600"}`} />
-          <h2 className={`text-lg sm:text-xl font-raleway font-bold tracking-wide transition-colors duration-300 ${
-            isDark ? "text-white" : "text-gray-900"
-          }`}>
+          <Filter className="w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-300 text-[var(--primary)]" />
+          <h2 className="text-lg sm:text-xl font-raleway font-bold tracking-wide transition-colors duration-300 text-[var(--foreground)]">
             Filters
           </h2>
         </div>
         <button 
           onClick={onClearFilters} 
-          className={`text-xs sm:text-sm flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-200 ${
-            isDark 
-              ? "text-red-400 hover:text-red-300 hover:bg-red-900/20 active:bg-red-900/30" 
-              : "text-red-600 hover:text-red-700 hover:bg-red-50 active:bg-red-100"
-          }`}
+          className="text-xs sm:text-sm flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-200 text-red-500 hover:text-red-600 hover:bg-red-500/10 active:bg-red-500/20"
         >
           <X size={12} className="sm:w-3.5 sm:h-3.5" /> 
           <span className="hidden sm:inline">Clear all</span>
@@ -241,9 +216,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
       <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 flex-1 transition-all duration-300">
         {/* Sort By Section */}
         <div className="space-y-2">
-          <h3 className={`text-sm font-semibold transition-colors duration-300 ${
-            isDark ? "text-gray-200" : "text-gray-800"
-          }`}>
+          <h3 className="text-sm font-semibold transition-colors duration-300 text-[var(--foreground)]">
             Sort By
           </h3>
           <div className="space-y-1.5 pl-1">
@@ -253,17 +226,13 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                   onClick={() => handleSortChange(option.value)} 
                   className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                     filters.sort === option.value 
-                      ? "bg-blue-500 border-blue-500" 
-                      : isDark 
-                        ? "border-gray-500 hover:border-gray-400" 
-                        : "border-gray-300 hover:border-gray-400"
+                      ? "bg-[var(--primary)] border-[var(--primary)]" 
+                      : "border-[var(--border)] hover:border-[var(--muted-foreground)]"
                   }`}
                 >
                   {filters.sort === option.value && <Check size={10} className="text-white" />}
                 </button>
-                <span className={`text-xs font-medium transition-colors duration-200 ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}>
+                <span className="text-xs font-medium transition-colors duration-200 text-[var(--muted-foreground)]">
                   {option.label}
                 </span>
               </div>
@@ -273,22 +242,18 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
 
         {/* Price Range Section */}
         <div className="space-y-2">
-          <h3 className={`text-sm font-semibold transition-colors duration-300 ${
-            isDark ? "text-gray-200" : "text-gray-800"
-          }`}>
+          <h3 className="text-sm font-semibold transition-colors duration-300 text-[var(--foreground)]">
             Price Range
           </h3>
           <div className="pl-1 space-y-3">
             <div className="relative">
               <div className="relative h-6 flex items-center">
                 {/* Track */}
-                <div className={`absolute w-full h-2 rounded-lg transition-colors duration-300 ${
-                  isDark ? "bg-gray-600" : "bg-gray-200"
-                }`}></div>
+                <div className="absolute w-full h-2 rounded-lg transition-colors duration-300 bg-[var(--muted)]"></div>
                 
                 {/* Active Range */}
                 <div 
-                  className="absolute h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-sm"
+                  className="absolute h-2 bg-[var(--primary)] rounded-lg shadow-sm"
                   style={{
                     left: `${(filters.priceRange[0] / 1000) * 100}%`,
                     width: `${((filters.priceRange[1] - filters.priceRange[0]) / 1000) * 100}%`
@@ -338,13 +303,11 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                 />
               </div>
             </div>
-            <div className={`flex justify-between text-sm font-semibold transition-colors duration-300 ${
-              isDark ? "text-gray-300" : "text-gray-600"
-            }`}>
-              <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+            <div className="flex justify-between text-sm font-semibold transition-colors duration-300 text-[var(--muted-foreground)]">
+              <span className="px-2 py-1 bg-[var(--primary)]/10 text-[var(--primary)] rounded">
                 {formatPrice(filters.priceRange[0])}
               </span>
-              <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+              <span className="px-2 py-1 bg-[var(--primary)]/10 text-[var(--primary)] rounded">
                 {formatPrice(filters.priceRange[1])}
               </span>
             </div>
@@ -358,17 +321,11 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
             <div className="flex flex-col items-start justify-between gap-2">
               <button
                 onClick={() => onFilterChange({ category: "", subcategory: "", subcategories: [] })}
-                className={`text-xs px-2 py-1 rounded-md font-medium transition-all duration-200 ${
-                  isDark 
-                    ? "text-red-400 hover:text-red-300 bg-red-900/20 hover:bg-red-900/30" 
-                    : "text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100"
-                }`}
+                className="text-xs px-2 py-1 rounded-md font-medium transition-all duration-200 text-red-500 hover:text-red-600 bg-red-500/10 hover:bg-red-500/20"
               >
                 ← Back to Categories
               </button>
-              <h3 className={`text-sm font-semibold transition-colors duration-300 ${
-                isDark ? "text-gray-200" : "text-gray-800"
-              }`}>
+              <h3 className="text-sm font-semibold transition-colors duration-300 text-[var(--foreground)]">
                 Subcategories
               </h3>
             </div>
@@ -381,12 +338,8 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                     onClick={() => handleSubcategoryChange(subcat.slug)} 
                     className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                       isSelected 
-                        ? isDark 
-                          ? "bg-blue-900/30 border-blue-600" 
-                          : "bg-blue-50 border-blue-400"
-                        : isDark 
-                          ? "hover:bg-gray-700/50 border-transparent" 
-                          : "hover:bg-gray-50 border-transparent"
+                        ? "bg-[var(--primary)]/10 border-[var(--primary)]"
+                        : "hover:bg-[var(--muted)] border-transparent"
                     }`}
                   >
                     {subcat.image && (
@@ -394,17 +347,13 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                         <Image src={subcat.image} alt={subcat.name} fill className="object-cover" />
                       </div>
                     )}
-                    <span className={`flex-1 text-xs font-medium transition-colors duration-200 ${
-                      isDark ? "text-gray-200" : "text-gray-800"
-                    }`}>
+                    <span className="flex-1 text-xs font-medium transition-colors duration-200 text-[var(--foreground)]">
                       {subcat.name}
                     </span>
                     <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
                       isSelected 
-                        ? "bg-blue-500 border-blue-500" 
-                        : isDark 
-                          ? "border-gray-500" 
-                          : "border-gray-300"
+                        ? "bg-[var(--primary)] border-[var(--primary)]" 
+                        : "border-[var(--border)]"
                     }`}>
                       {isSelected && <Check size={10} className="text-white" />}
                     </div>
@@ -414,11 +363,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
               {subcategories.length > 5 && (
                 <button 
                   onClick={() => setShowAllSubcategories(!showAllSubcategories)}
-                  className={`w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 ${
-                    isDark 
-                      ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
-                      : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  }`}
+                  className="w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 text-[var(--primary)] hover:bg-[var(--primary)]/10"
                 >
                   {showAllSubcategories ? "See Less" : `See More (${subcategories.length})`}
                 </button>
@@ -428,9 +373,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
         ) : (
           // Show categories when no category is selected
           <div className="space-y-2">
-            <h3 className={`text-sm font-semibold transition-colors duration-300 ${
-              isDark ? "text-gray-200" : "text-gray-800"
-            }`}>
+            <h3 className="text-sm font-semibold transition-colors duration-300 text-[var(--foreground)]">
               Categories
             </h3>
             <div className="space-y-2 pl-1">
@@ -440,12 +383,8 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                   onClick={() => handleCategoryChange(cat.slug)} 
                   className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                     filters.category === cat.slug 
-                      ? isDark 
-                        ? "bg-blue-900/30 border-blue-600" 
-                        : "bg-blue-50 border-blue-400"
-                      : isDark 
-                        ? "hover:bg-gray-700/50 border-transparent" 
-                        : "hover:bg-gray-50 border-transparent"
+                      ? "bg-[var(--primary)]/10 border-[var(--primary)]"
+                      : "hover:bg-[var(--muted)] border-transparent"
                   }`}
                 >
                   {cat.image && (
@@ -453,17 +392,13 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                       <Image src={cat.image} alt={cat.name} fill className="object-cover" />
                     </div>
                   )}
-                  <span className={`flex-1 text-xs font-medium transition-colors duration-200 ${
-                    isDark ? "text-gray-200" : "text-gray-800"
-                  }`}>
+                  <span className="flex-1 text-xs font-medium transition-colors duration-200 text-[var(--foreground)]">
                     {cat.name}
                   </span>
                   <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                     filters.category === cat.slug 
-                      ? "bg-blue-500 border-blue-500" 
-                      : isDark 
-                        ? "border-gray-500" 
-                        : "border-gray-300"
+                      ? "bg-[var(--primary)] border-[var(--primary)]" 
+                      : "border-[var(--border)]"
                   }`}>
                     {filters.category === cat.slug && <Check size={10} className="text-white" />}
                   </div>
@@ -472,11 +407,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
               {categories.length > 5 && (
                 <button 
                   onClick={() => setShowAllCategories(!showAllCategories)}
-                  className={`w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 ${
-                    isDark 
-                      ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
-                      : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  }`}
+                  className="w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 text-[var(--primary)] hover:bg-[var(--primary)]/10"
                 >
                   {showAllCategories ? "See Less" : `See More (${categories.length})`}
                 </button>
@@ -488,9 +419,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
         {/* Brand Section */}
         {brands.length > 0 && (
           <div className="space-y-2">
-            <h3 className={`text-sm font-semibold transition-colors duration-300 ${
-              isDark ? "text-gray-200" : "text-gray-800"
-            }`}>
+            <h3 className="text-sm font-semibold transition-colors duration-300 text-[var(--foreground)]">
               Brands
             </h3>
             <div className="space-y-2 pl-1">
@@ -502,12 +431,8 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                     onClick={() => handleBrandChange(brand.slug)} 
                     className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                       isSelected 
-                        ? isDark 
-                          ? "bg-blue-900/30 border-blue-600" 
-                          : "bg-blue-50 border-blue-400"
-                        : isDark 
-                          ? "hover:bg-gray-700/50 border-transparent" 
-                          : "hover:bg-gray-50 border-transparent"
+                        ? "bg-[var(--primary)]/10 border-[var(--primary)]"
+                        : "hover:bg-[var(--muted)] border-transparent"
                     }`}
                   >
                     {brand.image && (
@@ -515,17 +440,13 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                         <Image src={brand.image} alt={brand.name} fill className="object-cover" />
                       </div>
                     )}
-                    <span className={`flex-1 text-xs font-medium transition-colors duration-200 ${
-                      isDark ? "text-gray-200" : "text-gray-800"
-                    }`}>
+                    <span className="flex-1 text-xs font-medium transition-colors duration-200 text-[var(--foreground)]">
                       {brand.name}
                     </span>
                     <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
                       isSelected 
-                        ? "bg-blue-500 border-blue-500" 
-                        : isDark 
-                          ? "border-gray-500" 
-                          : "border-gray-300"
+                        ? "bg-[var(--primary)] border-[var(--primary)]" 
+                        : "border-[var(--border)]"
                     }`}>
                       {isSelected && <Check size={10} className="text-white" />}
                     </div>
@@ -535,11 +456,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
               {brands.length > 5 && (
                 <button 
                   onClick={() => setShowAllBrands(!showAllBrands)}
-                  className={`w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 ${
-                    isDark 
-                      ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
-                      : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  }`}
+                  className="w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 text-[var(--primary)] hover:bg-[var(--primary)]/10"
                 >
                   {showAllBrands ? "See Less" : `See More (${brands.length})`}
                 </button>
@@ -550,9 +467,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
 
         {/* Colors Section */}
         <div className="space-y-2">
-          <h3 className={`text-sm font-semibold transition-colors duration-300 ${
-            isDark ? "text-gray-200" : "text-gray-800"
-          }`}>
+          <h3 className="text-sm font-semibold transition-colors duration-300 text-[var(--foreground)]">
             Colors
           </h3>
           <div className="pl-1">
@@ -563,10 +478,8 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                   onClick={() => handleColorChange(color.name)} 
                   className={`relative w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ${
                     filters.colors.includes(color.name) 
-                      ? "ring-2 ring-blue-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-800" 
-                      : isDark 
-                        ? "ring-1 ring-gray-600" 
-                        : "ring-1 ring-gray-300"
+                      ? "ring-2 ring-[var(--primary)] ring-offset-1 ring-offset-[var(--card)]" 
+                      : "ring-1 ring-[var(--border)]"
                   }`} 
                   style={{ backgroundColor: color.hex_code }} 
                   title={color.name}
@@ -582,11 +495,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
             {colors.length > 6 && (
               <button 
                 onClick={() => setShowAllColors(!showAllColors)}
-                className={`w-full text-xs px-2 py-1.5 rounded-md mt-2 font-medium transition-all duration-200 ${
-                  isDark 
-                    ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
-                    : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                }`}
+                className="w-full text-xs px-2 py-1.5 rounded-md mt-2 font-medium transition-all duration-200 text-[var(--primary)] hover:bg-[var(--primary)]/10"
               >
                 {showAllColors ? "See Less" : `See More (${colors.length})`}
               </button>
@@ -597,9 +506,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
         {/* Shipping Categories Section */}
         {shippingCategories.length > 0 && (
           <div className="space-y-2">
-            <h3 className={`text-sm font-semibold transition-colors duration-300 ${
-              isDark ? "text-gray-200" : "text-gray-800"
-            }`}>
+            <h3 className="text-sm font-semibold transition-colors duration-300 text-[var(--foreground)]">
               Shipping Options
             </h3>
             <div className="space-y-2 pl-1">
@@ -609,27 +516,19 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
                   onClick={() => handleShippingCategoryChange(category.id)} 
                   className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                     (filters.shipping_categories || []).includes(category.id) 
-                      ? isDark 
-                        ? "bg-blue-900/30 border-blue-600" 
-                        : "bg-blue-50 border-blue-400"
-                      : isDark 
-                        ? "hover:bg-gray-700/50 border-transparent" 
-                        : "hover:bg-gray-50 border-transparent"
+                      ? "bg-[var(--primary)]/10 border-[var(--primary)]"
+                      : "hover:bg-[var(--muted)] border-transparent"
                   }`}
                 >
                   <div className="flex-1 min-w-0">
-                    <h4 className={`text-xs font-medium truncate transition-colors duration-200 ${
-                      isDark ? "text-gray-200" : "text-gray-800"
-                    }`}>
+                    <h4 className="text-xs font-medium truncate transition-colors duration-200 text-[var(--foreground)]">
                       {category.name}
                     </h4>
                   </div>
                   <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
                     (filters.shipping_categories || []).includes(category.id) 
-                      ? "bg-blue-500 border-blue-500" 
-                      : isDark 
-                        ? "border-gray-500" 
-                        : "border-gray-300"
+                      ? "bg-[var(--primary)] border-[var(--primary)]" 
+                      : "border-[var(--border)]"
                   }`}>
                     {(filters.shipping_categories || []).includes(category.id) && <Check size={10} className="text-white" />}
                   </div>
@@ -638,11 +537,7 @@ const Sidebar = ({ filters, onFilterChange, onClearFilters, theme }) => {
               {shippingCategories.length > 5 && (
                 <button 
                   onClick={() => setShowAllShippingCategories(!showAllShippingCategories)}
-                  className={`w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 ${
-                    isDark 
-                      ? "text-blue-400 hover:text-blue-300 hover:bg-blue-900/20" 
-                      : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  }`}
+                  className="w-full text-xs px-2 py-1.5 rounded-md font-medium transition-all duration-200 text-[var(--primary)] hover:bg-[var(--primary)]/10"
                 >
                   {showAllShippingCategories ? "See Less" : `See More (${shippingCategories.length})`}
                 </button>

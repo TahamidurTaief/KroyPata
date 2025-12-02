@@ -16,23 +16,23 @@ export default function ProductTabs({ product }) {
   ];
 
   return (
-    <div id="product-tabs" className="bg-[var(--color-second-bg)] rounded-xl p-6 lg:p-8 shadow-lg border border-border">
+    <div id="product-tabs" className="bg-[var(--card)] rounded-xl p-6 lg:p-8 shadow-lg border border-[var(--border)]">
       {/* Tab Buttons */}
-      <div className="flex gap-4 lg:gap-8 border-b border-border mb-6 overflow-x-auto">
+      <div className="flex gap-4 lg:gap-8 border-b border-[var(--border)] mb-6 overflow-x-auto">
         {tabs.map((tab) => (
           <button 
             key={tab.id} 
             onClick={() => setActiveTab(tab.id)} 
             className={`pb-3 px-1 text-lg font-semibold transition-colors duration-200 whitespace-nowrap relative focus:outline-none
               ${activeTab === tab.id 
-                ? "text-primary" 
-                : "text-muted-foreground hover:text-foreground"
+                ? "text-[var(--primary)]" 
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
               }`}
           >
             {tab.name}
             {activeTab === tab.id && (
               <motion.div 
-                className="absolute bottom-[-1px] left-0 w-full h-0.5 bg-primary" 
+                className="absolute bottom-[-1px] left-0 w-full h-0.5 bg-[var(--primary)]" 
                 layoutId="underline"
               />
             )}
@@ -41,7 +41,7 @@ export default function ProductTabs({ product }) {
       </div>
       
       {/* Tab Content */}
-      <div className="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none">
+      <div className="mt-4 text-[var(--muted-foreground)] leading-relaxed prose dark:prose-invert max-w-none">
         {activeTab === "description" && (
           <div dangerouslySetInnerHTML={{ __html: product.description || "No description available." }} />
         )}
@@ -51,9 +51,9 @@ export default function ProductTabs({ product }) {
               <table className="w-full text-left border-collapse">
                 <tbody>
                   {product.specifications.map((spec, index) => (
-                    <tr key={spec.name} className="border-b border-border last:border-b-0">
-                      <td className="py-3 pr-4 font-semibold text-foreground">{spec.name}</td>
-                      <td className="py-3 text-muted-foreground">{spec.value}</td>
+                    <tr key={spec.name} className="border-b border-[var(--border)] last:border-b-0">
+                      <td className="py-3 pr-4 font-semibold text-[var(--foreground)]">{spec.name}</td>
+                      <td className="py-3 text-[var(--muted-foreground)]">{spec.value}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -70,10 +70,10 @@ export default function ProductTabs({ product }) {
             ) : (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📦</div>
-                <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">
                   No Shipping Information
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-[var(--muted-foreground)]">
                   This product doesn't have specific shipping details configured yet.
                 </p>
               </div>
@@ -82,7 +82,7 @@ export default function ProductTabs({ product }) {
         )}
         {activeTab === "seller" && (
           <div>
-            <h3 className="text-xl font-semibold mb-3 text-foreground">{product.shop?.name || 'Shop Information'}</h3>
+            <h3 className="text-xl font-semibold mb-3 text-[var(--foreground)]">{product.shop?.name || 'Shop Information'}</h3>
             <p>{product.shop?.description || "No description available for this shop."}</p>
           </div>
         )}
@@ -91,12 +91,12 @@ export default function ProductTabs({ product }) {
             {product.reviews?.length > 0 ? (
                 <div className="space-y-6">
                     {product.reviews.map(review => (
-                        <div key={review.id} className="border-b border-border pb-4 last:border-b-0">
-                            <p className="font-semibold text-foreground">{review.user}</p>
-                            <p className="text-sm text-muted-foreground mb-1">{new Date(review.created_at).toLocaleDateString()}</p>
+                        <div key={review.id} className="border-b border-[var(--border)] pb-4 last:border-b-0">
+                            <p className="font-semibold text-[var(--foreground)]">{review.user}</p>
+                            <p className="text-sm text-[var(--muted-foreground)] mb-1">{new Date(review.created_at).toLocaleDateString()}</p>
                             <div className="flex text-amber-500 my-1">
                                 {[...Array(5)].map((_, i) => (
-                                    <svg key={i} className={`w-4 h-4 ${i < review.rating ? "fill-current" : "stroke-current text-gray-300"}`} viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" /></svg>
+                                    <svg key={i} className={`w-4 h-4 ${i < review.rating ? "fill-current" : "stroke-current text-[var(--muted)]"}`} viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" /></svg>
                                 ))}
                             </div>
                             <p>{review.comment}</p>

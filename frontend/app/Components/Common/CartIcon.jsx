@@ -26,7 +26,7 @@ const CartIcon = ({ cartCount, animationTrigger, className = "", iconClassName =
           transition: { duration: 0.2 }
         }}
         whileTap={{ scale: 0.95 }}
-        className={`relative p-2 rounded-full bg-[var(--color-muted-bg)] hover:bg-[var(--color-border)] transition-colors ${className}`}
+        className={`relative p-2 rounded-full bg-[var(--muted)] hover:bg-[var(--muted)]/80 transition-colors ${className}`}
         animate={showPulse ? {
           scale: [1, 1.25, 1],
           rotate: [0, -10, 10, 0],
@@ -46,7 +46,7 @@ const CartIcon = ({ cartCount, animationTrigger, className = "", iconClassName =
           } : {}}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <CiShoppingCart className={`${iconClassName} text-[var(--color-text-primary)]`} />
+          <CiShoppingCart className={`${iconClassName} text-[var(--foreground)]`} />
         </motion.div>
         
         {/* Cart Count Badge */}
@@ -60,11 +60,11 @@ const CartIcon = ({ cartCount, animationTrigger, className = "", iconClassName =
                 y: showPulse ? [-2, 0] : 0
               }}
               exit={{ scale: 0, opacity: 0 }}
-              className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1 shadow-lg"
+              className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-[var(--primary)] text-white text-xs font-bold rounded-full flex items-center justify-center px-1 shadow-lg"
               style={{
                 fontSize: '10px',
                 lineHeight: '1',
-                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                boxShadow: '0 2px 8px rgba(224, 39, 56, 0.3)'
               }}
             >
               <motion.span
@@ -89,7 +89,7 @@ const CartIcon = ({ cartCount, animationTrigger, className = "", iconClassName =
           {showPulse && (
             <>
               <motion.div
-                className="absolute inset-0 rounded-full bg-[var(--color-button-primary)]"
+                className="absolute inset-0 rounded-full bg-[var(--primary)]"
                 initial={{ scale: 0.8, opacity: 0.6 }}
                 animate={{ scale: 2, opacity: 0 }}
                 exit={{ opacity: 0 }}
@@ -97,7 +97,7 @@ const CartIcon = ({ cartCount, animationTrigger, className = "", iconClassName =
                 style={{ zIndex: -1 }}
               />
               <motion.div
-                className="absolute inset-0 rounded-full bg-green-400"
+                className="absolute inset-0 rounded-full bg-[#4ade80]"
                 initial={{ scale: 0.6, opacity: 0.4 }}
                 animate={{ scale: 1.8, opacity: 0 }}
                 exit={{ opacity: 0 }}
@@ -112,7 +112,7 @@ const CartIcon = ({ cartCount, animationTrigger, className = "", iconClassName =
         <AnimatePresence>
           {showPulse && (
             <motion.div
-              className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full"
+              className="absolute top-0 right-0 w-3 h-3 bg-[#22c55e] rounded-full"
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}

@@ -45,13 +45,13 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
   };
 
   return (
-    <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--cart-card-bg)' }}>
+    <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--card)' }}>
       <motion.h3 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3, delay: 0.3 }}
         className="text-sm font-bold mb-3" 
-        style={{ color: 'var(--cart-text-primary)' }}
+        style={{ color: 'var(--foreground)' }}
       >
         4. Payment Details
       </motion.h3>
@@ -62,14 +62,14 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
           onClick={() => onPaymentMethodSelect("cod")}
           className={`flex items-center px-3 py-1.5 rounded text-xs font-medium transition-all ${
             selectedMethod === "cod"
-              ? "bg-green-50 text-green-600 ring-1 ring-green-200 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800"
-              : "bg-[var(--color-muted-bg)] text-[var(--color-text-secondary)]"
+              ? "bg-[#f0fdf4] text-[#16a34a] ring-1 ring-[#bbf7d0]"
+              : "bg-[var(--muted)] text-[var(--muted-foreground)]"
           }`}
         >
           <div className={`w-4 h-4 rounded-full border mr-2 flex items-center justify-center ${
-             selectedMethod === "cod" ? "border-green-600 dark:border-green-400" : "border-gray-400"
+             selectedMethod === "cod" ? "border-[#16a34a]" : "border-[var(--muted-foreground)]"
           }`}>
-            {selectedMethod === "cod" && <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full" />}
+            {selectedMethod === "cod" && <div className="w-2 h-2 bg-[#16a34a] rounded-full" />}
           </div>
           <FaTruck className="w-4 h-4 mr-1" />
           Cash on Delivery
@@ -79,14 +79,14 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
           onClick={() => onPaymentMethodSelect("mobile")}
           className={`flex items-center px-3 py-1.5 rounded text-xs font-medium transition-all ${
             selectedMethod === "mobile"
-              ? "bg-blue-50 text-blue-600 ring-1 ring-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800"
-              : "bg-[var(--color-muted-bg)] text-[var(--color-text-secondary)]"
+              ? "bg-[var(--primary)]/10 text-[var(--primary)] ring-1 ring-[var(--primary)]/20"
+              : "bg-[var(--muted)] text-[var(--muted-foreground)]"
           }`}
         >
           <div className={`w-4 h-4 rounded-full border mr-2 flex items-center justify-center ${
-             selectedMethod === "mobile" ? "border-blue-600 dark:border-blue-400" : "border-gray-400"
+             selectedMethod === "mobile" ? "border-[var(--primary)]" : "border-[var(--muted-foreground)]"
           }`}>
-            {selectedMethod === "mobile" && <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full" />}
+            {selectedMethod === "mobile" && <div className="w-2 h-2 bg-[var(--primary)] rounded-full" />}
           </div>
           <FaMobileAlt className="w-4 h-4 mr-1" />
           Mobile Banking
@@ -96,8 +96,8 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
       {/* Cash on Delivery Form */}
       {selectedMethod === "cod" && (
         <div className="space-y-4 animate-in fade-in duration-300">
-          <div className="p-3 rounded" style={{ backgroundColor: 'var(--cart-success-bg)', border: '1px solid var(--cart-success-border)' }}>
-            <p className="text-xs" style={{ color: 'var(--cart-success-text)' }}>
+          <div className="p-3 rounded" style={{ backgroundColor: 'var(--primary-10)', border: '1px solid var(--primary)' }}>
+            <p className="text-xs" style={{ color: 'var(--primary)' }}>
               Pay with cash when your order is delivered. No advance payment required.
             </p>
           </div>
@@ -111,9 +111,9 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
                 validationErrors.codFullName ? 'border-red-500' : ''
               }`}
               style={{ 
-                backgroundColor: 'var(--cart-input-bg)', 
-                color: 'var(--cart-text-primary)',
-                border: validationErrors.codFullName ? '1px solid #ef4444' : '1px solid var(--cart-input-border)'
+                backgroundColor: 'var(--background)', 
+                color: 'var(--foreground)',
+                border: validationErrors.codFullName ? '1px solid #ef4444' : '1px solid var(--border)'
               }}
               onChange={(e) => handleCodDetailsChange({...localCodDetails, fullName: e.target.value})}
               required
@@ -132,9 +132,9 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
                 validationErrors.codPhone ? 'border-red-500' : ''
               }`}
               style={{ 
-                backgroundColor: 'var(--cart-input-bg)', 
-                color: 'var(--cart-text-primary)',
-                border: validationErrors.codPhone ? '1px solid #ef4444' : '1px solid var(--cart-input-border)'
+                backgroundColor: 'var(--background)', 
+                color: 'var(--foreground)',
+                border: validationErrors.codPhone ? '1px solid #ef4444' : '1px solid var(--border)'
               }}
               onChange={(e) => handleCodDetailsChange({...localCodDetails, alternativePhone: e.target.value})}
               required
@@ -151,9 +151,9 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
               rows={2}
               className="px-3 py-2 text-sm rounded outline-none transition-colors w-full resize-none"
               style={{ 
-                backgroundColor: 'var(--cart-input-bg)', 
-                color: 'var(--cart-text-primary)',
-                border: '1px solid var(--cart-input-border)'
+                backgroundColor: 'var(--background)', 
+                color: 'var(--foreground)',
+                border: '1px solid var(--border)'
               }}
               onChange={(e) => handleCodDetailsChange({...localCodDetails, notes: e.target.value})}
             />
@@ -166,14 +166,14 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
         <div className="space-y-4 animate-in fade-in duration-300">
           {/* Banking Method Selection */}
           <div>
-            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--cart-text-primary)' }}>
+            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--foreground)' }}>
               Banking Method <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { value: "bkash", label: "bKash", color: "bg-pink-100 border-pink-300 text-pink-800 dark:bg-pink-900/20 dark:border-pink-700 dark:text-pink-300" },
-                { value: "nagad", label: "Nagad", color: "bg-orange-100 border-orange-300 text-orange-800 dark:bg-orange-900/20 dark:border-orange-700 dark:text-orange-300" },
-                { value: "rocket", label: "Rocket", color: "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900/20 dark:border-purple-700 dark:text-purple-300" }
+                { value: "bkash", label: "bKash", color: "bg-pink-100 border-pink-300 text-pink-800" },
+                { value: "nagad", label: "Nagad", color: "bg-orange-100 border-orange-300 text-orange-800" },
+                { value: "rocket", label: "Rocket", color: "bg-purple-100 border-purple-300 text-purple-800" }
               ].map((method) => (
                 <button
                   key={method.value}
@@ -182,7 +182,7 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
                   className={`p-2 border rounded text-xs font-medium transition-all ${
                     localMobileBankingDetails.paymentMethod === method.value
                       ? method.color
-                      : "border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500"
+                      : "border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--foreground)]"
                   }`}
                 >
                   {method.label}
@@ -192,8 +192,8 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
           </div>
 
           {/* Instructions Section */}
-          <div className="p-3 rounded" style={{ backgroundColor: 'var(--cart-success-bg)', border: '1px solid var(--cart-success-border)' }}>
-            <div className="text-xs" style={{ color: 'var(--cart-success-text)' }}>
+          <div className="p-3 rounded" style={{ backgroundColor: 'var(--primary-10)', border: '1px solid var(--primary)' }}>
+            <div className="text-xs" style={{ color: 'var(--primary)' }}>
               <p>1. Send money to our {localMobileBankingDetails.paymentMethod.toUpperCase()} number</p>
               <p>2. Copy transaction ID and enter below</p>
             </div>
@@ -201,17 +201,17 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
 
           {/* Admin Account Number Display */}
           <div>
-            <label className="block text-xs font-medium text-[var(--color-text-primary)] mb-2">
+            <label className="block text-xs font-medium text-[var(--foreground)] mb-2">
               Send Money To
             </label>
-            <div className="flex items-center p-2 rounded" style={{ backgroundColor: 'var(--cart-warning-bg)', border: '1px solid var(--cart-warning-border)' }}>
+            <div className="flex items-center p-2 rounded" style={{ backgroundColor: 'var(--muted)', border: '1px solid var(--border)' }}>
               <div className="flex-1">
-                <span className="font-bold text-sm" style={{ color: 'var(--cart-text-primary)' }}>
+                <span className="font-bold text-sm" style={{ color: 'var(--foreground)' }}>
                   {localMobileBankingDetails.paymentMethod === "bkash" ? "01700000000" : 
                    localMobileBankingDetails.paymentMethod === "nagad" ? "01800000000" : 
                    "01900000000"}
                 </span>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--cart-text-muted)' }}>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
                   {localMobileBankingDetails.paymentMethod.charAt(0).toUpperCase() + localMobileBankingDetails.paymentMethod.slice(1)} Account
                 </p>
               </div>
@@ -223,7 +223,7 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
                                 "01900000000";
                   navigator.clipboard.writeText(number);
                 }}
-                className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="px-3 py-1 text-xs bg-[var(--muted)] text-[var(--foreground)] rounded hover:bg-[var(--muted)]/80 transition-colors"
               >
                 Copy
               </button>
@@ -241,9 +241,9 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
                   validationErrors.senderNumber ? 'border-red-500' : ''
                 }`}
                 style={{ 
-                  backgroundColor: 'var(--cart-input-bg)', 
-                  color: 'var(--cart-text-primary)',
-                  border: validationErrors.senderNumber ? '1px solid #ef4444' : '1px solid var(--cart-input-border)'
+                  backgroundColor: 'var(--background)', 
+                  color: 'var(--foreground)',
+                  border: validationErrors.senderNumber ? '1px solid #ef4444' : '1px solid var(--border)'
                 }}
                 onChange={(e) => handleMobileBankingDetailsChange({...localMobileBankingDetails, senderNumber: e.target.value})}
                 required
@@ -262,9 +262,9 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
                   validationErrors.transactionId ? 'border-red-500' : ''
                 }`}
                 style={{ 
-                  backgroundColor: 'var(--cart-input-bg)', 
-                  color: 'var(--cart-text-primary)',
-                  border: validationErrors.transactionId ? '1px solid #ef4444' : '1px solid var(--cart-input-border)'
+                  backgroundColor: 'var(--background)', 
+                  color: 'var(--foreground)',
+                  border: validationErrors.transactionId ? '1px solid #ef4444' : '1px solid var(--border)'
                 }}
                 onChange={(e) => handleMobileBankingDetailsChange({...localMobileBankingDetails, transactionId: e.target.value})}
                 required
@@ -282,8 +282,8 @@ const PaymentSection = ({ onPaymentMethodSelect, selectedMethod = "cod", onPay, 
         <motion.button
           className={`w-full py-3 font-medium rounded-lg transition-all ${
             isSubmitting 
-              ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
+              ? 'bg-[var(--muted)] cursor-not-allowed text-[var(--muted-foreground)]' 
+              : 'bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white'
           }`}
           whileTap={isSubmitting ? {} : { scale: 0.98 }}
           onClick={onPay}

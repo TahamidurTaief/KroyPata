@@ -170,6 +170,7 @@ export default function OrderDisplay({ order }) {
                     fill
                     className="object-cover"
                     sizes="56px"
+                    unoptimized={item.product.image && item.product.image.includes('.svg')}
                   />
                 </div>
                 <div className="flex-1">

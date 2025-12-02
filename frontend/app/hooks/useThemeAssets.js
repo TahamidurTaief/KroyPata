@@ -22,13 +22,13 @@ export const useThemeAssets = () => {
 
   // Logo paths based on theme
   const logoSrc = currentTheme === 'dark' 
-    ? '/img/logo_dark.svg' 
-    : '/img/logo_light.svg';
+    ? '/img/logo_dark.svg?v=new' 
+    : '/img/logo_light.svg?v=new';
 
   // No-image placeholder paths based on theme
   const noImagePlaceholder = currentTheme === 'dark'
-    ? '/img/no_img_dark.svg'
-    : '/img/no_img_light.svg';
+    ? '/img/no_img_dark.svg?v=new'
+    : '/img/no_img_light.svg?v=new';
 
   // Theme-aware banner images with fallback system
   const getThemeBanner = (bannerName) => {

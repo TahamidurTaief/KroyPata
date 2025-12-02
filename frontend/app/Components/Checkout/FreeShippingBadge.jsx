@@ -17,44 +17,44 @@ export default function FreeShippingBadge({ cartTotal, thresholdAmount, isEligib
   const progressPercentage = Math.min((cartTotal / thresholdAmount) * 100, 100);
 
   return (
-    <div className="bg-white rounded-lg border p-4 mb-4 shadow-sm">
+    <div className="bg-[var(--card)] rounded-lg border border-[var(--border)] p-4 mb-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
-          <FaTruck className="h-5 w-5 text-blue-600" />
-          <span className="font-medium text-gray-900">Free Shipping</span>
+          <FaTruck className="h-5 w-5 text-[var(--primary)]" />
+          <span className="font-medium text-[var(--foreground)]">Free Shipping</span>
         </div>
         
         {isEligible ? (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0]">
             <FaCheckCircle className="h-3 w-3 mr-1" />
             Eligible
           </span>
         ) : (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#fefce8] text-[#854d0e] border border-[#fef08a]">
             <Tk_icon size={12} className="mr-1" />{remainingAmount.toFixed(2)} away
           </span>
         )}
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+      <div className="w-full bg-[var(--muted)] rounded-full h-2 mb-2">
         <div 
           className={`h-2 rounded-full transition-all duration-300 ease-in-out ${
-            isEligible ? 'bg-green-500' : 'bg-blue-500'
+            isEligible ? 'bg-[#22c55e]' : 'bg-[var(--primary)]'
           }`}
           style={{ width: `${progressPercentage}%` }}
         />
       </div>
 
       {/* Status Text */}
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-[var(--muted-foreground)]">
         {isEligible ? (
-          <span className="text-green-700 font-medium">
+          <span className="text-[#15803d] font-medium">
             🎉 You qualify for free shipping!
           </span>
         ) : (
           <>
-            Add <span className="font-medium text-gray-900 inline-flex items-center"><Tk_icon size={14} className="mr-1" />{remainingAmount.toFixed(2)}</span> more to qualify for free shipping
+            Add <span className="font-medium text-[var(--foreground)] inline-flex items-center"><Tk_icon size={14} className="mr-1" />{remainingAmount.toFixed(2)}</span> more to qualify for free shipping
           </>
         )}
       </p>

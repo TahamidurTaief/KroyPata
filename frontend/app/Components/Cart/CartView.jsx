@@ -69,7 +69,7 @@ const CartView = () => {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen pb-20 pt-4 sm:pt-6 md:pt-10 font-sans" style={{ backgroundColor: 'var(--cart-bg)' }}>
+    <div className="min-h-screen pb-20 pt-4 sm:pt-6 md:pt-10 font-sans" style={{ backgroundColor: 'var(--background)' }}>
       <div className="container mx-auto px-2 sm:px-4 max-w-7xl">
         
         {/* Main Grid Layout */}
@@ -98,8 +98,8 @@ const CartView = () => {
             />
 
             {/* 2. Product-Based Shipping Methods - Second */}
-            <div className="rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm" style={{ backgroundColor: 'var(--cart-card-bg)', boxShadow: '0 1px 3px var(--cart-shadow)' }}>
-              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ color: 'var(--cart-text-primary)' }}>Available Shipping Methods</h3>
+            <div className="rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm" style={{ backgroundColor: 'var(--card)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ color: 'var(--foreground)' }}>Available Shipping Methods</h3>
               <ShippingAnalysis
                 cartItems={cartItems}
                 cartTotal={totalsWithCoupon.subtotal}

@@ -217,14 +217,20 @@ async function fetchAPI(endpoint, options = {}) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
-      const response = await fetchWithRetryInternal(url, { 
+      const fetchOptions = { 
         ...options, 
         headers: requestHeaders, 
         signal: controller.signal,
-        // Use Next.js caching options if provided, otherwise use default caching
+        // Use Next.js caching options if provided
         ...(options.next ? { next: options.next } : {}),
-        cache: options.cache || (options.method && options.method !== 'GET' ? 'no-store' : 'default')
-      });
+      };
+
+      // Only set cache if next is NOT provided to avoid conflict
+      if (!options.next) {
+        fetchOptions.cache = options.cache || (options.method && options.method !== 'GET' ? 'no-store' : 'default');
+      }
+      
+      const response = await fetchWithRetryInternal(url, fetchOptions);
       
       clearTimeout(timeoutId);
       

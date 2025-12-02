@@ -15,8 +15,8 @@ const SubcategoryImage = ({ src, alt }) => {
 
   if (hasError) {
     return (
-      <div className="aspect-square w-full rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[var(--color-muted-bg)] dark:to-[#2a3441] flex items-center justify-center shadow-inner">
-        <span className="text-xs text-center text-gray-500 dark:text-[var(--color-text-secondary)]">
+      <div className="aspect-square w-full rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[var(--muted)] dark:to-[var(--card)] flex items-center justify-center shadow-inner">
+        <span className="text-xs text-center text-[var(--muted-foreground)]">
           No Image
         </span>
       </div>
@@ -27,7 +27,7 @@ const SubcategoryImage = ({ src, alt }) => {
     <Image
       src={src}
       alt={alt}
-      className="aspect-square w-full object-cover rounded-xl bg-white shadow-inner"
+      className="aspect-square w-full object-cover rounded-xl bg-[var(--card)] shadow-inner"
       width={80}
       height={80}
       unoptimized
@@ -44,12 +44,12 @@ const CategoryCards = ({ categories = [] }) => {
   if (!Array.isArray(categories)) {
     console.warn('CategoryCards: categories prop is not an array', categories);
     return (
-      <section className="py-16 px-4 bg-[var(--color-background)]">
+      <section className="py-16 px-4 bg-[var(--background)]">
         <div className="container mx-auto">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 text-center text-[var(--color-text-primary)]">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 text-center text-[var(--foreground)]">
             Browse by <span className="text-sky-500">Category</span>
           </h2>
-          <div className="text-center text-[var(--color-text-secondary)]">
+          <div className="text-center text-[var(--muted-foreground)]">
             <p>Categories are loading...</p>
           </div>
         </div>
@@ -146,11 +146,11 @@ const CategoryCards = ({ categories = [] }) => {
         <div>
           <h2 
             id="category-section-title"
-            className="text-xl md:text-2xl lg:text-4xl xl:text-5xl font-bold text-[var(--color-text-primary)]"
+            className="text-xl md:text-2xl lg:text-4xl xl:text-5xl font-bold text-[var(--foreground)]"
           >
             Shop by <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-500">Category</span>
           </h2>
-          <p className="mt-2 text-sm md:text-base text-[var(--color-text-secondary)]">
+          <p className="mt-2 text-sm md:text-base text-[var(--muted-foreground)]">
             Explore our wide range of products organized by category
           </p>
         </div>
@@ -196,10 +196,10 @@ const CategoryCards = ({ categories = [] }) => {
 
               {/* Category Name Section */}
               <div className="mb-4 relative z-10">
-                <h3 className="font-bold text-xl md:text-2xl text-gray-900 dark:text-white mb-1 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                <h3 className="font-bold text-xl md:text-2xl text-[var(--foreground)] mb-1 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                   {category.name}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-[var(--muted-foreground)]">
                   {category.subcategories?.length || 0} subcategories
                 </p>
               </div>
@@ -225,8 +225,8 @@ const CategoryCards = ({ categories = [] }) => {
                       unoptimized
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-                      <span className="text-gray-400 dark:text-gray-500 text-sm">No Image</span>
+                    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[var(--muted)] dark:to-[var(--card)] flex items-center justify-center">
+                      <span className="text-[var(--muted-foreground)] text-sm">No Image</span>
                     </div>
                   )}
                   {subcategoryData[0]?.slug && (
@@ -308,7 +308,7 @@ const CategoryCards = ({ categories = [] }) => {
 
               {/* Hover Action Button */}
               <motion.div
-                className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white dark:from-gray-900 via-white/90 dark:via-gray-900/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-center z-20"
+                className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[var(--card)] via-[var(--card)]/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-center z-20"
                 initial={{ opacity: 0, y: 10 }}
               >
                 <motion.button
@@ -351,10 +351,10 @@ const CategoryCards = ({ categories = [] }) => {
 
                 {/* Category Name */}
                 <div className="mb-3 relative z-10">
-                  <h3 className="font-bold text-base md:text-lg text-gray-900 dark:text-white truncate">
+                  <h3 className="font-bold text-base md:text-lg text-[var(--foreground)] truncate">
                     {category.name}
                   </h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                  <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
                     {category.subcategories?.length || 0} items
                   </p>
                 </div>
@@ -377,8 +377,8 @@ const CategoryCards = ({ categories = [] }) => {
                         unoptimized
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-                        <span className="text-gray-400 dark:text-gray-500 text-xs">No Image</span>
+                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[var(--muted)] dark:to-[var(--card)] flex items-center justify-center">
+                        <span className="text-[var(--muted-foreground)] text-xs">No Image</span>
                       </div>
                     )}
                     {subcategoryData[0]?.name && (

@@ -87,31 +87,31 @@ const RelatedProducts = ({ product }) => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}
-      className="mt-12 lg:mt-16 p-6 sm:p-8 bg-[var(--color-second-bg)] rounded-xl border border-[var(--color-border)] shadow-sm"
+      className="mt-12 lg:mt-16 p-6 sm:p-8 bg-[var(--card)] rounded-xl border border-[var(--border)] shadow-sm"
     >
       <div className="mb-6 sm:mb-8">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--color-text-primary)] mb-2">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--foreground)] mb-2">
           Related <span className="text-sky-500">Products</span>
         </h2>
-        <p className="text-[var(--color-text-secondary)] text-sm md:text-base">
+        <p className="text-[var(--muted-foreground)] text-sm md:text-base">
           {categoryName ? 'Discover more products from ' + categoryName : 'Discover more products from the same category'}
         </p>
       </div>
 
       {loading && (
         <div className="space-y-4">
-          <div className="flex items-center justify-center text-[var(--color-text-secondary)] mb-6">
+          <div className="flex items-center justify-center text-[var(--muted-foreground)] mb-6">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-sky-500"></div>
             <span className="ml-3 text-sm">Loading related products...</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
             {[...Array(8)].map((_, index) => (
               <div key={index} className="animate-pulse">
-                <div className="bg-[var(--color-muted-bg)] rounded-lg aspect-square mb-3 sm:mb-4"></div>
+                <div className="bg-[var(--muted)] rounded-lg aspect-square mb-3 sm:mb-4"></div>
                 <div className="space-y-2">
-                  <div className="h-3 sm:h-4 bg-[var(--color-muted-bg)] rounded w-3/4"></div>
-                  <div className="h-3 sm:h-4 bg-[var(--color-muted-bg)] rounded w-1/2"></div>
-                  <div className="h-4 sm:h-6 bg-[var(--color-muted-bg)] rounded w-1/3"></div>
+                  <div className="h-3 sm:h-4 bg-[var(--muted)] rounded w-3/4"></div>
+                  <div className="h-3 sm:h-4 bg-[var(--muted)] rounded w-1/2"></div>
+                  <div className="h-4 sm:h-6 bg-[var(--muted)] rounded w-1/3"></div>
                 </div>
               </div>
             ))}
@@ -121,8 +121,8 @@ const RelatedProducts = ({ product }) => {
 
       {error && (
         <div className="text-center py-6 sm:py-8">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 sm:p-6 max-w-md mx-auto">
-            <p className="text-red-700 dark:text-red-300 text-sm">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 sm:p-6 max-w-md mx-auto">
+            <p className="text-red-500 text-sm">
               {error}
             </p>
           </div>
@@ -131,7 +131,7 @@ const RelatedProducts = ({ product }) => {
 
       {!loading && !error && relatedProducts.length === 0 && (
         <div className="text-center py-6 sm:py-8">
-          <div className="text-[var(--color-text-secondary)]">
+          <div className="text-[var(--muted-foreground)]">
             <p className="text-sm sm:text-base">No related products found at the moment.</p>
             <p className="text-xs sm:text-sm mt-2">Check back later for more products in this category.</p>
           </div>
@@ -177,7 +177,7 @@ const RelatedProducts = ({ product }) => {
         >
           <Link
             href={`/products?category=${categorySlug}`}
-            className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-[var(--color-button-primary)] hover:bg-[var(--color-button-primary)]/90 text-white font-medium rounded-lg transition-all duration-200 group shadow-md hover:shadow-lg"
+            className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-medium rounded-lg transition-all duration-200 group shadow-md hover:shadow-lg"
           >
             <span className="text-sm sm:text-base">{'View All ' + (categoryName || 'Category') + ' Products'}</span>
             <svg

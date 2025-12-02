@@ -11,23 +11,23 @@
   /* --- LIGHT MODE COLORS --- */
   --color-background: #f9fafb;
   --color-second-bg: #ffffff;
-  --color-text-primary: #1f2937;
-  --color-text-secondary: #4b5563;
-  --color-button-primary: #2563eb;
-  --color-accent-orange: #f59e0b;
+  --color-text-primary: #111111;
+  --color-text-secondary: #2C2C2C;
+  --color-button-primary: #E02738;
+  --color-accent-orange: #FFF164;
   --color-accent-green: #16a34a;
   --color-border: #e5e7eb;
   
   /* Order Status Colors */
-  --color-status-pending: #f59e0b;    /* Orange for pending */
-  --color-status-processing: #2563eb; /* Blue for processing */
+  --color-status-pending: #FFF164;    /* Orange for pending */
+  --color-status-processing: #E02738; /* Blue for processing */
   --color-status-shipped: #16a34a;    /* Green for shipped */
   --color-status-delivered: #16a34a;  /* Green for delivered */
-  --color-status-cancelled: #dc2626;  /* Red for cancelled */
+  --color-status-cancelled: #E02738;  /* Red for cancelled */
 
   --scrollbar-track: #f0f0f0;
-  --scrollbar-thumb: #3b82f6; /* Tailwind blue-500 */
-  --scrollbar-thumb-hover: #2563eb; /* Tailwind blue-600 */
+  --scrollbar-thumb: #E02738; /* Tailwind blue-500 */
+  --scrollbar-thumb-hover: #111111; /* Tailwind blue-600 */
 
   /* Additional variables for clarity */
   --color-surface: #ffffff; /* For elements that pop, like cards or menus */
@@ -37,20 +37,20 @@
   --cart-bg: #f9fafb; /* Cart page background */
   --cart-card-bg: #ffffff; /* Cart card backgrounds */
   --cart-card-border: #e5e7eb; /* Cart card borders */
-  --cart-totals-bg: #fcd34d; /* Cart totals yellow background */
-  --cart-totals-text: #1f2937; /* Cart totals text color */
+  --cart-totals-bg: #FFF164; /* Cart totals yellow background */
+  --cart-totals-text: #111827; /* Cart totals text color */
   --cart-button-primary: #111827; /* Primary cart buttons (black) */
   --cart-button-secondary: #f3f4f6; /* Secondary cart buttons (light gray) */
   --cart-button-secondary-hover: #e5e7eb; /* Secondary button hover */
-  --cart-text-primary: #1f2937; /* Primary text in cart */
-  --cart-text-secondary: #6b7280; /* Secondary text in cart */
+  --cart-text-primary: #111111; /* Primary text in cart */
+  --cart-text-secondary: #2C2C2C; /* Secondary text in cart */
   --cart-text-muted: #9ca3af; /* Muted text in cart */
   --cart-success-bg: #f0fdf4; /* Success message background */
   --cart-success-border: #bbf7d0; /* Success message border */
   --cart-success-text: #166534; /* Success message text */
   --cart-error-bg: #fef2f2; /* Error message background */
   --cart-error-border: #fecaca; /* Error message border */
-  --cart-error-text: #dc2626; /* Error message text */
+  --cart-error-text: #E02738; /* Error message text */
   --cart-warning-bg: #fffbeb; /* Warning message background */
   --cart-warning-border: #fed7aa; /* Warning message border */
   --cart-warning-text: #ea580c; /* Warning message text */
@@ -59,96 +59,99 @@
   --cart-input-focus: #111827; /* Input field focus border */
   --cart-shadow: rgba(0, 0, 0, 0.1); /* Card shadows */
   --cart-muted-bg: #f3f4f6; /* Muted background elements */
-  --cart-price-color: #374151; /* Dark-ish price color for light mode */
-  --cart-total-price-color: #f59e0b; /* Highlighted total price color */
+  --cart-price-color: #2C2C2C; /* Dark-ish price color for light mode */
+  --cart-total-price-color: #E02738; /* Highlighted total price color */
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Standard Tailwind Variables - Light Mode */
+  --background: #f9fafb;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #E02738;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111111;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #FFF164;
+  --accent-foreground: #111111;
+  --destructive: #E02738;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #E02738;
+  --chart-1: #E02738;
+  --chart-2: #FFF164;
+  --chart-3: #111111;
+  --chart-4: #2C2C2C;
+  --chart-5: #16a34a;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111111;
+  --sidebar-primary: #E02738;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #FFF164;
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #E02738;
 }
 
 html.dark {
   /* --- DARK MODE COLORS (these override the root values when .dark is active) --- */
-  --color-background: #1f2937;
-  --color-second-bg: #313c48;
-  --color-text-primary: #f9fafb;
-  --color-text-secondary: #d1d5db;
-  --color-button-primary: #3b82f6;
-  --color-accent-orange: #f59e0b;
+  --color-background: #050505;
+  --color-second-bg: #111111;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a1a1aa;
+  --color-button-primary: #E02738;
+  --color-accent-orange: #FFF164;
   --color-accent-green: #16a34a;
-  --color-border: #374151;
+  --color-border: #2C2C2C;
   
   /* Order Status Colors for Dark Mode */
-  --color-status-pending: #f59e0b;    /* Orange for pending */
-  --color-status-processing: #3b82f6; /* Blue for processing */
+  --color-status-pending: #FFF164;    /* Orange for pending */
+  --color-status-processing: #E02738; /* Blue for processing */
   --color-status-shipped: #16a34a;    /* Green for shipped */
   --color-status-delivered: #16a34a;  /* Green for delivered */
-  --color-status-cancelled: #ef4444;  /* Red for cancelled */
+  --color-status-cancelled: #E02738;  /* Red for cancelled */
 
   /* Additional variables for clarity */
-  --color-surface: #111827; /* A darker surface for dark mode */
-  --color-muted-bg: #374151;
+  --color-surface: #111111; /* A darker surface for dark mode */
+  --color-muted-bg: #111111;
   
   /* Cart-specific color variables for dark mode */
-  --cart-bg: #1f2937; /* Cart page background - dark */
-  --cart-card-bg: #374151; /* Cart card backgrounds - dark */
-  --cart-card-border: #4b5563; /* Cart card borders - dark */
-  --cart-totals-bg: #f59e0b; /* Cart totals yellow background - stays same */
-  --cart-totals-text: #111827; /* Cart totals text color - dark on yellow */
-  --cart-button-primary: #f9fafb; /* Primary cart buttons (white on dark) */
-  --cart-button-secondary: #4b5563; /* Secondary cart buttons (dark gray) */
-  --cart-button-secondary-hover: #6b7280; /* Secondary button hover - dark */
-  --cart-text-primary: #f9fafb; /* Primary text in cart - white */
-  --cart-text-secondary: #d1d5db; /* Secondary text in cart - light gray */
-  --cart-text-muted: #9ca3af; /* Muted text in cart - stays same */
+  --cart-bg: #050505; /* Cart page background - dark */
+  --cart-card-bg: #111111; /* Cart card backgrounds - dark */
+  --cart-card-border: #2C2C2C; /* Cart card borders - dark */
+  --cart-totals-bg: #FFF164; /* Cart totals yellow background - stays same */
+  --cart-totals-text: #050505; /* Cart totals text color - dark on yellow */
+  --cart-button-primary: #ffffff; /* Primary cart buttons (white on dark) */
+  --cart-button-secondary: #2C2C2C; /* Secondary cart buttons (dark gray) */
+  --cart-button-secondary-hover: #050505; /* Secondary button hover - dark */
+  --cart-text-primary: #ffffff; /* Primary text in cart - white */
+  --cart-text-secondary: #a1a1aa; /* Secondary text in cart - light gray */
+  --cart-text-muted: #71717a; /* Muted text in cart - stays same */
   --cart-success-bg: #064e3b; /* Success message background - dark */
   --cart-success-border: #059669; /* Success message border - dark */
   --cart-success-text: #10b981; /* Success message text - bright green */
   --cart-error-bg: #7f1d1d; /* Error message background - dark */
-  --cart-error-border: #dc2626; /* Error message border - dark */
+  --cart-error-border: #E02738; /* Error message border - dark */
   --cart-error-text: #f87171; /* Error message text - light red */
   --cart-warning-bg: #78350f; /* Warning message background - dark */
-  --cart-warning-border: #f59e0b; /* Warning message border - dark */
-  --cart-warning-text: #fbbf24; /* Warning message text - light orange */
-  --cart-input-bg: #374151; /* Input field background - dark */
-  --cart-input-border: #6b7280; /* Input field border - dark */
-  --cart-input-focus: #f9fafb; /* Input field focus border - white */
-  --cart-shadow: rgba(0, 0, 0, 0.3); /* Card shadows - darker */
-  --cart-muted-bg: #4b5563; /* Muted background elements - dark */
-  --cart-price-color: #d1d5db; /* Light-ish price color for dark mode */
-  --cart-total-price-color: #fbbf24; /* Highlighted total price color for dark mode */
+  --cart-warning-border: #FFF164; /* Warning message border - dark */
+  --cart-warning-text: #FFF164; /* Warning message text - light orange */
+  --cart-input-bg: #111111; /* Input field background - dark */
+  --cart-input-border: #2C2C2C; /* Input field border - dark */
+  --cart-input-focus: #ffffff; /* Input field focus border - white */
+  --cart-shadow: rgba(0, 0, 0, 0.5); /* Card shadows - darker */
+  --cart-muted-bg: #111111; /* Muted background elements - dark */
+  --cart-price-color: #a1a1aa; /* Light-ish price color for dark mode */
+  --cart-total-price-color: #FFF164; /* Highlighted total price color for dark mode */
 
-  --scrollbar-track: #1f1f1f;
-  --scrollbar-thumb: #60a5fa; /* Light blue */
-  --scrollbar-thumb-hover: #3b82f6;
+  --scrollbar-track: #050505;
+  --scrollbar-thumb: #E02738; /* Light blue */
+  --scrollbar-thumb-hover: #FFF164;
 }
 
 /* Global Scrollbar Styles */
@@ -501,37 +504,38 @@ html.dark .theme-toggle-moon {
 /* Converted theme variables to regular CSS variables */
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #050505;
+  --foreground: #ffffff;
+  --card: #111111;
+  --card-foreground: #ffffff;
+  --popover: #111111;
+  --popover-foreground: #ffffff;
+  --primary: #E02738;
+  --primary-foreground: #ffffff;
+  --secondary: #2C2C2C;
+  --secondary-foreground: #ffffff;
+  --muted: #2C2C2C;
+  --muted-foreground: #a1a1aa;
+  --accent: #FFF164;
+  --accent-foreground: #050505;
+  --destructive: #E02738;
+  --destructive-foreground: #ffffff;
+  --border: #2C2C2C;
+  --input: #2C2C2C;
+  --ring: #E02738;
+  --chart-1: #E02738;
+  --chart-2: #FFF164;
+  --chart-3: #111111;
+  --chart-4: #2C2C2C;
+  --chart-5: #16a34a;
+  --sidebar: #111111;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #E02738;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #FFF164;
+  --sidebar-accent-foreground: #050505;
+  --sidebar-border: #2C2C2C;
+  --sidebar-ring: #E02738;
 }
 
 /* Base styles - converted from @layer and @apply */

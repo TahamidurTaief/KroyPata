@@ -43,20 +43,20 @@ const ProductsDebugTest = () => {
   };
 
   return (
-    <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-      <h3 className="text-lg font-semibold mb-4">Products API Debug Test</h3>
+    <div className="p-4 border rounded-lg bg-[var(--card)] border-[var(--border)]">
+      <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">Products API Debug Test</h3>
       
       <button 
         onClick={testAPI} 
         disabled={loading}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        className="px-4 py-2 bg-[var(--primary)] text-white rounded hover:bg-[var(--primary)]/90 disabled:opacity-50"
       >
         {loading ? 'Testing...' : 'Test API'}
       </button>
       
       {testResult && (
-        <div className="mt-4 p-3 rounded bg-white dark:bg-gray-700">
-          <pre>{JSON.stringify(testResult, null, 2)}</pre>
+        <div className="mt-4 p-3 rounded bg-[var(--muted)]">
+          <pre className="text-[var(--foreground)]">{JSON.stringify(testResult, null, 2)}</pre>
         </div>
       )}
     </div>

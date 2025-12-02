@@ -67,7 +67,7 @@ const Hero = () => {
     return (
       <section className="w-full">
         <div className="w-full max-w-[1920px] mx-auto" style={{ aspectRatio: '1920/600' }}>
-          <div className="w-full h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
+          <div className="w-full h-full bg-gradient-to-r from-[var(--card)] via-[var(--muted)] to-[var(--card)] animate-pulse" />
         </div>
       </section>
     );
@@ -122,7 +122,9 @@ const Hero = () => {
                       onError={() => handleImageError(banner.id)}
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700" />
+                    <div className="w-full h-full bg-[var(--card)] flex items-center justify-center">
+                      <span className="text-[var(--muted-foreground)]">Image not available</span>
+                    </div>
                   )}
                 </div>
               </SwiperSlide>

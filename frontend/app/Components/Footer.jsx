@@ -13,7 +13,7 @@ const SocialIcon = ({ href, 'aria-label': ariaLabel, children, hoverColorClass }
     target="_blank"
     rel="noopener noreferrer"
     aria-label={ariaLabel}
-    className={`text-[var(--color-text-secondary)] transition-all duration-300 hover:-translate-y-1 ${hoverColorClass}`}
+    className={`text-[var(--muted-foreground)] transition-all duration-300 hover:-translate-y-1 ${hoverColorClass}`}
   >
     {children}
   </a>
@@ -82,7 +82,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[var(--color-surface)] text-[var(--color-text-secondary)] font-sans">
+    <footer className="bg-[var(--card)] text-[var(--muted-foreground)] font-sans">
       <div className="container mx-auto px-8 sm:px-12 pt-16 pb-8">
         <div className="grid lg:grid-cols-5 gap-x-8 gap-y-12">
           {/* Section 1: Logo Section */}
@@ -95,6 +95,7 @@ export default function Footer() {
                 height={36}
                 className="transition-opacity duration-300"
                 priority 
+                unoptimized
               />
             </Link>
             <p className="mt-6 text-sm leading-relaxed">
@@ -117,10 +118,10 @@ export default function Footer() {
               }) || (
                 // Fallback social icons if no data from API
                 <>
-                  <SocialIcon href="https://x.com" aria-label="Follow us on X" hoverColorClass="hover:text-[var(--color-text-primary)]"><XIcon /></SocialIcon>
-                  <SocialIcon href="https://facebook.com" aria-label="Follow us on Facebook" hoverColorClass="hover:text-blue-600"><FacebookIcon /></SocialIcon>
-                  <SocialIcon href="https://instagram.com" aria-label="Follow us on Instagram" hoverColorClass="hover:text-pink-500"><InstagramIcon /></SocialIcon>
-                  <SocialIcon href="https://linkedin.com" aria-label="Follow us on LinkedIn" hoverColorClass="hover:text-blue-500"><LinkedInIcon /></SocialIcon>
+                  <SocialIcon href="https://x.com" aria-label="Follow us on X" hoverColorClass="hover:text-[var(--foreground)]"><XIcon /></SocialIcon>
+                  <SocialIcon href="https://facebook.com" aria-label="Follow us on Facebook" hoverColorClass="hover:text-[var(--primary)]"><FacebookIcon /></SocialIcon>
+                  <SocialIcon href="https://instagram.com" aria-label="Follow us on Instagram" hoverColorClass="hover:text-[var(--primary)]"><InstagramIcon /></SocialIcon>
+                  <SocialIcon href="https://linkedin.com" aria-label="Follow us on LinkedIn" hoverColorClass="hover:text-[var(--primary)]"><LinkedInIcon /></SocialIcon>
                 </>
               )}
             </div>
@@ -128,13 +129,13 @@ export default function Footer() {
 
           {/* Section 2: Navigation Links from Navbar */}
           <div>
-            <h4 className="text-base font-semibold text-[var(--color-text-primary)]">Navigation</h4>
+            <h4 className="text-base font-semibold text-[var(--foreground)]">Navigation</h4>
             <ul className="mt-4 space-y-3">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link 
                     href={link.href} 
-                    className="text-sm transition hover:text-[var(--color-text-primary)]"
+                    className="text-sm transition hover:text-[var(--foreground)]"
                   >
                     {link.name}
                   </Link>
@@ -147,11 +148,11 @@ export default function Footer() {
           <div>
             {isLoading ? (
               <div className="animate-pulse">
-                <div className="h-4 bg-[var(--color-border)] rounded w-24 mb-4"></div>
+                <div className="h-4 bg-[var(--border)] rounded w-24 mb-4"></div>
                 <div className="space-y-3">
-                  <div className="h-3 bg-[var(--color-border)] rounded w-20"></div>
-                  <div className="h-3 bg-[var(--color-border)] rounded w-16"></div>
-                  <div className="h-3 bg-[var(--color-border)] rounded w-18"></div>
+                  <div className="h-3 bg-[var(--border)] rounded w-20"></div>
+                  <div className="h-3 bg-[var(--border)] rounded w-16"></div>
+                  <div className="h-3 bg-[var(--border)] rounded w-18"></div>
                 </div>
               </div>
             ) : (
@@ -159,7 +160,7 @@ export default function Footer() {
                 const servicesSection = getServicesSection();
                 return servicesSection ? (
                   <div>
-                    <h4 className="text-base font-semibold text-[var(--color-text-primary)]">
+                    <h4 className="text-base font-semibold text-[var(--foreground)]">
                       {servicesSection.title}
                     </h4>
                     <ul className="mt-4 space-y-3">
@@ -167,7 +168,7 @@ export default function Footer() {
                         <li key={link.id}>
                           <Link 
                             href={link.url} 
-                            className="text-sm transition hover:text-[var(--color-text-primary)]"
+                            className="text-sm transition hover:text-[var(--foreground)]"
                             target={link.url.startsWith('http') ? '_blank' : '_self'}
                             rel={link.url.startsWith('http') ? 'noopener noreferrer' : undefined}
                           >
@@ -180,12 +181,12 @@ export default function Footer() {
                 ) : (
                   // Fallback services section
                   <div>
-                    <h4 className="text-base font-semibold text-[var(--color-text-primary)]">Services</h4>
+                    <h4 className="text-base font-semibold text-[var(--foreground)]">Services</h4>
                     <ul className="mt-4 space-y-3">
-                      <li><Link href="/support" className="text-sm transition hover:text-[var(--color-text-primary)]">Support</Link></li>
-                      <li><Link href="/pricing" className="text-sm transition hover:text-[var(--color-text-primary)]">Pricing</Link></li>
-                      <li><Link href="/contact" className="text-sm transition hover:text-[var(--color-text-primary)]">Contact</Link></li>
-                      <li><Link href="/shipping" className="text-sm transition hover:text-[var(--color-text-primary)]">Shipping Info</Link></li>
+                      <li><Link href="/support" className="text-sm transition hover:text-[var(--foreground)]">Support</Link></li>
+                      <li><Link href="/pricing" className="text-sm transition hover:text-[var(--foreground)]">Pricing</Link></li>
+                      <li><Link href="/contact" className="text-sm transition hover:text-[var(--foreground)]">Contact</Link></li>
+                      <li><Link href="/shipping" className="text-sm transition hover:text-[var(--foreground)]">Shipping Info</Link></li>
                     </ul>
                   </div>
                 );
@@ -195,13 +196,13 @@ export default function Footer() {
 
           {/* Section 4: Top 4 Categories (Dynamic) */}
           <div>
-            <h4 className="text-base font-semibold text-[var(--color-text-primary)]">Top Categories</h4>
+            <h4 className="text-base font-semibold text-[var(--foreground)]">Top Categories</h4>
             <ul className="mt-4 space-y-3">
               {isLoading ? (
                 // Loading skeleton
                 Array.from({ length: 4 }).map((_, index) => (
                   <li key={index}>
-                    <div className="animate-pulse h-3 bg-[var(--color-border)] rounded w-24"></div>
+                    <div className="animate-pulse h-3 bg-[var(--border)] rounded w-24"></div>
                   </li>
                 ))
               ) : categories.length > 0 ? (
@@ -209,7 +210,7 @@ export default function Footer() {
                   <li key={category.id}>
                     <Link 
                       href={`/categories/${category.slug}`} 
-                      className="text-sm transition hover:text-[var(--color-text-primary)]"
+                      className="text-sm transition hover:text-[var(--foreground)]"
                     >
                       {category.name}
                     </Link>
@@ -218,10 +219,10 @@ export default function Footer() {
               ) : (
                 // Fallback categories
                 <>
-                  <li><Link href="/categories/electronics" className="text-sm transition hover:text-[var(--color-text-primary)]">Electronics</Link></li>
-                  <li><Link href="/categories/clothing" className="text-sm transition hover:text-[var(--color-text-primary)]">Clothing</Link></li>
-                  <li><Link href="/categories/home-garden" className="text-sm transition hover:text-[var(--color-text-primary)]">Home & Garden</Link></li>
-                  <li><Link href="/categories/sports" className="text-sm transition hover:text-[var(--color-text-primary)]">Sports</Link></li>
+                  <li><Link href="/categories/electronics" className="text-sm transition hover:text-[var(--foreground)]">Electronics</Link></li>
+                  <li><Link href="/categories/clothing" className="text-sm transition hover:text-[var(--foreground)]">Clothing</Link></li>
+                  <li><Link href="/categories/home-garden" className="text-sm transition hover:text-[var(--foreground)]">Home & Garden</Link></li>
+                  <li><Link href="/categories/sports" className="text-sm transition hover:text-[var(--foreground)]">Sports</Link></li>
                 </>
               )}
             </ul>
@@ -229,25 +230,25 @@ export default function Footer() {
 
           {/* Section 5: Pages Section */}
           <div>
-            <h4 className="text-base font-semibold text-[var(--color-text-primary)]">Pages</h4>
+            <h4 className="text-base font-semibold text-[var(--foreground)]">Pages</h4>
             <ul className="mt-4 space-y-3">
-              <li><Link href="/" className="text-sm transition hover:text-[var(--color-text-primary)]">Home</Link></li>
-              <li><Link href="/Categories" className="text-sm transition hover:text-[var(--color-text-primary)]">Categories</Link></li>
-              <li><Link href="/products" className="text-sm transition hover:text-[var(--color-text-primary)]">Shop</Link></li>
-              <li><Link href="/orders" className="text-sm transition hover:text-[var(--color-text-primary)]">Orders</Link></li>
-              <li><Link href="/privacy-policy" className="text-sm transition hover:text-[var(--color-text-primary)]">Privacy Policy</Link></li>
+              <li><Link href="/" className="text-sm transition hover:text-[var(--foreground)]">Home</Link></li>
+              <li><Link href="/Categories" className="text-sm transition hover:text-[var(--foreground)]">Categories</Link></li>
+              <li><Link href="/products" className="text-sm transition hover:text-[var(--foreground)]">Shop</Link></li>
+              <li><Link href="/orders" className="text-sm transition hover:text-[var(--foreground)]">Orders</Link></li>
+              <li><Link href="/privacy-policy" className="text-sm transition hover:text-[var(--foreground)]">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Bar: Copyright and Links */}
-        <div className="mt-16 pt-6 border-t border-[var(--color-border)] flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+        <div className="mt-16 pt-6 border-t border-[var(--border)] flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-center sm:text-left">
             © {new Date().getFullYear()} icommerce. All rights reserved.
           </p>
           <div className="flex sm:justify-end space-x-6">
-            <Link href="/sitemap" className="text-sm transition hover:text-[var(--color-text-primary)]">Sitemap</Link>
-            <Link href="/faq" className="text-sm transition hover:text-[var(--color-text-primary)]">FAQ</Link>
+            <Link href="/sitemap" className="text-sm transition hover:text-[var(--foreground)]">Sitemap</Link>
+            <Link href="/faq" className="text-sm transition hover:text-[var(--foreground)]">FAQ</Link>
           </div>
         </div>
       </div>
@@ -269,11 +270,11 @@ const getSocialIcon = (platform) => {
 
 const getSocialHoverColor = (platform) => {
   const colors = {
-    'facebook': 'hover:text-blue-600',
-    'twitter': 'hover:text-[var(--color-text-primary)]',
-    'x': 'hover:text-[var(--color-text-primary)]',
-    'instagram': 'hover:text-pink-500',
-    'linkedin': 'hover:text-blue-500'
+    'facebook': 'hover:text-[var(--primary)]',
+    'twitter': 'hover:text-[var(--foreground)]',
+    'x': 'hover:text-[var(--foreground)]',
+    'instagram': 'hover:text-[var(--primary)]',
+    'linkedin': 'hover:text-[var(--primary)]'
   };
-  return colors[platform?.toLowerCase()] || 'hover:text-[var(--color-text-primary)]';
+  return colors[platform?.toLowerCase()] || 'hover:text-[var(--foreground)]';
 };

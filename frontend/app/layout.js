@@ -67,6 +67,9 @@ export const metadata = {
   },
   
   // Additional metadata
+  icons: {
+    icon: '/img/favicon.ico',
+  },
   robots: {
     index: true,
     follow: true,

@@ -64,10 +64,10 @@ const ProductGrid = ({ products, isLoading, isError }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <div className="bg-gray-200 dark:bg-gray-800 rounded-xl h-64 w-full mb-3"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2"></div>
-            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2 mb-2"></div>
-            <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-2/3"></div>
+            <div className="bg-[var(--muted)] rounded-xl h-64 w-full mb-3"></div>
+            <div className="h-4 bg-[var(--muted)] rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-[var(--muted)] rounded w-1/2 mb-2"></div>
+            <div className="h-6 bg-[var(--muted)] rounded w-2/3"></div>
           </motion.div>
         ))}
       </div>
@@ -83,18 +83,18 @@ const ProductGrid = ({ products, isLoading, isError }) => {
         className="col-span-full flex flex-col items-center justify-center py-20"
       >
         <div className="text-6xl mb-4">😔</div>
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+        <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">
           Oops! Something went wrong
         </h3>
-        <p className="text-gray-600 dark:text-gray-400 text-center max-w-md mb-2">
+        <p className="text-[var(--muted-foreground)] text-center max-w-md mb-2">
           We couldn't load the products right now. Please check your internet connection and try again.
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-500 text-center mb-4">
+        <p className="text-sm text-[var(--muted-foreground)] text-center mb-4">
           Error: {isError?.message || JSON.stringify(isError)}
         </p>
         <button 
           onClick={() => window.location.reload()} 
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="px-6 py-2 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white rounded-lg transition-colors"
         >
           Try Again
         </button>
@@ -110,10 +110,10 @@ const ProductGrid = ({ products, isLoading, isError }) => {
         className="col-span-full flex flex-col items-center justify-center py-20"
       >
         <div className="text-6xl mb-4">🔍</div>
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+        <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">
           No products found
         </h3>
-        <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
+        <p className="text-[var(--muted-foreground)] text-center max-w-md">
           We couldn't find any products matching your criteria. Try adjusting your filters or search terms.
         </p>
       </motion.div>

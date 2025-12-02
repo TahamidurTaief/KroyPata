@@ -147,6 +147,27 @@ class Product(models.Model):
         default=1,
         help_text="Minimum quantity required for wholesale orders. Admin can set different values per product (e.g., Mobile=10, Laptop=5, Fashion=60)"
     )
+    
+    # Landing Page Features
+    enable_landing_page = models.BooleanField(
+        default=False,
+        help_text="Enable dedicated landing page for this product"
+    )
+    landing_features = RichTextField(
+        blank=True,
+        null=True,
+        help_text="Product features to display on landing page"
+    )
+    landing_how_to_use = RichTextField(
+        blank=True,
+        null=True,
+        help_text="How to use instructions for landing page"
+    )
+    landing_why_choose = RichTextField(
+        blank=True,
+        null=True,
+        help_text="Why should customers choose this product"
+    )
     affiliate_commission_rate = models.DecimalField(
         max_digits=5, 
         decimal_places=2, 
@@ -277,24 +298,98 @@ class Review(models.Model):
         ]
 
 
-class CategoryMinimumOrderQuantity(models.Model):
-    """Minimum order quantities for wholesale orders by category"""
-    category = models.OneToOneField(
-        Category, 
-        on_delete=models.CASCADE, 
-        related_name='minimum_order_quantity',
-        help_text="Category for which minimum order quantity applies"
+# NOTE: Category-level minimum order quantity model removed.
+# The per-product `minimum_purchase` field on `Product` is used instead.
+
+
+class LandingPageOrder(models.Model):
+    """Orders placed through product landing pages"""
+    ORDER_STATUS_CHOICES = [
+        ('PENDING', 'Pending Confirmation'),
+        ('CONFIRMED', 'Confirmed'),
+        ('PROCESSING', 'Processing'),
+        ('SHIPPED', 'Shipped'),
+        ('DELIVERED', 'Delivered'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    
+    # Order identification
+    order_number = models.CharField(max_length=50, unique=True, blank=True, db_index=True)
+    
+    # Product and pricing
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='landing_orders', db_index=True)
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price at the time of order")
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Total price (unit_price * quantity)")
+    
+    # Customer information
+    full_name = models.CharField(max_length=100, help_text="Customer's full name")
+    email = models.EmailField(help_text="Customer's email address", db_index=True)
+    phone = models.CharField(max_length=20, help_text="Customer's phone number")
+    detailed_address = models.TextField(help_text="Complete delivery address")
+    
+    # User type tracking
+    is_wholesaler = models.BooleanField(default=False, help_text="Whether this is a wholesale order")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='landing_page_orders',
+        db_index=True,
+        help_text="Associated user if logged in"
     )
-    minimum_quantity = models.PositiveIntegerField(
-        help_text="Minimum quantity required for wholesale orders in this category"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Order status
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='PENDING', db_index=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # Additional notes
+    customer_notes = models.TextField(blank=True, null=True, help_text="Additional notes from customer")
+    admin_notes = models.TextField(blank=True, null=True, help_text="Internal notes for admin")
+    
     class Meta:
-        verbose_name = "Category Minimum Order Quantity"
-        verbose_name_plural = "Category Minimum Order Quantities"
-        ordering = ['category__name']
+        ordering = ['-created_at']
+        verbose_name = "Landing Page Order"
+        verbose_name_plural = "Landing Page Orders"
+        indexes = [
+            models.Index(fields=['-created_at'], name='landing_order_created_idx'),
+            models.Index(fields=['status', '-created_at'], name='landing_order_status_idx'),
+            models.Index(fields=['product', '-created_at'], name='landing_order_product_idx'),
+            models.Index(fields=['email', '-created_at'], name='landing_order_email_idx'),
+        ]
     
     def __str__(self):
-        return f"{self.category.name}: {self.minimum_quantity} units minimum"
+        return f"{self.order_number} - {self.full_name} ({self.product.name})"
+    
+    def save(self, *args, **kwargs):
+        # Generate order number if not set
+        if not self.order_number:
+            import datetime
+            import random
+            
+            now = datetime.datetime.now()
+            time_part = now.strftime('%H%M%S')
+            random_part = f"{random.randint(0, 999):03d}"
+            
+            self.order_number = f"LPO{time_part}{random_part}"
+            
+            # Ensure uniqueness
+            counter = 1
+            original_order_number = self.order_number
+            while LandingPageOrder.objects.filter(order_number=self.order_number).exclude(pk=self.pk).exists():
+                new_random = (int(random_part) + counter) % 1000
+                self.order_number = f"LPO{time_part}{new_random:03d}"
+                counter += 1
+                if counter > 999:
+                    self.order_number = f"{original_order_number}X{counter - 999}"
+                    break
+        
+        # Calculate total price
+        if self.unit_price and self.quantity:
+            self.total_price = self.unit_price * self.quantity
+        
+        super().save(*args, **kwargs)

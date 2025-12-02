@@ -39,27 +39,27 @@ const ShippingInfoModal = ({ isOpen, onClose, shippingMethod }) => {
           onClick={onClose}
         >
           <motion.div
-            className="bg-[var(--color-surface)] rounded-lg p-6 max-w-md w-full mx-4 relative z-50"
+            className="bg-[var(--card)] rounded-lg p-6 max-w-md w-full mx-4 relative z-50"
             variants={modalVariants}
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              className="absolute top-4 right-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
             >
               <FiX size={20} />
             </button>
 
             <div className="pr-8">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <FiTruck className="text-blue-600 dark:text-blue-400" size={20} />
+                <div className="p-2 bg-[var(--primary)]/10 rounded-lg">
+                  <FiTruck className="text-[var(--primary)]" size={20} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h3 className="text-xl font-bold text-[var(--foreground)]">
                     {shippingMethod.title || shippingMethod.name}
                   </h3>
-                  <p className="text-lg font-semibold text-blue-600 dark:text-blue-400 flex items-center">
+                  <p className="text-lg font-semibold text-[var(--primary)] flex items-center">
                     <Tk_icon size={18} className="mr-1" />{shippingMethod.price}
                   </p>
                 </div>
@@ -67,21 +67,21 @@ const ShippingInfoModal = ({ isOpen, onClose, shippingMethod }) => {
 
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  <h4 className="font-semibold text-[var(--foreground)] mb-2">
                     Description
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  <p className="text-[var(--muted-foreground)] leading-relaxed">
                     {shippingMethod.description || "No description available for this shipping method."}
                   </p>
                 </div>
                 
                 {shippingMethod.delivery_estimated_time && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                    <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="bg-[var(--primary)]/5 border border-[var(--primary)]/20 rounded-lg p-4">
+                    <h4 className="font-semibold text-[var(--primary)] mb-2 flex items-center gap-2">
+                      <div className="w-2 h-2 bg-[var(--primary)] rounded-full"></div>
                       Estimated Delivery Time
                     </h4>
-                    <p className="text-blue-700 dark:text-blue-300 font-medium">
+                    <p className="text-[var(--primary)] font-medium">
                       {shippingMethod.delivery_estimated_time}
                     </p>
                   </div>
@@ -91,7 +91,7 @@ const ShippingInfoModal = ({ isOpen, onClose, shippingMethod }) => {
               <div className="mt-6">
                 <button
                   onClick={onClose}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  className="w-full bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   Close
                 </button>
@@ -132,9 +132,9 @@ const ShippingMethodCard = ({
         ${className}
       `}
       style={{
-        backgroundColor: isSelected ? 'var(--cart-success-bg)' : 'var(--cart-card-bg)',
-        borderColor: isSelected ? 'var(--color-accent-green)' : 'var(--cart-card-border)',
-        boxShadow: isSelected ? '0 4px 12px var(--cart-shadow)' : '0 1px 3px var(--cart-shadow)'
+        backgroundColor: isSelected ? 'var(--primary-10)' : 'var(--card)',
+        borderColor: isSelected ? 'var(--primary)' : 'var(--border)',
+        boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
       }}
       variants={cardVariants}
       initial="hidden"
@@ -147,7 +147,7 @@ const ShippingMethodCard = ({
           e.stopPropagation();
           onInfoClick(method);
         }}
-        className="absolute top-3 right-3 p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors z-10"
+        className="absolute top-3 right-3 p-1 text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors z-10"
       >
         <FiInfo size={16} />
       </button>
@@ -156,8 +156,8 @@ const ShippingMethodCard = ({
         <div 
           className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
           style={{
-            borderColor: isSelected ? 'var(--color-accent-green)' : 'var(--cart-text-muted)',
-            backgroundColor: isSelected ? 'var(--color-accent-green)' : 'transparent'
+            borderColor: isSelected ? 'var(--primary)' : 'var(--muted-foreground)',
+            backgroundColor: isSelected ? 'var(--primary)' : 'transparent'
           }}
         >
           {isSelected && (
@@ -172,13 +172,13 @@ const ShippingMethodCard = ({
         <div 
           className="p-2 rounded-lg flex-shrink-0"
           style={{
-            backgroundColor: isSelected ? 'var(--cart-success-border)' : 'var(--cart-card-border)'
+            backgroundColor: isSelected ? 'var(--primary)' : 'var(--border)'
           }}
         >
           <FiTruck 
             size={20} 
             style={{
-              color: isSelected ? 'var(--color-accent-green)' : 'var(--cart-text-secondary)'
+              color: isSelected ? 'white' : 'var(--muted-foreground)'
             }}
           />
         </div>
@@ -186,16 +186,16 @@ const ShippingMethodCard = ({
         <div className="flex-1 min-w-0 pr-6">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <h3 className="font-semibold truncate" style={{ color: 'var(--cart-text-primary)' }}>
+              <h3 className="font-semibold truncate" style={{ color: 'var(--foreground)' }}>
                 {method.title || method.name}
               </h3>
               {method.delivery_estimated_time && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0" style={{ backgroundColor: 'var(--cart-success-bg)', color: 'var(--cart-success-text)', border: '1px solid var(--cart-success-border)' }}>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0" style={{ backgroundColor: 'var(--primary-10)', color: 'var(--primary)', border: '1px solid var(--primary)' }}>
                   {method.delivery_estimated_time}
                 </span>
               )}
             </div>
-            <p className="text-lg font-bold ml-2 flex items-center" style={{ color: 'var(--cart-total-price-color)' }}>
+            <p className="text-lg font-bold ml-2 flex items-center" style={{ color: 'var(--foreground)' }}>
               <Tk_icon size={18} className="mr-1" />{method.price}
             </p>
           </div>
@@ -206,7 +206,7 @@ const ShippingMethodCard = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center"
+          className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--primary)] rounded-full flex items-center justify-center"
         >
           <FiCheck size={12} className="text-white" />
         </motion.div>
@@ -217,13 +217,13 @@ const ShippingMethodCard = ({
 
 // Loading Skeleton (same as before)
 const ShippingMethodSkeleton = () => (
-  <div className="rounded-lg p-4 border-2 animate-pulse" style={{ backgroundColor: 'var(--cart-card-bg)', borderColor: 'var(--cart-card-border)' }}>
+  <div className="rounded-lg p-4 border-2 animate-pulse" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
     <div className="flex items-center space-x-3">
-      <div className="w-5 h-5 rounded-full" style={{ backgroundColor: 'var(--cart-card-border)' }}></div>
-      <div className="w-10 h-10 rounded-lg" style={{ backgroundColor: 'var(--cart-card-border)' }}></div>
+      <div className="w-5 h-5 rounded-full" style={{ backgroundColor: 'var(--border)' }}></div>
+      <div className="w-10 h-10 rounded-lg" style={{ backgroundColor: 'var(--border)' }}></div>
       <div className="flex-1">
-        <div className="h-4 rounded mb-2 w-3/4" style={{ backgroundColor: 'var(--cart-card-border)' }}></div>
-        <div className="h-5 rounded w-1/2" style={{ backgroundColor: 'var(--cart-card-border)' }}></div>
+        <div className="h-4 rounded mb-2 w-3/4" style={{ backgroundColor: 'var(--border)' }}></div>
+        <div className="h-5 rounded w-1/2" style={{ backgroundColor: 'var(--border)' }}></div>
       </div>
     </div>
   </div>
@@ -232,18 +232,18 @@ const ShippingMethodSkeleton = () => (
 // Error State (same as before)
 const ShippingMethodError = ({ error, onRetry }) => (
   <div className="text-center py-8">
-    <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-      <FiAlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+    <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+      <FiAlertCircle className="w-8 h-8 text-red-600" />
     </div>
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+    <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">
       Failed to Load Shipping Methods
     </h3>
-    <p className="text-gray-600 dark:text-gray-400 mb-4">
+    <p className="text-[var(--muted-foreground)] mb-4">
       {error || "Something went wrong while fetching shipping options."}
     </p>
     <button
       onClick={onRetry}
-      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+      className="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white rounded-lg transition-colors"
     >
       Try Again
     </button>
@@ -291,25 +291,25 @@ const ContextShippingMethodSelector = ({
   if (loading) {
     if (compact) {
       return (
-        <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--cart-card-bg)' }}>
+        <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--card)' }}>
           <motion.h3 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
             className="text-sm font-bold mb-3" 
-            style={{ color: 'var(--cart-text-primary)' }}
+            style={{ color: 'var(--foreground)' }}
           >
             {title}
           </motion.h3>
           <div className="space-y-2">
             {[...Array(2)].map((_, index) => (
-              <div key={index} className="w-full p-3 rounded animate-pulse" style={{ backgroundColor: 'var(--cart-input-bg)', border: '1px solid var(--cart-input-border)' }}>
+              <div key={index} className="w-full p-3 rounded animate-pulse" style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)' }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="h-4 w-24 rounded mb-1" style={{ backgroundColor: 'var(--cart-card-border)' }}></div>
-                    <div className="h-3 w-32 rounded" style={{ backgroundColor: 'var(--cart-card-border)' }}></div>
+                    <div className="h-4 w-24 rounded mb-1" style={{ backgroundColor: 'var(--border)' }}></div>
+                    <div className="h-3 w-32 rounded" style={{ backgroundColor: 'var(--border)' }}></div>
                   </div>
-                  <div className="h-4 w-12 rounded" style={{ backgroundColor: 'var(--cart-card-border)' }}></div>
+                  <div className="h-4 w-12 rounded" style={{ backgroundColor: 'var(--border)' }}></div>
                 </div>
               </div>
             ))}
@@ -319,7 +319,7 @@ const ContextShippingMethodSelector = ({
     }
     return (
       <div className={className}>
-        <h2 className="text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4" style={{ color: 'var(--cart-text-primary)' }}>
+        <h2 className="text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4" style={{ color: 'var(--foreground)' }}>
           {title}
         </h2>
         <div className="space-y-3">
@@ -334,13 +334,13 @@ const ContextShippingMethodSelector = ({
   if (error) {
     if (compact) {
       return (
-        <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--cart-card-bg)' }}>
+        <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--card)' }}>
           <motion.h3 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
             className="text-sm font-bold mb-3" 
-            style={{ color: 'var(--cart-text-primary)' }}
+            style={{ color: 'var(--foreground)' }}
           >
             {title}
           </motion.h3>
@@ -348,7 +348,7 @@ const ContextShippingMethodSelector = ({
             <p className="text-sm text-red-500 mb-2">{error || "Failed to load shipping methods"}</p>
             <button
               onClick={refetch}
-              className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              className="text-xs px-3 py-1 bg-[var(--primary)] text-white rounded hover:bg-[var(--primary)]/90 transition-colors"
             >
               Try Again
             </button>
@@ -363,7 +363,7 @@ const ContextShippingMethodSelector = ({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4" 
-          style={{ color: 'var(--cart-text-primary)' }}
+          style={{ color: 'var(--foreground)' }}
         >
           {title}
         </motion.h2>
@@ -375,19 +375,19 @@ const ContextShippingMethodSelector = ({
   if (!shippingMethods.length) {
     if (compact) {
       return (
-        <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--cart-card-bg)' }}>
+        <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--card)' }}>
           <motion.h3 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
             className="text-sm font-bold mb-3" 
-            style={{ color: 'var(--cart-text-primary)' }}
+            style={{ color: 'var(--foreground)' }}
           >
             {title}
           </motion.h3>
           <div className="text-center py-4">
-            <FiTruck size={24} className="mx-auto mb-2" style={{ color: 'var(--cart-text-muted)' }} />
-            <p className="text-sm" style={{ color: 'var(--cart-text-secondary)' }}>
+            <FiTruck size={24} className="mx-auto mb-2" style={{ color: 'var(--muted-foreground)' }} />
+            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
               No shipping methods available
             </p>
           </div>
@@ -401,13 +401,13 @@ const ContextShippingMethodSelector = ({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4" 
-          style={{ color: 'var(--cart-text-primary)' }}
+          style={{ color: 'var(--foreground)' }}
         >
           {title}
         </motion.h2>
         <div className="text-center py-8">
-          <FiTruck size={48} className="mx-auto mb-4" style={{ color: 'var(--cart-text-muted)' }} />
-          <p className="text-lg" style={{ color: 'var(--cart-text-secondary)' }}>
+          <FiTruck size={48} className="mx-auto mb-4" style={{ color: 'var(--muted-foreground)' }} />
+          <p className="text-lg" style={{ color: 'var(--muted-foreground)' }}>
             No shipping methods available at the moment.
           </p>
         </div>
@@ -417,13 +417,13 @@ const ContextShippingMethodSelector = ({
 
   if (compact) {
     return (
-      <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--cart-card-bg)' }}>
+      <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--card)' }}>
         <motion.h3 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-sm font-bold mb-3" 
-          style={{ color: 'var(--cart-text-primary)' }}
+          style={{ color: 'var(--foreground)' }}
         >
           {title} {validationErrors.shippingMethod && <span className="text-red-500">*</span>}
         </motion.h3>
@@ -443,24 +443,24 @@ const ContextShippingMethodSelector = ({
               }`}
               style={{
                 backgroundColor: selectedShippingMethod?.id === method.id 
-                  ? 'var(--cart-success-bg)' 
-                  : 'var(--cart-input-bg)',
+                  ? 'var(--primary-10)' 
+                  : 'var(--background)',
                 borderColor: selectedShippingMethod?.id === method.id 
-                  ? 'var(--cart-success-border)' 
-                  : 'var(--cart-input-border)',
-                color: 'var(--cart-text-primary)'
+                  ? 'var(--primary)' 
+                  : 'var(--border)',
+                color: 'var(--foreground)'
               }}
             >
               <div>
                 <div className="text-sm font-medium">{method.name || method.title}</div>
-                <div className="text-xs" style={{ color: 'var(--cart-text-muted)' }}>
+                <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                   {method.description || method.delivery_estimated_time || '3-5 business days'}
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium flex items-center"><Tk_icon size={14} className="mr-1" />{method.price}</span>
                 {selectedShippingMethod?.id === method.id && (
-                  <svg className="w-4 h-4" style={{ color: 'var(--cart-success-text)' }} fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4" style={{ color: 'var(--primary)' }} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}
@@ -479,7 +479,7 @@ const ContextShippingMethodSelector = ({
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3, delay: 0.2 }}
         className="text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4" 
-        style={{ color: 'var(--cart-text-primary)' }}
+        style={{ color: 'var(--foreground)' }}
       >
         {title}
       </motion.h2>
@@ -505,12 +505,12 @@ const ContextShippingMethodSelector = ({
       {selectedShippingMethod && (
         <motion.div 
           className="mt-4 p-3 rounded-lg"
-          style={{ backgroundColor: 'var(--cart-success-bg)', border: '1px solid var(--cart-success-border)' }}
+          style={{ backgroundColor: 'var(--primary-10)', border: '1px solid var(--primary)' }}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="flex items-center gap-2" style={{ color: 'var(--cart-success-text)' }}>
+          <div className="flex items-center gap-2" style={{ color: 'var(--primary)' }}>
             <FiCheck className="w-4 h-4" />
             <span className="text-sm font-medium">
               {selectedShippingMethod.name || selectedShippingMethod.title} selected

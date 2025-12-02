@@ -15,7 +15,7 @@ import CategoryBasedSection from "./CategoryBasedSection";
 
 const HomePage = ({ initialProducts, categories, horizontalBanners, offerBanners }) => {
   return (
-    <div className="w-full min-h-screen bg-[var(--color-background)]">
+    <div className="w-full min-h-screen bg-[var(--background)]">
       <Hero />
       <CategoryCarousel />
       {/* <CategoryCards categories={categories} /> */}

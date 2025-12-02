@@ -66,12 +66,12 @@ export const WholesalePricing = ({ product, size = "medium", showBadge = true, s
     <div className="flex flex-col gap-2">
       {/* Primary price display */}
       <div className="flex items-baseline gap-3 flex-wrap">
-        <span className={`${sizeConfig.primaryText} font-bold text-primary flex items-baseline gap-1`}>
-          <Tk_icon size={sizeConfig.iconSize} className="text-primary" />
+        <span className={`${sizeConfig.primaryText} font-bold text-[var(--primary)] flex items-baseline gap-1`}>
+          <Tk_icon size={sizeConfig.iconSize} className="text-[var(--primary)]" />
           {displayPrice.toFixed(2)}
         </span>
         {showBadge && showWholesaleLabel && (
-          <span className={`bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded ${sizeConfig.badgeText} ${sizeConfig.badgePadding} font-medium`}>
+          <span className={`bg-[var(--primary)]/10 text-[var(--primary)] rounded ${sizeConfig.badgeText} ${sizeConfig.badgePadding} font-medium`}>
             🏪 Wholesale
           </span>
         )}
@@ -84,22 +84,22 @@ export const WholesalePricing = ({ product, size = "medium", showBadge = true, s
             // Wholesaler pricing display
             <div className="flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-1">
-                <span className="text-sm text-muted-foreground">Regular:</span>
-                <span className={`${sizeConfig.secondaryText} flex items-baseline gap-1 text-muted-foreground line-through`}>
-                  <Tk_icon size={sizeConfig.iconSize - 4} className="text-muted-foreground" />
+                <span className="text-sm text-[var(--muted-foreground)]">Regular:</span>
+                <span className={`${sizeConfig.secondaryText} flex items-baseline gap-1 text-[var(--muted-foreground)] line-through`}>
+                  <Tk_icon size={sizeConfig.iconSize - 4} className="text-[var(--muted-foreground)]" />
                   {originalPrice.toFixed(2)}
                 </span>
               </div>
               {showSavings && wholesaleSavings > 0 && (
-                <span className={`${sizeConfig.badgeText} text-green-600 dark:text-green-400 font-medium bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded`}>
+                <span className={`${sizeConfig.badgeText} text-[#16a34a] font-medium bg-[#16a34a]/10 px-2 py-0.5 rounded`}>
                   Save {wholesaleSavings}%
                 </span>
               )}
             </div>
           ) : (
             // Regular discount display
-            <span className={`${sizeConfig.secondaryText} flex items-baseline gap-1 text-muted-foreground line-through`}>
-              <Tk_icon size={sizeConfig.iconSize - 4} className="text-muted-foreground" />
+            <span className={`${sizeConfig.secondaryText} flex items-baseline gap-1 text-[var(--muted-foreground)] line-through`}>
+              <Tk_icon size={sizeConfig.iconSize - 4} className="text-[var(--muted-foreground)]" />
               {originalPrice.toFixed(2)}
             </span>
           )}
@@ -132,7 +132,7 @@ export const PricingBadges = ({ product }) => {
   return (
     <div className="flex flex-col gap-1">
       {wholesaleSavings > 0 && (
-        <div className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+        <div className="bg-[var(--primary)] text-white text-xs font-bold px-2.5 py-1 rounded-full">
           -{wholesaleSavings}% Wholesale
         </div>
       )}

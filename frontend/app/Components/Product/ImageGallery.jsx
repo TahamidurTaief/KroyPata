@@ -34,7 +34,7 @@ export default function ImageGallery({ images, productName }) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-full aspect-square rounded-xl overflow-hidden shadow-lg mb-4 bg-white">
+      <div className="relative w-full aspect-square rounded-xl overflow-hidden shadow-lg mb-4 bg-[var(--card)]">
         <Image
           src={getImageSrc(selectedImage)}
           alt={productName || 'Product Image'}
@@ -53,8 +53,8 @@ export default function ImageGallery({ images, productName }) {
             onClick={() => setSelectedImage(img)}
             className={`relative w-16 h-16 min-w-[2rem] rounded-lg overflow-hidden border-2 transition-all duration-200 ${
               selectedImage === img
-                ? "border-primary ring-2 ring-primary"
-                : "border-border hover:border-muted-foreground"
+                ? "border-[var(--primary)] ring-2 ring-[var(--primary)]"
+                : "border-[var(--border)] hover:border-[var(--muted-foreground)]"
             }`}
           >
             <Image

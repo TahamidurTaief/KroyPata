@@ -45,13 +45,13 @@ const ProductListHeader = ({
     >
       {/* Search Bar */}
       <div className="flex-1 relative">
-        <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none z-10" size={18} />
+        <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--muted-foreground)] pointer-events-none z-10" size={18} />
         <input
           type="search"
           value={localSearchQuery}
           onChange={handleSearchChange}
           placeholder="Search products..."
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 focus:border-transparent transition-all outline-none"
+          className="w-full pl-10 pr-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--card)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all outline-none"
         />
       </div>
 
@@ -59,7 +59,7 @@ const ProductListHeader = ({
       <select
         value={currentSort}
         onChange={(e) => onSortChange?.(e.target.value)}
-        className="px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 focus:border-transparent transition-all outline-none cursor-pointer min-w-[160px]"
+        className="px-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--card)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all outline-none cursor-pointer min-w-[160px]"
       >
         {sortOptions.map((option) => (
           <option key={option.value} value={option.value}>
@@ -73,7 +73,7 @@ const ProductListHeader = ({
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={onToggleMobileFilters}
-        className="xl:hidden flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-700 text-white rounded-lg transition-colors font-medium"
+        className="xl:hidden flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white rounded-lg transition-colors font-medium"
       >
         <FiFilter size={18} />
         Filters

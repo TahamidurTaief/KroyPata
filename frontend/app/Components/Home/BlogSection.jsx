@@ -47,7 +47,7 @@ const BlogSection = () => {
     <div>
       <div className="container mt-3 md:mt-5 lg:mt-8 xl:mt-10 ">
         <div className="flex flex-row justify-between items-center">
-          <h2 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-[var(--color-text-primary)]">
+          <h2 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-[var(--foreground)]">
             Read Our{" "}
             <span className="text-sky-500 dark:text-sky-300">Blog Post</span>
           </h2>

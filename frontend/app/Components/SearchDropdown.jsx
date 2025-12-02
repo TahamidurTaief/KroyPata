@@ -83,9 +83,9 @@ export default function SearchDropdown({
   return (
     <div ref={dropdownRef} className="relative w-full">
       {/* Search Input */}
-      <div className="relative flex items-center border border-[var(--color-border)] rounded-full bg-[var(--color-muted-bg)] focus-within:bg-[var(--color-surface)] focus-within:border-[var(--color-text-secondary)] transition-all">
+      <div className="relative flex items-center border border-[var(--border)] rounded-full bg-[var(--muted)] focus-within:bg-[var(--card)] focus-within:border-[var(--muted-foreground)] transition-all">
         <svg 
-          className="absolute left-4 w-5 h-5 text-[var(--color-text-secondary)]"
+          className="absolute left-4 w-5 h-5 text-[var(--muted-foreground)]"
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -109,7 +109,7 @@ export default function SearchDropdown({
               setIsOpen(true);
             }
           }}
-          className="w-full h-11 pl-11 pr-14 rounded-full bg-transparent text-sm outline-none placeholder:text-[var(--color-text-secondary)] text-[var(--color-text-primary)]"
+          className="w-full h-11 pl-11 pr-14 rounded-full bg-transparent text-sm outline-none placeholder:text-[var(--muted-foreground)] text-[var(--foreground)]"
         />
         
         {/* Clear Button */}
@@ -120,7 +120,7 @@ export default function SearchDropdown({
               setIsOpen(false);
               inputRef.current?.focus();
             }}
-            className="absolute right-12 w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
+            className="absolute right-12 w-5 h-5 rounded-full bg-[var(--muted)] hover:bg-[var(--muted)]/80 flex items-center justify-center transition-colors"
           >
             <span className="text-xs">✕</span>
           </button>
@@ -130,7 +130,7 @@ export default function SearchDropdown({
         <Link
           href={searchQuery.trim() ? `/products?search=${encodeURIComponent(searchQuery)}` : '/products'}
           onClick={() => setIsOpen(false)}
-          className="absolute right-1 h-9 w-9 bg-[var(--color-text-primary)] hover:bg-[var(--color-text-secondary)] text-[var(--color-surface)] rounded-full flex items-center justify-center transition-all flex-shrink-0"
+          className="absolute right-1 h-9 w-9 bg-[var(--foreground)] hover:bg-[var(--muted-foreground)] text-[var(--card)] rounded-full flex items-center justify-center transition-all flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -146,25 +146,25 @@ export default function SearchDropdown({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-2xl z-50 max-h-[70vh] overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-2xl z-50 max-h-[70vh] overflow-y-auto"
           >
             {isLoading ? (
               <div className="p-8 text-center">
                 <div className="inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-2 text-sm text-[var(--color-text-secondary)]">Searching...</p>
+                <p className="mt-2 text-sm text-[var(--muted-foreground)]">Searching...</p>
               </div>
             ) : !hasResults ? (
               <div className="p-8 text-center">
                 <div className="text-4xl mb-2">📦</div>
-                <p className="text-sm font-medium text-[var(--color-text-primary)]">No results found</p>
-                <p className="text-xs text-[var(--color-text-secondary)] mt-1">Try different keywords</p>
+                <p className="text-sm font-medium text-[var(--foreground)]">No results found</p>
+                <p className="text-xs text-[var(--muted-foreground)] mt-1">Try different keywords</p>
               </div>
             ) : (
               <div className="py-2">
                 {/* Categories */}
                 {results.categories.length > 0 && (
                   <div className="px-3 py-2">
-                    <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
+                    <p className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wide mb-2">
                       Categories
                     </p>
                     <div className="space-y-1">
@@ -176,7 +176,7 @@ export default function SearchDropdown({
                             setIsOpen(false);
                             onSearchChange("");
                           }}
-                          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[var(--color-muted-bg)] transition-colors group"
+                          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[var(--muted)] transition-colors group"
                         >
                           {category.image_url || category.image ? (
                             <Image 
@@ -189,7 +189,7 @@ export default function SearchDropdown({
                           ) : (
                             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex-shrink-0" />
                           )}
-                          <span className="text-sm font-medium text-[var(--color-text-primary)] group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                          <span className="text-sm font-medium text-[var(--foreground)] group-hover:text-blue-600 dark:group-hover:text-blue-400">
                             {category.name}
                           </span>
                         </Link>
@@ -200,8 +200,8 @@ export default function SearchDropdown({
 
                 {/* Brands */}
                 {results.brands.length > 0 && (
-                  <div className="px-3 py-2 border-t border-[var(--color-border)]">
-                    <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
+                  <div className="px-3 py-2 border-t border-[var(--border)]">
+                    <p className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wide mb-2">
                       Brands
                     </p>
                     <div className="space-y-1">
@@ -213,14 +213,14 @@ export default function SearchDropdown({
                             setIsOpen(false);
                             onSearchChange("");
                           }}
-                          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[var(--color-muted-bg)] transition-colors group"
+                          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[var(--muted)] transition-colors group"
                         >
                           <div className="w-6 h-6 rounded bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 flex items-center justify-center flex-shrink-0">
                             <span className="text-xs font-bold text-purple-600 dark:text-purple-300">
                               {brand.charAt(0).toUpperCase()}
                             </span>
                           </div>
-                          <span className="text-sm font-medium text-[var(--color-text-primary)] group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                          <span className="text-sm font-medium text-[var(--foreground)] group-hover:text-purple-600 dark:group-hover:text-purple-400">
                             {brand}
                           </span>
                         </Link>
@@ -231,8 +231,8 @@ export default function SearchDropdown({
 
                 {/* Products */}
                 {results.products.length > 0 && (
-                  <div className="px-3 py-2 border-t border-[var(--color-border)]">
-                    <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
+                  <div className="px-3 py-2 border-t border-[var(--border)]">
+                    <p className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wide mb-2">
                       Products
                     </p>
                     <div className="space-y-1">
@@ -244,7 +244,7 @@ export default function SearchDropdown({
                             setIsOpen(false);
                             onSearchChange("");
                           }}
-                          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[var(--color-muted-bg)] transition-colors group"
+                          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[var(--muted)] transition-colors group"
                         >
                           {product.image_url || product.images?.[0]?.image ? (
                             <Image 
@@ -255,15 +255,15 @@ export default function SearchDropdown({
                               className="rounded object-cover flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
+                            <div className="w-10 h-10 rounded bg-[var(--muted)] flex-shrink-0" />
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-[var(--color-text-primary)] group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
+                            <p className="text-sm font-medium text-[var(--foreground)] group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
                               {product.name}
                             </p>
                             <div className="flex items-center gap-2 text-xs">
                               {product.brand_name && (
-                                <span className="text-[var(--color-text-secondary)]">{product.brand_name}</span>
+                                <span className="text-[var(--muted-foreground)]">{product.brand_name}</span>
                               )}
                               {/* Price with Tk_icon */}
                               <div className="flex items-center gap-0.5">
@@ -277,8 +277,8 @@ export default function SearchDropdown({
                                   </>
                                 ) : (
                                   <>
-                                    <Tk_icon size={12} className="text-[var(--color-text-secondary)]" />
-                                    <span className="text-[var(--color-text-secondary)] font-medium">
+                                    <Tk_icon size={12} className="text-[var(--muted-foreground)]" />
+                                    <span className="text-[var(--muted-foreground)] font-medium">
                                       {product.discount_price 
                                         ? parseFloat(product.discount_price).toFixed(2)
                                         : parseFloat(product.price).toFixed(2)
@@ -296,7 +296,7 @@ export default function SearchDropdown({
                 )}
 
                 {/* View All Results */}
-                <div className="px-3 py-2 border-t border-[var(--color-border)]">
+                <div className="px-3 py-2 border-t border-[var(--border)]">
                   <Link
                     href={`/products?search=${encodeURIComponent(searchQuery)}`}
                     onClick={() => {

@@ -4,11 +4,11 @@ import ProductCard from "@/app/Components/Common/ProductCard";
 export default function FilteredProductGrid({ productData }) {
   if (!productData || productData.length === 0) {
     return (
-      <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-lg h-full flex flex-col justify-center items-center">
-        <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
+      <div className="text-center py-20 bg-[var(--muted)] rounded-lg h-full flex flex-col justify-center items-center">
+        <h2 className="text-2xl font-bold text-[var(--foreground)]">
           No Products Found
         </h2>
-        <p className="text-[var(--color-text-secondary)] mt-2 max-w-sm">
+        <p className="text-[var(--muted-foreground)] mt-2 max-w-sm">
           Your search returned no results. Please try adjusting your filters to find what you're looking for.
         </p>
       </div>

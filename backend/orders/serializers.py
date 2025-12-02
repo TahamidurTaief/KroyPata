@@ -10,7 +10,7 @@ from .models import (
     Order, OrderItem, OrderUpdate, ShippingMethod, OrderPayment, Coupon, ShippingTier,
     ShippingCategory, FreeShippingRule, CashOnDelivery
 )
-from products.models import Product, Color, Size, CategoryMinimumOrderQuantity
+from products.models import Product, Color, Size
 from products.serializers import ColorSerializer, SizeSerializer
 from users.models import Address
 
@@ -560,21 +560,24 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         validation_errors = []
         
         for category, total_quantity in category_quantities.items():
-            try:
-                min_order_requirement = CategoryMinimumOrderQuantity.objects.get(category=category)
-                required_minimum = min_order_requirement.minimum_quantity
-                
-                if total_quantity < required_minimum:
-                    validation_errors.append(
-                        f"Category '{category.name}' requires minimum {required_minimum} units, "
-                        f"but you have only {total_quantity} units in your cart."
-                    )
-                    
-            except CategoryMinimumOrderQuantity.DoesNotExist:
-                # If no minimum requirement is set for this category, skip validation
+                # Migration note: CategoryMinimumOrderQuantity model removed.
+                # We now validate per-product `minimum_purchase` instead of per-category totals.
+                # If any product in the category has a per-product minimum greater than the
+                # quantity for that product in the cart, add an error.
+                # (This loop grouped by category originally; we'll now iterate products in cart.)
                 continue
         
-        # Raise validation error if any category doesn't meet minimum requirements
+        # Validate per-product minimum_purchase requirements
+        validation_errors = []
+        for cart_item in cart_items:
+            product = cart_item['product']
+            quantity = cart_item['quantity']
+            required_minimum = getattr(product, 'minimum_purchase', 1) or 1
+            if quantity < required_minimum:
+                validation_errors.append(
+                    f"Product '{product.name}' requires minimum {required_minimum} units for wholesale orders, but you ordered {quantity}."
+                )
+
         if validation_errors:
             error_message = "Wholesale order minimum quantity requirements not met:\n" + "\n".join(validation_errors)
             raise serializers.ValidationError(error_message)

@@ -68,14 +68,14 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
   };
 
   return (
-    <section className="w-full bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-slate-900 py-4 md:py-6">
+    <section className="w-full bg-[var(--color-second-bg)] py-4 md:py-6">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mb-4 md:mb-5">
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-            Explore <span className="text-sky-500">Products</span>
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[var(--foreground)]">
+            Explore <span className="text-[var(--primary)]">Products</span>
           </h2>
-          <p className="mt-1 text-xs md:text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-xs md:text-sm text-[var(--muted-foreground)]">
             Browse our curated collection by category
           </p>
         </div>
@@ -86,10 +86,10 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
           {canScrollLeft && (
             <button
               onClick={() => scroll('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 shadow-lg rounded-full p-1.5 md:p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[var(--card)] shadow-lg rounded-full p-1.5 md:p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               aria-label="Scroll left"
             >
-              <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-gray-700 dark:text-gray-300" />
+              <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-[var(--foreground)]" />
             </button>
           )}
 
@@ -108,7 +108,7 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
               onClick={() => handleCategoryClick("")}
               className={`flex-shrink-0 snap-start group/card cursor-pointer transition-all duration-300 hover:scale-105 ${
                 selectedCategory === "" 
-                  ? "ring-2 ring-sky-500 shadow-lg shadow-sky-500/50" 
+                  ? "ring-2 ring-[var(--primary)] shadow-lg shadow-[var(--primary)]/50" 
                   : "hover:shadow-xl"
               }`}
               aria-label="Show all products"
@@ -118,8 +118,8 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
                 {/* Image Container */}
                 <div className={`relative w-[20px] h-[20px] md:w-[30px] md:h-[30px] lg:w-[50px] lg:h-[50px] rounded-full overflow-hidden mb-2 ${
                   selectedCategory === "" 
-                    ? "bg-gradient-to-br from-sky-400 to-blue-600" 
-                    : "bg-gradient-to-br from-sky-300 to-blue-500"
+                    ? "bg-[var(--primary)]" 
+                    : "bg-[var(--primary)]/80"
                 }`}>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Grid3x3 className="w-8 h-8 md:w-10 md:h-10 text-white opacity-90" strokeWidth={1.5} />
@@ -131,8 +131,8 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
                 {/* Category Name */}
                 <h3 className={`text-xs md:text-sm font-semibold text-center px-1 transition-colors duration-300 line-clamp-2 ${
                   selectedCategory === "" 
-                    ? "text-sky-600 dark:text-sky-400" 
-                    : "text-gray-700 dark:text-gray-300 group-hover/card:text-sky-600 dark:group-hover/card:text-sky-400"
+                    ? "text-[var(--primary)]" 
+                    : "text-[var(--foreground)] group-hover/card:text-[var(--primary)]"
                 }`}>
                   All Products
                 </h3>
@@ -146,7 +146,7 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
                 onClick={() => handleCategoryClick(category.slug)}
                 className={`flex-shrink-0 snap-start group/card cursor-pointer transition-all duration-300 hover:scale-105 ${
                   selectedCategory === category.slug 
-                    ? "ring-2 ring-sky-500 shadow-lg shadow-sky-500/50" 
+                    ? "ring-2 ring-[var(--primary)] shadow-lg shadow-[var(--primary)]/50" 
                     : "hover:shadow-xl"
                 }`}
                 aria-label={`Filter by ${category.name}`}
@@ -154,7 +154,7 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
               >
                 <div className="flex flex-col items-center w-[30px] md:w-[40px] lg:w-[60px]">
                   {/* Image Container */}
-                  <div className="relative w-[20px] h-[20px] md:w-[30px] md:h-[30px] lg:w-[50px] lg:h-[50px] rounded-full overflow-hidden mb-2 bg-gray-100 dark:bg-gray-800">
+                  <div className="relative w-[20px] h-[20px] md:w-[30px] md:h-[30px] lg:w-[50px] lg:h-[50px] rounded-full overflow-hidden mb-2 bg-[var(--card)]">
                     {category.image ? (
                       <Image
                         src={category.image}
@@ -166,7 +166,7 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
                         quality={85}
                       />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800">
+                      <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-border)]">
                         <span className="text-2xl md:text-3xl opacity-30">📦</span>
                       </div>
                     )}
@@ -175,7 +175,7 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
                     
                     {/* Selected indicator */}
                     {selectedCategory === category.slug && (
-                      <div className="absolute top-1 right-1 bg-sky-500 text-white rounded-full p-1">
+                      <div className="absolute top-1 right-1 bg-[var(--primary)] text-white rounded-full p-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -186,8 +186,8 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
                   {/* Category Name */}
                   <h3 className={`text-xs md:text-sm font-semibold text-center px-1 transition-colors duration-300 line-clamp-1 ${
                     selectedCategory === category.slug 
-                      ? "text-sky-600 dark:text-sky-400" 
-                      : "text-gray-700 dark:text-gray-300 group-hover/card:text-sky-600 dark:group-hover/card:text-sky-400"
+                      ? "text-[var(--primary)]" 
+                      : "text-[var(--foreground)] group-hover/card:text-[var(--primary)]"
                   }`}>
                     {category.name}
                   </h3>
@@ -200,10 +200,10 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
           {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 shadow-lg rounded-full p-1.5 md:p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[var(--card)] shadow-lg rounded-full p-1.5 md:p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               aria-label="Scroll right"
             >
-              <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-gray-700 dark:text-gray-300" />
+              <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-[var(--foreground)]" />
             </button>
           )}
         </div>
@@ -213,7 +213,7 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
           {categories.length > 3 && Array.from({ length: Math.min(5, categories.length) }).map((_, idx) => (
             <div
               key={idx}
-              className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700"
+              className="w-1.5 h-1.5 rounded-full bg-[var(--color-border)]"
             />
           ))}
         </div>

@@ -18,42 +18,24 @@ const EnhancedCartTotals = ({
     subtotal >= (shippingAnalysis.free_shipping_rule.threshold_amount || 0);
   
   return (
-    <div className="rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 lg:p-8 shadow-sm" style={{ backgroundColor: 'var(--cart-totals-bg)', boxShadow: '0 1px 3px var(--cart-shadow)' }}>
-      <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--cart-totals-text)' }}>Cart Total</h3>
+    <div className="rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 lg:p-8 shadow-sm" style={{ backgroundColor: 'var(--card)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--foreground)' }}>Cart Total</h3>
       
       <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-        <div className="flex justify-between items-center text-xs sm:text-sm font-medium" style={{ color: 'var(--cart-totals-text)' }}>
+        <div className="flex justify-between items-center text-xs sm:text-sm font-medium" style={{ color: 'var(--foreground)' }}>
           <span>Cart Subtotal</span>
           <span className="flex items-center"><Tk_icon size={14} className="mr-1"/>{subtotal.toFixed(2)}</span>
         </div>
-        
-        <div className="flex justify-between items-center text-xs sm:text-sm font-medium" style={{ color: 'var(--cart-totals-text)' }}>
-          <span>Shipping Cost</span>
-          <span className="flex items-center">
-            {isShippingFree || shipping === 0 ? (
-              'FREE'
-            ) : (
-              <>
-                <Tk_icon size={14} className="mr-1"/>
-                {shipping.toFixed(2)}
-              </>
-            )}
-          </span>
-        </div>
 
-        <div className="flex justify-between items-center text-xs sm:text-sm font-medium" style={{ color: 'var(--cart-totals-text)' }}>
-          <span>Design by Fluttertop</span>
-          <span>Free</span>
-        </div>
 
         {discount > 0 && (
-          <div className="flex justify-between items-center text-xs sm:text-sm font-medium" style={{ color: 'var(--cart-success-text)' }}>
+          <div className="flex justify-between items-center text-xs sm:text-sm font-medium" style={{ color: '#16a34a' }}>
             <span>Discount</span>
             <span className="flex items-center">-<Tk_icon size={14} className="mr-1"/>{discount.toFixed(2)}</span>
           </div>
         )}
         
-        <div className="flex justify-between items-center text-base sm:text-lg font-bold pt-3 sm:pt-4 mt-3 sm:mt-4" style={{ color: 'var(--cart-totals-text)', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+        <div className="flex justify-between items-center text-base sm:text-lg font-bold pt-3 sm:pt-4 mt-3 sm:mt-4" style={{ color: 'var(--foreground)', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
           <span>Cart Total</span>
           <span className="flex items-center">
             <Tk_icon size={18} className="mr-1"/>
@@ -67,11 +49,11 @@ const EnhancedCartTotals = ({
           whileTap={{ scale: 0.98 }}
           className="w-full font-bold py-2.5 sm:py-3 rounded-full transition-colors shadow-sm text-xs sm:text-sm"
           style={{ 
-            backgroundColor: 'var(--cart-button-secondary)', 
-            color: 'var(--cart-text-primary)'
+            backgroundColor: 'var(--primary)', 
+            color: '#ffffff'
           }}
-          onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--cart-button-secondary-hover)'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--cart-button-secondary)'}
+          onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+          onMouseLeave={(e) => e.target.style.opacity = '1'}
         >
           Proceed to checkout
         </motion.button>

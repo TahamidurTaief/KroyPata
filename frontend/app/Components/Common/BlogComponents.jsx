@@ -7,7 +7,7 @@ const BlogComponents = ({ blog_data }) => {
   return (
     <div>
       <div className="w-full h-full pb-5 md:pb-8 lg:pb-10 xl:pb-12">
-        <div className="flex flex-col poppins justify-between gap-3 max-w-xs rounded-lg shadow-lg overflow-hidden bg-white dark:bg-[var(--color-second-bg)] p-2 md:p-3">
+        <div className="flex flex-col poppins justify-between gap-3 max-w-xs rounded-lg shadow-lg overflow-hidden bg-[var(--card)] p-2 md:p-3">
           <div className="w-full h-48 object-cover">
             <Image
               src={blog_data.image}
@@ -16,10 +16,10 @@ const BlogComponents = ({ blog_data }) => {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <span className="text-xs text-[var(--color-text-secondary)]">
+            <span className="text-xs text-[var(--muted-foreground)]">
               {blog_data.date}
             </span>
-            <h2 className="text-sm md:text-md font-semibold text-[var(--color-text-primary)] truncate">
+            <h2 className="text-sm md:text-md font-semibold text-[var(--foreground)] truncate">
               {blog_data.title}
             </h2>
           </div>

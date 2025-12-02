@@ -162,23 +162,23 @@ export const WholesalePricingDisplay = ({
     <div className={`flex flex-col ${sizeConfig.gap} ${className}`}>
       {/* Primary price with wholesale badge */}
       <div className={`flex items-baseline ${sizeConfig.gap} flex-wrap`}>
-        <span className={`${sizeConfig.primaryText} ${isUsingWholesalePrice ? 'text-blue-600 dark:text-blue-400' : 'text-primary'} flex items-baseline gap-1`}>
-          <Tk_icon size={sizeConfig.iconSize} className={isUsingWholesalePrice ? 'text-blue-600 dark:text-blue-400' : 'text-primary'} />
+        <span className={`${sizeConfig.primaryText} ${isUsingWholesalePrice ? 'text-[var(--primary)]' : 'text-[var(--primary)]'} flex items-baseline gap-1`}>
+          <Tk_icon size={sizeConfig.iconSize} className={isUsingWholesalePrice ? 'text-[var(--primary)]' : 'text-[var(--primary)]'} />
           {displayPrice.toFixed(2)}
         </span>
         
         {/* Show wholesale available badge when using wholesale price */}
         {isUsingWholesalePrice && showLabels && (
-          <span className={`bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded font-medium ${sizeConfig.badgeText} flex items-center gap-1`}>
-            <FaCheckCircle className="text-green-600" size={12} />
+          <span className={`bg-[var(--primary)]/10 text-[var(--primary)] rounded font-medium ${sizeConfig.badgeText} flex items-center gap-1`}>
+            <FaCheckCircle className="text-[#16a34a]" size={12} />
             Wholesale Available
           </span>
         )}
         
         {/* Show "not available" badge when approved wholesaler but no wholesale price for this product */}
         {showWholesaleUnavailable && showLabels && (
-          <span className={`bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded font-medium ${sizeConfig.badgeText} flex items-center gap-1`}>
-            <FaTimesCircle className="text-red-600" size={12} />
+          <span className={`bg-red-500/10 text-red-500 rounded font-medium ${sizeConfig.badgeText} flex items-center gap-1`}>
+            <FaTimesCircle className="text-red-500" size={12} />
             Wholesale Not Available
           </span>
         )}
@@ -187,13 +187,13 @@ export const WholesalePricingDisplay = ({
       {/* Secondary price (small label) - show regular price for wholesalers when wholesale is available */}
       {secondaryPrice > 0 && secondaryLabel && showLabels && (
         <div className="flex items-center gap-1">
-          <span className={`text-muted-foreground ${sizeConfig.secondaryText}`}>
+          <span className={`text-[var(--muted-foreground)] ${sizeConfig.secondaryText}`}>
             {secondaryLabel}:
           </span>
           <span className={`${sizeConfig.secondaryText} flex items-baseline gap-1 ${
-            isUsingWholesalePrice ? 'text-muted-foreground line-through' : 'text-muted-foreground line-through'
+            isUsingWholesalePrice ? 'text-[var(--muted-foreground)] line-through' : 'text-[var(--muted-foreground)] line-through'
           }`}>
-            <Tk_icon size={sizeConfig.iconSize - 2} className="text-muted-foreground" />
+            <Tk_icon size={sizeConfig.iconSize - 2} className="text-[var(--muted-foreground)]" />
             {secondaryPrice.toFixed(2)}
           </span>
         </div>
@@ -204,7 +204,7 @@ export const WholesalePricingDisplay = ({
       {/* Show minimum purchase requirement for wholesalers */}
       {isUsingWholesalePrice && minimumPurchase > 1 && showLabels && (
         <div className="flex items-center gap-1">
-          <span className={`text-orange-600 dark:text-orange-400 ${sizeConfig.secondaryText} font-medium flex items-center gap-1`}>
+          <span className={`text-orange-500 ${sizeConfig.secondaryText} font-medium flex items-center gap-1`}>
             <FaBox className="text-orange-500" size={12} />
             Minimum Order: {minimumPurchase} units
           </span>
@@ -251,7 +251,7 @@ export const WholesalePricingBadge = ({
     <div className="flex flex-col gap-1">
       {/* Wholesale discount percentage for approved wholesaler users */}
       {isApprovedWholesaler && wholesaleSavings > 0 && (
-        <div className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+        <div className="bg-[var(--primary)] text-white text-xs font-bold px-2 py-1 rounded-full">
           -{wholesaleSavings}%
         </div>
       )}

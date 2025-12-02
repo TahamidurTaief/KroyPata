@@ -97,66 +97,66 @@ export default function TestimonialCarousel() {
 
         .swiper-slide.swiper-slide-active {
           --tw-border-opacity: 1 !important;
-          border-color: var(--color-button-primary) !important;
+          border-color: var(--primary) !important;
         }
 
         .swiper-slide.swiper-slide-active > .swiper-slide-active\\:text-indigo-600 {
           --tw-text-opacity: 1;
-          color: var(--color-button-primary);
+          color: var(--primary);
         }
 
         .swiper-slide.swiper-slide-active > .flex .grid .swiper-slide-active\\:text-indigo-600 {
           --tw-text-opacity: 1;
-          color: var(--color-button-primary);
+          color: var(--primary);
         }
 
         /* Testimonial card hover effects */
         .testimonial-card:hover {
-          border-color: var(--color-button-primary) !important;
+          border-color: var(--primary) !important;
         }
 
         .testimonial-card:hover .testimonial-text {
-          color: var(--color-text-primary) !important;
+          color: var(--foreground) !important;
         }
 
         .testimonial-card:hover .testimonial-name {
-          color: var(--color-button-primary) !important;
+          color: var(--primary) !important;
         }
 
         .group:hover .group-hover\\:text-blue-600 {
-          color: var(--color-button-primary) !important;
+          color: var(--primary) !important;
         }
 
         /* Active slide styling */
         .swiper-slide-active .testimonial-card {
-          border-color: var(--color-button-primary) !important;
+          border-color: var(--primary) !important;
         }
 
         .swiper-slide-active .testimonial-name {
-          color: var(--color-button-primary) !important;
+          color: var(--primary) !important;
         }
       `}</style>
 
-      <section className="container mx-auto" style={{ backgroundColor: 'var(--color-background)' }}>
+      <section className="container mx-auto" style={{ backgroundColor: 'var(--background)' }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-14 flex flex-col justify-center items-center sm:flex-row sm:items-center sm:justify-between max-sm:gap-8">
-            <h2 className="text-4xl text-center font-bold lg:text-left" style={{ color: 'var(--color-text-primary)' }}>Reviews</h2>
+            <h2 className="text-4xl text-center font-bold lg:text-left" style={{ color: 'var(--foreground)' }}>Reviews</h2>
             {/* Slider controls */}
             <div className="flex items-center gap-8">
               <button
                 id="slider-button-left"
                 className="swiper-button-prev group flex justify-center items-center border border-solid w-12 h-12 transition-all duration-500 rounded-full"
                 style={{ 
-                  borderColor: 'var(--color-button-primary)',
-                  color: 'var(--color-button-primary)'
+                  borderColor: 'var(--primary)',
+                  color: 'var(--primary)'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-button-primary)';
+                  e.target.style.backgroundColor = 'var(--primary)';
                   e.target.style.color = 'white';
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.backgroundColor = 'transparent';
-                  e.target.style.color = 'var(--color-button-primary)';
+                  e.target.style.color = 'var(--primary)';
                 }}
               >
                 <svg className="h-6 w-6 transition-colors duration-300" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -173,16 +173,16 @@ export default function TestimonialCarousel() {
                 id="slider-button-right"
                 className="swiper-button-next group flex justify-center items-center border border-solid w-12 h-12 transition-all duration-500 rounded-full"
                 style={{ 
-                  borderColor: 'var(--color-button-primary)',
-                  color: 'var(--color-button-primary)'
+                  borderColor: 'var(--primary)',
+                  color: 'var(--primary)'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-button-primary)';
+                  e.target.style.backgroundColor = 'var(--primary)';
                   e.target.style.color = 'white';
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.backgroundColor = 'transparent';
-                  e.target.style.color = 'var(--color-button-primary)';
+                  e.target.style.color = 'var(--primary)';
                 }}
               >
                 <svg className="h-6 w-6 transition-colors duration-300" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -237,14 +237,14 @@ export default function TestimonialCarousel() {
                   <div 
                     className="group border border-solid h-auto rounded-2xl p-6 transition-all duration-500 w-full testimonial-card"
                     style={{ 
-                      backgroundColor: 'var(--color-surface)',
+                      backgroundColor: 'var(--card)',
                       borderColor: 'var(--color-border)'
                     }}
                   >
                     <StarRating className="group-hover:text-blue-600" />
                     <p 
                       className="text-lg leading-8 h-24 transition-all duration-500 mb-9 testimonial-text"
-                      style={{ color: 'var(--color-text-secondary)' }}
+                      style={{ color: 'var(--muted-foreground)' }}
                     >
                       {testimonial.quote}
                     </p>
@@ -264,13 +264,13 @@ export default function TestimonialCarousel() {
                       <div className="grid gap-1">
                         <h5 
                           className="font-medium transition-all duration-500 testimonial-name"
-                          style={{ color: 'var(--color-text-primary)' }}
+                          style={{ color: 'var(--foreground)' }}
                         >
                           {testimonial.name}
                         </h5>
                         <span 
                           className="text-sm leading-6"
-                          style={{ color: 'var(--color-text-secondary)' }}
+                          style={{ color: 'var(--muted-foreground)' }}
                         >
                           {testimonial.title}
                         </span>

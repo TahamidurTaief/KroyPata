@@ -39,8 +39,8 @@ const SectionRenderer = ({ page = 'home', className = '' }) => {
     return (
       <div className={`sections-container ${className}`}>
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600 dark:text-gray-400">Loading sections...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
+          <span className="ml-3 text-[var(--muted-foreground)]">Loading sections...</span>
         </div>
       </div>
     );
@@ -142,7 +142,7 @@ const Section = ({ pageSection, index }) => {
           <div className="flex-1">
             {show_title && title_display && (
               <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-2xl md:text-3xl font-bold text-[var(--color-text-primary)] tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-bold text-[var(--foreground)] tracking-tight">
                   {title_display}
                 </h2>
                 
@@ -156,7 +156,7 @@ const Section = ({ pageSection, index }) => {
             )}
             
             {show_subtitle && subtitle_display && (
-              <p className="text-base md:text-lg text-[var(--color-text-secondary)] leading-relaxed">
+              <p className="text-base md:text-lg text-[var(--muted-foreground)] leading-relaxed">
                 {subtitle_display}
               </p>
             )}
@@ -167,7 +167,7 @@ const Section = ({ pageSection, index }) => {
             <div className="flex-shrink-0">
               <Link 
                 href={`/products?section=${encodeURIComponent(name || '')}`}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--primary)] hover:text-[var(--primary)]/80 transition-colors group"
               >
                 View All
                 <svg 
@@ -236,10 +236,10 @@ const Section = ({ pageSection, index }) => {
       {/* Section Footer - Additional info for special offers */}
       {section_type === 'special_offer' && section_info?.offer_end_date && (
         <motion.div 
-          className="section-footer mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg border border-red-200 dark:border-red-800"
+          className="section-footer mt-6 p-4 bg-[var(--muted)] rounded-lg border border-[var(--primary)]/30"
           variants={itemVariants}
         >
-          <div className="flex items-center justify-center gap-2 text-sm text-red-700 dark:text-red-300">
+          <div className="flex items-center justify-center gap-2 text-sm text-[var(--primary)]">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>

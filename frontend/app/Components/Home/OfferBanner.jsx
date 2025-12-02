@@ -142,18 +142,18 @@ export default function OfferBanner({ offerBanners = [] }) {
   // Prevent hydration issues by checking client state
   if (!isClient) {
     return (
-      <section className="py-8 px-4" style={{ backgroundColor: 'var(--color-background)' }}>
+      <section className="py-8 px-4" style={{ backgroundColor: 'var(--background)' }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Our Special Offers</h2>
-            <p style={{ color: 'var(--color-text-secondary)' }}>Don't miss these amazing deals!</p>
+            <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>Our Special Offers</h2>
+            <p style={{ color: 'var(--muted-foreground)' }}>Don't miss these amazing deals!</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-48 md:h-64 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--color-muted-bg)' }}></div>
+              <div key={index} className="h-48 md:h-64 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--muted)' }}></div>
             ))}
           </div>
-          <div className="h-96 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--color-muted-bg)' }}></div>
+          <div className="h-96 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--muted)' }}></div>
         </div>
       </section>
     );
@@ -213,7 +213,7 @@ export default function OfferBanner({ offerBanners = [] }) {
     // Convert Tailwind gradient classes to CSS gradient if needed
     const getGradientStyle = (gradientColors) => {
       if (!gradientColors) {
-        return `linear-gradient(135deg, var(--color-button-primary), var(--color-accent-orange))`;
+        return `linear-gradient(135deg, var(--primary), var(--primary))`;
       }
       
       // If it's already a CSS gradient, use it
@@ -236,8 +236,8 @@ export default function OfferBanner({ offerBanners = [] }) {
       };
       
       const parts = gradientColors.split(' ');
-      const fromColor = colorMap[parts[0]] || 'var(--color-button-primary)';
-      const toColor = colorMap[parts[1]] || 'var(--color-accent-orange)';
+      const fromColor = colorMap[parts[0]] || 'var(--primary)';
+      const toColor = colorMap[parts[1]] || 'var(--primary)';
       
       return `linear-gradient(135deg, ${fromColor}, ${toColor})`;
     };
@@ -319,7 +319,7 @@ export default function OfferBanner({ offerBanners = [] }) {
                 className="px-3 py-1 rounded text-sm font-semibold transition-colors"
                 style={{
                   backgroundColor: 'var(--color-second-bg)',
-                  color: 'var(--color-text-primary)',
+                  color: 'var(--foreground)',
                   borderColor: 'var(--color-border)'
                 }}
                 whileHover={{ scale: 1.05 }}
@@ -344,23 +344,23 @@ export default function OfferBanner({ offerBanners = [] }) {
   // Return early if no banners
   if (!bannersToUse || bannersToUse.length === 0) {
     return (
-      <section className="container mx-auto py-8" style={{ backgroundColor: 'var(--color-background)' }}>
+      <section className="container mx-auto py-8" style={{ backgroundColor: 'var(--background)' }}>
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Our Special Offers</h2>
-          <p style={{ color: 'var(--color-text-secondary)' }}>Check back soon for amazing deals!</p>
+          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>Our Special Offers</h2>
+          <p style={{ color: 'var(--muted-foreground)' }}>Check back soon for amazing deals!</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="container mx-auto py-8" id="special-offers" style={{ backgroundColor: 'var(--color-background)' }}>
+    <section className="container mx-auto py-8" id="special-offers" style={{ backgroundColor: 'var(--background)' }}>
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-8">
           <motion.h2 
             className="text-3xl font-bold mb-2"
-            style={{ color: 'var(--color-text-primary)' }}
+            style={{ color: 'var(--foreground)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -368,7 +368,7 @@ export default function OfferBanner({ offerBanners = [] }) {
             Our Special Offers
           </motion.h2>
           <motion.p 
-            style={{ color: 'var(--color-text-secondary)' }}
+            style={{ color: 'var(--muted-foreground)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -433,7 +433,7 @@ export default function OfferBanner({ offerBanners = [] }) {
                   className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full shadow-lg transition-all duration-200"
                   style={{
                     backgroundColor: 'var(--color-second-bg)',
-                    color: 'var(--color-text-primary)',
+                    color: 'var(--foreground)',
                     opacity: 0.9
                   }}
                   onMouseEnter={(e) => e.target.style.opacity = '1'}
@@ -450,7 +450,7 @@ export default function OfferBanner({ offerBanners = [] }) {
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full shadow-lg transition-all duration-200"
                   style={{
                     backgroundColor: 'var(--color-second-bg)',
-                    color: 'var(--color-text-primary)',
+                    color: 'var(--foreground)',
                     opacity: 0.9
                   }}
                   onMouseEnter={(e) => e.target.style.opacity = '1'}
@@ -475,8 +475,8 @@ export default function OfferBanner({ offerBanners = [] }) {
                   className="w-2 h-2 rounded-full transition-all duration-200"
                   style={{
                     backgroundColor: index === currentIndex 
-                      ? 'var(--color-button-primary)' 
-                      : 'var(--color-muted-bg)'
+                      ? 'var(--primary)' 
+                      : 'var(--muted)'
                   }}
                   aria-label={`Go to banner ${index + 1}`}
                 />
