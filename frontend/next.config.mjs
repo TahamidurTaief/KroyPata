@@ -70,6 +70,18 @@ const nextConfig = {
         pathname: '/media/**',
       },
       {
+        protocol: 'http',
+        hostname: 'api.chinakroy.com',
+        port: '',
+        pathname: '/media/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.chinakroy.com',
+        port: '',
+        pathname: '/media/**',
+      },
+      {
         protocol: 'https',
         hostname: 'placehold.co',
         port: '',
