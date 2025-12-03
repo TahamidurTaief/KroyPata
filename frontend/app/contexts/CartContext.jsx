@@ -17,8 +17,24 @@ const CartContext = createContext();
 // Custom hook to use the Cart Context
 export const useCartContext = () => {
   const context = useContext(CartContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useCartContext must be used within a CartProvider');
+  }
+  // Return safe default if context is null
+  if (context === null) {
+    console.warn('CartContext is null - returning default values');
+    return {
+      cart: [],
+      cartCount: 0,
+      cartTotal: 0,
+      isLoading: false,
+      addToCart: async () => ({ success: false }),
+      removeFromCart: async () => ({ success: false }),
+      updateQuantity: async () => ({ success: false }),
+      clearCart: async () => ({ success: false }),
+      refreshCart: async () => {},
+      isInCart: () => false,
+    };
   }
   return context;
 };

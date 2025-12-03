@@ -8,8 +8,29 @@ const MessageContext = createContext();
 // Custom hook to use the MessageContext
 export const useMessage = () => {
   const context = useContext(MessageContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useMessage must be used within a MessageProvider');
+  }
+  // Return a safe default if context is null (during SSR or initialization)
+  if (context === null) {
+    console.warn('MessageContext is null - returning default values');
+    return {
+      isOpen: false,
+      message: '',
+      type: 'success',
+      title: '',
+      primaryActionText: '',
+      onPrimaryAction: null,
+      secondaryActionText: '',
+      onSecondaryAction: null,
+      playAudio: true,
+      openMessage: () => {},
+      openAdvancedMessage: () => {},
+      closeMessage: () => {},
+      showSuccess: () => {},
+      showError: () => {},
+      showWarning: () => {},
+    };
   }
   return context;
 };

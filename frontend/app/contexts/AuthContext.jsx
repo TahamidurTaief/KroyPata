@@ -170,8 +170,26 @@ export const AuthProvider = ({ children }) => {
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
+  }
+  // Return a safe default if context is null (during SSR or initialization)
+  if (context === null) {
+    console.warn('AuthContext is null - returning default values');
+    return {
+      isAuthModalOpen: false,
+      authModalView: 'login',
+      user: null,
+      isAuthenticated: false,
+      openAuthModal: () => {},
+      closeAuthModal: () => {},
+      switchToLogin: () => {},
+      switchToSignup: () => {},
+      login: () => {},
+      logout: () => {},
+      checkAuthStatus: () => {},
+      getAccessToken: () => null,
+    };
   }
   return context;
 };

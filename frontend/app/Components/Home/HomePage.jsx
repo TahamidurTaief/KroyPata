@@ -13,24 +13,30 @@ import OfferBanner from "./OfferBanner";
 import EnhancedSectionRenderer from "../Common/EnhancedSectionRenderer";
 import CategoryBasedSection from "./CategoryBasedSection";
 
-const HomePage = ({ initialProducts, categories, horizontalBanners, offerBanners }) => {
+const HomePage = ({ initialProducts = [], categories = [], horizontalBanners = [], offerBanners = [] }) => {
+  // Ensure all props are arrays
+  const safeProducts = Array.isArray(initialProducts) ? initialProducts : [];
+  const safeCategories = Array.isArray(categories) ? categories : [];
+  const safeHorizontalBanners = Array.isArray(horizontalBanners) ? horizontalBanners : [];
+  const safeOfferBanners = Array.isArray(offerBanners) ? offerBanners : [];
+
   return (
     <div className="w-full min-h-screen bg-[var(--background)]">
       <Hero />
       <CategoryCarousel />
-      {/* <CategoryCards categories={categories} /> */}
+      {/* <CategoryCards categories={safeCategories} /> */}
       <FilterProducts 
-        initialProducts={initialProducts} 
-        categories={categories} 
+        initialProducts={safeProducts} 
+        categories={safeCategories} 
       />
       
       {/* Category-Based Product Sections with Search */}
       <CategoryBasedSection />
       
       {/* Horizontal Banner Slider with all banners */}
-      <HorizontalBannerSlider banners={horizontalBanners} />
+      <HorizontalBannerSlider banners={safeHorizontalBanners} />
       {/* <Review /> */}
-      <OfferBanner offerBanners={offerBanners} />
+      <OfferBanner offerBanners={safeOfferBanners} />
       
       {/* Dynamic Sections - After Our Special Offers */}
       <EnhancedSectionRenderer page="home" />

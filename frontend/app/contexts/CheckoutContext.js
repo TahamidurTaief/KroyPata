@@ -9,8 +9,24 @@ const CheckoutContext = createContext();
 // Custom hook to use the checkout context
 export const useCheckout = () => {
   const context = useContext(CheckoutContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useCheckout must be used within a CheckoutProvider');
+  }
+  // Return safe default if context is null
+  if (context === null) {
+    console.warn('CheckoutContext is null - returning default values');
+    return {
+      cartItems: [],
+      buyNowItem: null,
+      isBuyNowMode: false,
+      mounted: false,
+      initiateBuyNow: () => {},
+      clearBuyNow: () => {},
+      clearCart: async () => {},
+      addToCart: async () => {},
+      removeFromCart: async () => {},
+      updateCartItemQuantity: async () => {},
+    };
   }
   return context;
 };

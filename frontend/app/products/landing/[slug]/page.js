@@ -69,9 +69,12 @@ export default function ProductLandingPage() {
   }, [product]);
 
   useEffect(() => {
+    console.log('Landing page mounted, params:', params);
     if (params.slug) {
       fetchProduct();
       checkUser();
+    } else {
+      console.error('No slug in params');
     }
   }, [params.slug]);
 
@@ -120,15 +123,19 @@ export default function ProductLandingPage() {
         { headers }
       );
       
-      if (!response.ok) throw new Error('Product not found');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        throw new Error(`Product not found (${response.status})`);
+      }
       
       const data = await response.json();
+      console.log('Product data fetched:', data);
       
-      // Check if landing page is enabled
+      // Check if landing page is enabled - show warning but still display the page
       if (!data.enable_landing_page) {
-        toast.error('This product does not have a landing page');
-        router.push('/products');
-        return;
+        console.warn('Landing page is not enabled for this product, showing basic product page');
+        // Don't redirect, just show the product with available information
       }
       
       setProduct(data);
@@ -137,11 +144,11 @@ export default function ProductLandingPage() {
       if (data._user_context?.is_approved_wholesaler && data.minimum_purchase) {
         setFormData(prev => ({ ...prev, quantity: data.minimum_purchase }));
       }
+      
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching product:', error);
-      toast.error('Failed to load product');
-      setLoading(false);
-    } finally {
+      toast.error(error.message || 'Failed to load product');
       setLoading(false);
     }
   };
@@ -327,6 +334,25 @@ export default function ProductLandingPage() {
   return (
     <div className="landing-page-container">
       <div className="container">
+        {/* Info banner for products without full landing page */}
+        {!product.enable_landing_page && (
+          <div style={{
+            backgroundColor: 'var(--color-second-bg)',
+            border: '1px solid var(--color-border)',
+            borderRadius: '8px',
+            padding: '1rem 1.5rem',
+            marginBottom: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>ℹ️</span>
+            <p style={{ margin: 0, color: 'var(--color-text-primary)' }}>
+              This product is available for quick order. You can place your order using the checkout form on the right.
+            </p>
+          </div>
+        )}
+        
         <div className="landing-page-content">
         
         {/* Left Side - Product Details */}
@@ -378,7 +404,7 @@ export default function ProductLandingPage() {
             <div className="product-price">
               <span className="price-label">Price:</span>
               <span className="price-value">
-                <Tk_icon size={20} className="mr-1" />
+                {Tk_icon && <Tk_icon size={20} className="mr-1" />}
                 {getDisplayPrice().toLocaleString()}
               </span>
               {isWholesaler && product.wholesale_price && (
@@ -408,24 +434,53 @@ export default function ProductLandingPage() {
           )}
 
           {/* Landing Page Sections */}
-          {product.landing_features && (
+          {product.landing_features && product.landing_features.trim() !== '' && (
             <div className="landing-section">
               <h2>Features</h2>
               <div dangerouslySetInnerHTML={{ __html: product.landing_features }} />
             </div>
           )}
 
-          {product.landing_how_to_use && (
+          {product.landing_how_to_use && product.landing_how_to_use.trim() !== '' && (
             <div className="landing-section">
               <h2>How to Use</h2>
               <div dangerouslySetInnerHTML={{ __html: product.landing_how_to_use }} />
             </div>
           )}
 
-          {product.landing_why_choose && (
+          {product.landing_why_choose && product.landing_why_choose.trim() !== '' && (
             <div className="landing-section">
               <h2>Why Choose This Product?</h2>
               <div dangerouslySetInnerHTML={{ __html: product.landing_why_choose }} />
+            </div>
+          )}
+          
+          {/* Show message if no landing content is available */}
+          {(!product.landing_features || product.landing_features.trim() === '') &&
+           (!product.landing_how_to_use || product.landing_how_to_use.trim() === '') &&
+           (!product.landing_why_choose || product.landing_why_choose.trim() === '') && (
+            <div className="landing-section">
+              <h2>Product Highlights</h2>
+              <div style={{ 
+                padding: '2rem', 
+                backgroundColor: 'var(--color-second-bg)', 
+                borderRadius: '8px',
+                border: '1px solid var(--color-border)'
+              }}>
+                <p style={{ color: 'var(--color-text-primary)', marginBottom: '1rem' }}>
+                  <strong>{product.name}</strong> is available for order with fast delivery.
+                </p>
+                <ul style={{ color: 'var(--color-text-secondary)', lineHeight: '1.8' }}>
+                  <li>✓ Authentic product from {product.brand?.name || 'trusted brand'}</li>
+                  <li>✓ {product.stock > 0 ? `${product.stock} units in stock` : 'Available on order'}</li>
+                  <li>✓ Competitive pricing with quality guarantee</li>
+                  <li>✓ Fast and reliable delivery service</li>
+                  <li>✓ Secure checkout and payment process</li>
+                </ul>
+                <p style={{ color: 'var(--color-text-secondary)', marginTop: '1rem', fontStyle: 'italic' }}>
+                  Complete product details and features are available upon request. Feel free to order or contact us for more information.
+                </p>
+              </div>
             </div>
           )}
 
@@ -498,10 +553,10 @@ export default function ProductLandingPage() {
               </div>
 
               {/* Total Price */}
-              <div className="total-price">
+              <div className="total-price text-[var(--color-button-primary)]">
                 <span>Total:</span>
                 <span className="total-amount">
-                  <Tk_icon size={22} className="mr-1" />
+                  {Tk_icon && <Tk_icon size={22} className="mr-1" />}
                   {getTotalPrice().toLocaleString()}
                 </span>
               </div>

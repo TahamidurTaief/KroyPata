@@ -5,7 +5,21 @@ import NotificationModal from '@/app/Components/Common/NotificationModal';
 
 const ModalContext = createContext();
 
-export const useModal = () => useContext(ModalContext);
+export const useModal = () => {
+  const context = useContext(ModalContext);
+  if (context === undefined) {
+    throw new Error('useModal must be used within a ModalProvider');
+  }
+  // Return safe default if context is null
+  if (context === null) {
+    console.warn('ModalContext is null - returning default values');
+    return {
+      showModal: () => {},
+      hideModal: () => {},
+    };
+  }
+  return context;
+};
 
 export const ModalProvider = ({ children }) => {
   const [modalState, setModalState] = useState({

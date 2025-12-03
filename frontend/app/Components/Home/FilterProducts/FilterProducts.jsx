@@ -5,8 +5,12 @@ import FilteredProduct from "./FilteredProduct";
 import { getProducts } from "@/app/lib/api";
 import { useAuth } from "@/app/contexts/AuthContext";
 
-const FilterProducts = ({ initialProducts, categories }) => {
-  const [products, setProducts] = useState(initialProducts);
+const FilterProducts = ({ initialProducts = [], categories = [] }) => {
+  // Ensure props are arrays
+  const safeInitialProducts = Array.isArray(initialProducts) ? initialProducts : [];
+  const safeCategories = Array.isArray(categories) ? categories : [];
+  
+  const [products, setProducts] = useState(safeInitialProducts);
   const [isLoading, setIsLoading] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -35,20 +39,20 @@ const FilterProducts = ({ initialProducts, categories }) => {
         
         if (newProductsData?.error) {
           console.error('API Error:', newProductsData.error);
-          setProducts(initialProducts);
+          setProducts(safeInitialProducts);
         } else {
           setProducts(newProductsData?.results || []);
         }
       } catch (error) {
         console.error('Category filter error:', error);
-        setProducts(initialProducts);
+        setProducts(safeInitialProducts);
       }
       
       setIsLoading(false);
     };
     
     fetchFilteredProducts();
-  }, [selectedCategory, initialProducts]);
+  }, [selectedCategory, safeInitialProducts]);
 
   // Authentication-aware product refetching for wholesalers
   useEffect(() => {
@@ -84,7 +88,7 @@ const FilterProducts = ({ initialProducts, categories }) => {
   return (
     <div className="py-0">
       <CategoryCarousel 
-        categories={categories} 
+        categories={safeCategories} 
         onCategoryChange={handleCategoryChange}
         selectedCategory={selectedCategory}
       />

@@ -17,6 +17,8 @@ import FooterSkeleton from './Components/FooterSkeleton'; // <-- IMPORT THE SKEL
 import ClientManifestErrorBoundary from './Components/ErrorBoundaries/ClientManifestErrorBoundary';
 import ChunkLoadErrorBoundary from './Components/ErrorBoundaries/ChunkLoadErrorBoundary';
 import { ChunkErrorHandler } from './Components/ChunkErrorHandler';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -146,6 +148,7 @@ export default function RootLayout({ children }) {
                       <Footer />
                       
                       <AuthModal />
+                      <ToastContainer />
                     </div>
                   </SWRProvider>
                 </CartProvider>
