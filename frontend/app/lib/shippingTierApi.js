@@ -2,7 +2,7 @@
  * Enhanced Shipping API Functions with Tier Support
  */
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+import { API_BASE_URL } from './api';
 
 /**
  * Fetch all shipping methods with their pricing tiers

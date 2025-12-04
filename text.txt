@@ -12,7 +12,7 @@ make this category carousal in home page (/). place it after hero section.
 - for color use css variable form global.css
 - then decalare this component section in HomePage.jsx
 - and don't use dummy data or staic data.. directly work with dynamic data from api.
-- api link demo : https://api.icommerce.passmcq.com/api/products/categories/
+- api link demo : https://api.chinakroy.com/api/products/categories/
 
 - don't change backend or api.
 - be careful about it. no error hsould be occord

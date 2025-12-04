@@ -5,13 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'react-toastify';
 import Tk_icon from '@/app/Components/Common/Tk_icon';
+import { API_BASE_URL } from '@/app/lib/api';
 import './landing.css';
 
 export default function ProductLandingPage() {
   const params = useParams();
   const router = useRouter();
   // Ensure we have a usable API base URL on the client — fall back to local dev server
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+  const API_BASE = API_BASE_URL;
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

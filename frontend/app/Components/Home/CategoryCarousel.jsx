@@ -43,7 +43,7 @@ const CategoryCarousel = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          "https://api.icommerce.passmcq.com/api/products/categories/"
+          "https://api.chinakroy.com/api/products/categories/"
         );
         
         if (!response.ok) {

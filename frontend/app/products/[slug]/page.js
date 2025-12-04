@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import ProductDetailPageClient from "@/app/Components/Product/ProductDetailPageClient";
 import { Suspense } from "react";
 import Loading from "./loading";
+import { API_BASE_URL } from "@/app/lib/api";
 
 // Revalidate product pages every 60s (ISR-like behavior in App Router)
 export const revalidate = 60;
@@ -13,7 +14,7 @@ export async function generateStaticParams() {
 
 // Helper to fetch a single product with proper base URL and revalidate
 async function fetchProductBySlug(slug) {
-  const base = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+  const base = API_BASE_URL;
   const url = `${base}/api/products/products/${slug}/`;
   try {
     const res = await fetch(url, { next: { revalidate: 60 } });

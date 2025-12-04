@@ -43,7 +43,7 @@ import { fetchWithRetry } from './safeFetch';
 
 // Normalize API base URL and ensure no trailing slash
 // Use local development server if running locally, otherwise use production API
-const API_BASE_URL = (() => {
+export const API_BASE_URL = (() => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL;
   
   // If no env var is set and we're in development, use local server
@@ -60,7 +60,7 @@ const API_BASE_URL = (() => {
   }
   
   // Otherwise use env var or production default
-  return (envUrl || 'https://api.icommerce.passmcq.com').replace(/\/+$/, '');
+  return (envUrl || 'https://api.chinakroy.com').replace(/\/+$/, '');
 })();
 
 // Debug API calls

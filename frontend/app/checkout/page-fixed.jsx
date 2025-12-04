@@ -14,7 +14,7 @@ const makeAPIRequest = async (endpoint, options = {}) => {
     if (!envUrl && typeof window !== 'undefined' && window.location.hostname === 'localhost') {
       return 'http://127.0.0.1:8000';
     }
-    return envUrl || 'https://api.icommerce.passmcq.com';
+    return envUrl || 'https://api.chinakroy.com';
   })();
   
   const url = `${baseUrl}${endpoint}`.replace(/\/+/g, '/').replace(/:\//,'://');

@@ -23,8 +23,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3001",
     "http://192.168.1.6:3000",
     "http://10.17.90.39:3000",
-    "https://icommerce-beta.vercel.app",
-    "https://icommerce.passmcq.com",
+    "https://chinakroy.com",
+    "https://www.chinakroy.com",
+    "https://api.chinakroy.com",
 ]
 
 
@@ -369,6 +370,8 @@ LOGGING = {
 # SECURE_BROWSER_XSS_FILTER = True
 # SECURE_CONTENT_TYPE_NOSNIFF = True
 
+# Trust the X-Forwarded-Proto header for SSL (required for Vercel/Proxies)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # # SSL redirect
 # SECURE_SSL_REDIRECT = True

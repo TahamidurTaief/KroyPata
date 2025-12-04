@@ -50,6 +50,76 @@
 			"command": "npm run dev",
 			"isBackground": true,
 			"group": "build"
+		},
+		{
+			"label": "Check Git Status",
+			"type": "shell",
+			"command": "git status",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Continue Rebase",
+			"type": "shell",
+			"command": "git -c core.editor=\"cmd /c exit 0\" rebase --continue",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Continue Rebase 2",
+			"type": "shell",
+			"command": "git rebase --continue",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Check Git Status 2",
+			"type": "shell",
+			"command": "git status",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Check Branch",
+			"type": "shell",
+			"command": "git branch",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Add and Continue",
+			"type": "shell",
+			"command": "git add . && git rebase --continue",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Add and Continue 2",
+			"type": "shell",
+			"command": "git add .; git rebase --continue",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Remove Swap File",
+			"type": "shell",
+			"command": "Remove-Item .git/.COMMIT_EDITMSG.swp -Force -ErrorAction SilentlyContinue",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Continue Rebase 3",
+			"type": "shell",
+			"command": "git -c core.editor=cat rebase --continue",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Add and Continue 3",
+			"type": "shell",
+			"command": "git add .; git -c core.editor=cat rebase --continue",
+			"isBackground": false,
+			"group": "test"
 		}
 	]
 }

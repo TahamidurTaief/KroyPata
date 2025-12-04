@@ -65,18 +65,12 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'api.icommerce.passmcq.com',
-        port: '',
-        pathname: '/media/**',
-      },
-      {
-        protocol: 'http',
         hostname: 'api.chinakroy.com',
         port: '',
         pathname: '/media/**',
       },
       {
-        protocol: 'https',
+        protocol: 'http',
         hostname: 'api.chinakroy.com',
         port: '',
         pathname: '/media/**',
