@@ -11,9 +11,6 @@ import ProtectedRoute from '../Components/Auth/ProtectedRoute';
 const makeAPIRequest = async (endpoint, options = {}) => {
   const baseUrl = (() => {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!envUrl && typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      return 'http://127.0.0.1:8000';
-    }
     return envUrl || 'https://api.chinakroy.com';
   })();
   

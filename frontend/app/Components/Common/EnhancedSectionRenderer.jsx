@@ -15,9 +15,6 @@ const EnhancedSectionRenderer = ({ page = 'home', className = '' }) => {
 
   // API Base URL helper
   const getApiBaseUrl = () => {
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      return 'http://127.0.0.1:8000';
-    }
     return process.env.NEXT_PUBLIC_API_URL || 'https://api.chinakroy.com';
   };
 

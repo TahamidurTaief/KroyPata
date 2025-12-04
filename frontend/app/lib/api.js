@@ -46,19 +46,6 @@ import { fetchWithRetry } from './safeFetch';
 export const API_BASE_URL = (() => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL;
   
-  // If no env var is set and we're in development, use local server
-  if (!envUrl && typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.')) {
-      return 'http://127.0.0.1:8000';
-    }
-  }
-  
-  // For server-side rendering or when no window object, check NODE_ENV
-  if (!envUrl && typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
-    return 'http://127.0.0.1:8000';
-  }
-  
   // Otherwise use env var or production default
   return (envUrl || 'https://api.chinakroy.com').replace(/\/+$/, '');
 })();

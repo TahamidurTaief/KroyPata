@@ -120,6 +120,34 @@
 			"command": "git add .; git -c core.editor=cat rebase --continue",
 			"isBackground": false,
 			"group": "test"
+		},
+		{
+			"label": "Start Django Server Correct",
+			"type": "shell",
+			"command": "cd backend; .\\.venv\\Scripts\\activate; python manage.py runserver 127.0.0.1:8000",
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Commit API Changes",
+			"type": "shell",
+			"command": "git add . && git commit -m \"Force use of api.chinakroy.com even on localhost\"",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Commit API Changes 2",
+			"type": "shell",
+			"command": "git add .; git commit -m \"Force use of api.chinakroy.com even on localhost\"",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Commit API Changes 3",
+			"type": "shell",
+			"command": "git add .; git commit -m 'Force use of api.chinakroy.com even on localhost'",
+			"isBackground": false,
+			"group": "build"
 		}
 	]
 }
