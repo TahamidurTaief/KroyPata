@@ -2,7 +2,7 @@
 import { API_BASE_URL } from '@/app/lib/api';
 
 export default async function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com';
   const apiUrl = API_BASE_URL;
 
   // Static routes

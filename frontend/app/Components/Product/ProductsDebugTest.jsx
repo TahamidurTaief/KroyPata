@@ -10,7 +10,8 @@ const ProductsDebugTest = () => {
     setLoading(true);
     try {
       console.log('🧪 Starting API test...');
-      const response = await fetch('http://127.0.0.1:8000/api/products/');
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.chinakroy.com';
+      const response = await fetch(`${apiBaseUrl}/api/products/`);
       
       console.log('Response:', {
         status: response.status,

@@ -37,14 +37,14 @@ export async function generateMetadata({ params }) {
   const product = await fetchProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com';
   const plainDescription = product.description ? product.description.replace(/<[^>]*>?/gm, '') : '';
-  const description = plainDescription.substring(0, 160) || `Buy ${product.name} at the best price on ICommerce`;
+  const description = plainDescription.substring(0, 160) || `Buy ${product.name} at the best price on ChinaKroy`;
   const productImage = product.images?.[0] || product.image_url || product.image || '';
   const productUrl = `${baseUrl}/products/${slug}`;
   
   return {
-    title: `${product.name} | ICommerce`,
+    title: `${product.name} | ChinaKroy`,
     description: description,
     keywords: `${product.name}, ${product.sub_category?.name || ''}, ${product.sub_category?.category?.name || ''}, buy online, ecommerce`,
     

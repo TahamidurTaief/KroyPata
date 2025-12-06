@@ -3,22 +3,22 @@ import CategoriesBlock from "@/app/Components/Categories/CategoriesBlock";
 
 // Metadata for SEO
 export const metadata = {
-  title: 'All Categories | ICommerce - Browse Products by Category',
-  description: 'Browse all product categories on ICommerce. Find electronics, fashion, home goods, and more. Shop by category for easy product discovery.',
+  title: 'All Categories | ChinaKroy - Browse Products by Category',
+  description: 'Browse all product categories on ChinaKroy. Find electronics, fashion, home goods, and more. Shop by category for easy product discovery.',
   keywords: 'categories, product categories, shop by category, browse products, ecommerce categories, online shopping',
   
   // Open Graph metadata
   openGraph: {
-    title: 'All Categories | ICommerce',
-    description: 'Browse all product categories and find what you need on ICommerce',
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com'}/categories`,
-    siteName: 'ICommerce',
+    title: 'All Categories | ChinaKroy',
+    description: 'Browse all product categories and find what you need on ChinaKroy',
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com'}/categories`,
+    siteName: 'ChinaKroy',
     images: [
       {
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com'}/og-categories.jpg`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com'}/og-categories.jpg`,
         width: 1200,
         height: 630,
-        alt: 'ICommerce Categories',
+        alt: 'ChinaKroy Categories',
       },
     ],
     locale: 'en_US',
@@ -28,16 +28,16 @@ export const metadata = {
   // Twitter Card metadata
   twitter: {
     card: 'summary_large_image',
-    title: 'All Categories | ICommerce',
-    description: 'Browse all product categories and find what you need on ICommerce',
-    images: [`${process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com'}/og-categories.jpg`],
-    creator: '@icommerce',
-    site: '@icommerce',
+    title: 'All Categories | ChinaKroy',
+    description: 'Browse all product categories and find what you need on ChinaKroy',
+    images: [`${process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com'}/og-categories.jpg`],
+    creator: '@chinakroy',
+    site: '@chinakroy',
   },
   
   // Canonical URL
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com'}/categories`,
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com'}/categories`,
   },
   
   // Robots

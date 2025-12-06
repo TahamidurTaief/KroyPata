@@ -1,6 +1,6 @@
 // app/robots.js
 export default function robots() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com';
 
   return {
     rules: [

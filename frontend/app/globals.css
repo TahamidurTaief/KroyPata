@@ -100,35 +100,35 @@
 
 html.dark {
   /* --- DARK MODE COLORS (these override the root values when .dark is active) --- */
-  --color-background: #0f0f0f;
-  --color-second-bg: #181818;
+  --color-background: #03041C;
+  --color-second-bg: #161730;
   --color-text-primary: #ffffff;
   --color-text-secondary: #a1a1aa;
-  --color-button-primary: #E02738;
-  --color-accent-orange: #FFF164;
+  --color-button-primary: #F7411B;
+  --color-accent-orange: #FDD00C;
   --color-accent-green: #16a34a;
   --color-border: #2C2C2C;
   
   /* Order Status Colors for Dark Mode */
-  --color-status-pending: #FFF164;    /* Orange for pending */
-  --color-status-processing: #E02738; /* Blue for processing */
+  --color-status-pending: #FDD00C;    /* Orange for pending */
+  --color-status-processing: #F7411B; /* Blue for processing */
   --color-status-shipped: #16a34a;    /* Green for shipped */
   --color-status-delivered: #16a34a;  /* Green for delivered */
-  --color-status-cancelled: #E02738;  /* Red for cancelled */
+  --color-status-cancelled: #F7411B;  /* Red for cancelled */
 
   /* Additional variables for clarity */
-  --color-surface: #111111; /* A darker surface for dark mode */
-  --color-muted-bg: #111111;
+  --color-surface: #161730; /* A darker surface for dark mode */
+  --color-muted-bg: #161730;
   
   /* Cart-specific color variables for dark mode */
-  --cart-bg: #050505; /* Cart page background - dark */
-  --cart-card-bg: #111111; /* Cart card backgrounds - dark */
+  --cart-bg: #03041C; /* Cart page background - dark */
+  --cart-card-bg: #161730; /* Cart card backgrounds - dark */
   --cart-card-border: #2C2C2C; /* Cart card borders - dark */
-  --cart-totals-bg: #FFF164; /* Cart totals yellow background - stays same */
-  --cart-totals-text: #050505; /* Cart totals text color - dark on yellow */
+  --cart-totals-bg: #FDD00C; /* Cart totals yellow background - stays same */
+  --cart-totals-text: #03041C; /* Cart totals text color - dark on yellow */
   --cart-button-primary: #ffffff; /* Primary cart buttons (white on dark) */
   --cart-button-secondary: #2C2C2C; /* Secondary cart buttons (dark gray) */
-  --cart-button-secondary-hover: #050505; /* Secondary button hover - dark */
+  --cart-button-secondary-hover: #03041C; /* Secondary button hover - dark */
   --cart-text-primary: #ffffff; /* Primary text in cart - white */
   --cart-text-secondary: #a1a1aa; /* Secondary text in cart - light gray */
   --cart-text-muted: #71717a; /* Muted text in cart - stays same */
@@ -136,22 +136,22 @@ html.dark {
   --cart-success-border: #059669; /* Success message border - dark */
   --cart-success-text: #10b981; /* Success message text - bright green */
   --cart-error-bg: #7f1d1d; /* Error message background - dark */
-  --cart-error-border: #E02738; /* Error message border - dark */
+  --cart-error-border: #F7411B; /* Error message border - dark */
   --cart-error-text: #f87171; /* Error message text - light red */
   --cart-warning-bg: #78350f; /* Warning message background - dark */
-  --cart-warning-border: #FFF164; /* Warning message border - dark */
-  --cart-warning-text: #FFF164; /* Warning message text - light orange */
-  --cart-input-bg: #111111; /* Input field background - dark */
+  --cart-warning-border: #FDD00C; /* Warning message border - dark */
+  --cart-warning-text: #FDD00C; /* Warning message text - light orange */
+  --cart-input-bg: #161730; /* Input field background - dark */
   --cart-input-border: #2C2C2C; /* Input field border - dark */
   --cart-input-focus: #ffffff; /* Input field focus border - white */
   --cart-shadow: rgba(0, 0, 0, 0.5); /* Card shadows - darker */
-  --cart-muted-bg: #111111; /* Muted background elements - dark */
+  --cart-muted-bg: #161730; /* Muted background elements - dark */
   --cart-price-color: #a1a1aa; /* Light-ish price color for dark mode */
-  --cart-total-price-color: #FFF164; /* Highlighted total price color for dark mode */
+  --cart-total-price-color: #FDD00C; /* Highlighted total price color for dark mode */
 
-  --scrollbar-track: #050505;
-  --scrollbar-thumb: #E02738; /* Light blue */
-  --scrollbar-thumb-hover: #FFF164;
+  --scrollbar-track: #03041C;
+  --scrollbar-thumb: #F7411B; /* Light blue */
+  --scrollbar-thumb-hover: #FDD00C;
 }
 
 /* Global Scrollbar Styles */
@@ -504,38 +504,38 @@ html.dark .theme-toggle-moon {
 /* Converted theme variables to regular CSS variables */
 
 .dark {
-  --background: #050505;
+  --background: #03041C;
   --foreground: #ffffff;
-  --card: #111111;
+  --card: #161730;
   --card-foreground: #ffffff;
-  --popover: #111111;
+  --popover: #161730;
   --popover-foreground: #ffffff;
-  --primary: #E02738;
+  --primary: #F7411B;
   --primary-foreground: #ffffff;
-  --secondary: #2C2C2C;
+  --secondary: #161730;
   --secondary-foreground: #ffffff;
-  --muted: #2C2C2C;
+  --muted: #161730;
   --muted-foreground: #a1a1aa;
-  --accent: #FFF164;
-  --accent-foreground: #050505;
-  --destructive: #E02738;
+  --accent: #FDD00C;
+  --accent-foreground: #03041C;
+  --destructive: #F7411B;
   --destructive-foreground: #ffffff;
   --border: #2C2C2C;
   --input: #2C2C2C;
-  --ring: #E02738;
-  --chart-1: #E02738;
-  --chart-2: #FFF164;
+  --ring: #F7411B;
+  --chart-1: #F7411B;
+  --chart-2: #FDD00C;
   --chart-3: #111111;
   --chart-4: #2C2C2C;
   --chart-5: #16a34a;
-  --sidebar: #111111;
+  --sidebar: #161730;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #E02738;
+  --sidebar-primary: #F7411B;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #FFF164;
-  --sidebar-accent-foreground: #050505;
+  --sidebar-accent: #FDD00C;
+  --sidebar-accent-foreground: #03041C;
   --sidebar-border: #2C2C2C;
-  --sidebar-ring: #E02738;
+  --sidebar-ring: #F7411B;
 }
 
 /* Base styles - converted from @layer and @apply */

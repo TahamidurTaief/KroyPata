@@ -10,7 +10,7 @@ export function ThemeProvider({ children }) {
       defaultTheme="dark"
       enableSystem
       disableTransitionOnChange={false}
-      storageKey="icommerce-theme"
+      storageKey="chinakroy-theme"
     >
       {children}
     </NextThemesProvider>

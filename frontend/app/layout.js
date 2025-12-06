@@ -45,16 +45,16 @@ const raleway = Raleway({
 });
 
 export const metadata = {
-  title: "ICommerce",
+  title: "ChinaKroy",
   description: "Import products from China to Bangladesh",
   keywords: "ecommerce, online shopping, China import, Bangladesh, products, wholesale",
   
   // Open Graph metadata
   openGraph: {
-    title: 'ICommerce - Import Products from China to Bangladesh',
+    title: 'ChinaKroy - Import Products from China to Bangladesh',
     description: 'Your trusted platform for importing quality products from China to Bangladesh',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com',
-    siteName: 'ICommerce',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com',
+    siteName: 'ChinaKroy',
     locale: 'en_US',
     type: 'website',
   },
@@ -62,10 +62,10 @@ export const metadata = {
   // Twitter Card metadata
   twitter: {
     card: 'summary_large_image',
-    title: 'ICommerce - Import Products from China to Bangladesh',
+    title: 'ChinaKroy - Import Products from China to Bangladesh',
     description: 'Your trusted platform for importing quality products from China to Bangladesh',
-    creator: '@icommerce',
-    site: '@icommerce',
+    creator: '@chinakroy',
+    site: '@chinakroy',
   },
   
   // Additional metadata
@@ -84,25 +84,25 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   // Get base URL from environment
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com';
   
   // Organization Schema for site-wide SEO
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'ICommerce',
+    name: 'ChinaKroy',
     description: 'Import products from China to Bangladesh',
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'Customer Service',
-      email: 'support@icommerce.com',
+      email: 'support@chinakroy.com',
     },
     sameAs: [
-      'https://www.facebook.com/icommerce',
-      'https://twitter.com/icommerce',
-      'https://www.instagram.com/icommerce',
+      'https://www.facebook.com/chinakroy',
+      'https://twitter.com/chinakroy',
+      'https://www.instagram.com/chinakroy',
     ],
   };
 
@@ -113,7 +113,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const theme = localStorage.getItem('icommerce-theme') || 'dark';
+                const theme = localStorage.getItem('chinakroy-theme') || 'dark';
                 if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                   document.documentElement.classList.add('dark');
                 }

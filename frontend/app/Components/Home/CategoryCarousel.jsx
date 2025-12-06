@@ -13,7 +13,7 @@ const CategorySkeleton = () => {
           key={index}
           className="flex-shrink-0 w-[180px]"
         >
-          <div className="bg-[var(--card)] rounded-lg overflow-hidden border border-[var(--color-border)]">
+          <div className="bg-[var(--color-background)] rounded-lg overflow-hidden border border-[var(--color-border)]">
             {/* Image skeleton */}
             <div className="w-full h-32 bg-[var(--muted)] animate-pulse"></div>
             {/* Title skeleton */}

@@ -216,8 +216,10 @@ CORS_ALLOWED_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://icommerce.onrender.com',
-
+    "http://chinakroy.com",
+    "https://chinakroy.com",
+    "http://api.chinakroy.com",
+    "https://api.chinakroy.com",
 ]
 
 CSRF_COOKIE_SECURE = True  # Ensures the CSRF cookie is only sent over HTTPS

@@ -6,12 +6,18 @@ import Image from 'next/image';
 import { toast } from 'react-toastify';
 import Tk_icon from '@/app/Components/Common/Tk_icon';
 import { API_BASE_URL } from '@/app/lib/api';
+import { Noto_Sans_Bengali } from 'next/font/google';
 import './landing.css';
+
+const notoSansBengali = Noto_Sans_Bengali({
+  subsets: ['bengali'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
 
 export default function ProductLandingPage() {
   const params = useParams();
   const router = useRouter();
-  // Ensure we have a usable API base URL on the client — fall back to local dev server
   const API_BASE = API_BASE_URL;
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +43,6 @@ export default function ProductLandingPage() {
     if (product) {
       document.title = `${product.name} - iCommerce`;
       
-      // Update meta tags
       const updateMetaTag = (name, content, isProperty = false) => {
         const attribute = isProperty ? 'property' : 'name';
         let element = document.querySelector(`meta[${attribute}="${name}"]`);
@@ -61,7 +66,6 @@ export default function ProductLandingPage() {
       updateMetaTag('twitter:description', description);
       updateMetaTag('twitter:image', product.thumbnail_url);
       
-      // Update canonical link
       let canonical = document.querySelector('link[rel="canonical"]');
       if (!canonical) {
         canonical = document.createElement('link');
@@ -73,12 +77,9 @@ export default function ProductLandingPage() {
   }, [product]);
 
   useEffect(() => {
-    console.log('Landing page mounted, params:', params);
     if (params.slug) {
       fetchProduct();
       checkUser();
-    } else {
-      console.error('No slug in params');
     }
   }, [params.slug]);
 
@@ -94,8 +95,6 @@ export default function ProductLandingPage() {
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
-          
-          // Pre-fill form with user data
           setFormData(prev => ({
             ...prev,
             full_name: userData.name || '',
@@ -111,7 +110,6 @@ export default function ProductLandingPage() {
 
   const fetchProduct = async () => {
     if (!params.slug) {
-      console.error('No slug provided');
       setLoading(false);
       return;
     }
@@ -120,31 +118,23 @@ export default function ProductLandingPage() {
       const token = localStorage.getItem('access_token');
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-      console.log('Fetching product with slug:', params.slug);
-
       const response = await fetch(
         `${API_BASE}/api/products/products/${params.slug}/`,
         { headers }
       );
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', response.status, errorText);
         throw new Error(`Product not found (${response.status})`);
       }
       
       const data = await response.json();
-      console.log('Product data fetched:', data);
       
-      // Check if landing page is enabled - show warning but still display the page
       if (!data.enable_landing_page) {
-        console.warn('Landing page is not enabled for this product, showing basic product page');
-        // Don't redirect, just show the product with available information
+        console.warn('Landing page is not enabled for this product');
       }
       
       setProduct(data);
       
-      // Set minimum quantity for wholesalers
       if (data._user_context?.is_approved_wholesaler && data.minimum_purchase) {
         setFormData(prev => ({ ...prev, quantity: data.minimum_purchase }));
       }
@@ -177,7 +167,6 @@ export default function ProductLandingPage() {
     
     if (submitting) return;
     
-    // Validation
     if (!formData.full_name || !formData.email || !formData.phone || !formData.detailed_address) {
       toast.error('অনুগ্রহ করে সব তথ্য পূরণ করুন');
       return;
@@ -202,9 +191,6 @@ export default function ProductLandingPage() {
         customer_notes: formData.customer_notes || ''
       };
       
-      console.log('Submitting order:', orderData);
-      console.log('API URL:', `${API_BASE}/api/products/landing-orders/`);
-      
       const response = await fetch(
         `${API_BASE}/api/products/landing-orders/`,
         {
@@ -214,16 +200,10 @@ export default function ProductLandingPage() {
         }
       );
       
-      console.log('Response status:', response.status);
       const result = await response.json();
-      console.log('Response data:', result);
       
       if (!response.ok) {
-        // Handle validation errors
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        // Handle field-specific errors
+        if (result.error) throw new Error(result.error);
         if (typeof result === 'object') {
           const errors = Object.entries(result)
             .map(([field, messages]) => {
@@ -231,14 +211,13 @@ export default function ProductLandingPage() {
               return `${field}: ${msgArray.join(', ')}`;
             })
             .join('\n');
-          throw new Error(errors || 'অর্ডার করতে সমস্যা হয়েছে');
+          throw new Error(errors || 'অর্ডার করতে সমস্যা হয়েছে');
         }
-        throw new Error('অর্ডার করতে সমস্যা হয়েছে');
+        throw new Error('অর্ডার করতে সমস্যা হয়েছে');
       }
       
-      toast.success(`অর্ডার সফল হয়েছে! অর্ডার #${result.order_number}`);
+      toast.success(`অর্ডার সফল হয়েছে! অর্ডার #${result.order_number}`);
       
-      // Store order data in sessionStorage for confirmation page
       sessionStorage.setItem('landingOrderConfirmation', JSON.stringify({
         order_number: result.order_number,
         product_name: product.name,
@@ -251,14 +230,13 @@ export default function ProductLandingPage() {
         phone: formData.phone
       }));
       
-      // Redirect to landing confirmation page after a short delay
       setTimeout(() => {
         router.push('/products/landing/confirmation');
       }, 1500);
       
     } catch (error) {
       console.error('Error placing order:', error);
-      toast.error(error.message || 'অর্ডার করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      toast.error(error.message || 'অর্ডার করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     } finally {
       setSubmitting(false);
     }
@@ -266,13 +244,10 @@ export default function ProductLandingPage() {
 
   const getDisplayPrice = () => {
     if (!product) return 0;
-    
     const isWholesaler = product._user_context?.is_approved_wholesaler;
-    
     if (isWholesaler && product.wholesale_price) {
       return product.wholesale_price;
     }
-    
     return product.discount_price || product.price;
   };
 
@@ -280,7 +255,6 @@ export default function ProductLandingPage() {
     return getDisplayPrice() * formData.quantity;
   };
 
-  // Get all images (thumbnail + additional images)
   const getAllImages = () => {
     if (!product) return [];
     const images = [];
@@ -306,18 +280,10 @@ export default function ProductLandingPage() {
       <div className="landing-page-container">
         <div className="container">
           <div className="landing-page-content">
-            {/* Left Side Skeleton */}
             <div className="product-section">
-              {/* Image Skeleton */}
               <div className="skeleton-box" style={{ height: '400px', marginBottom: '1rem' }}></div>
-              {/* Info Skeleton */}
               <div className="skeleton-box" style={{ height: '150px', marginBottom: '1rem' }}></div>
-              {/* Description Skeleton */}
-              <div className="skeleton-box" style={{ height: '200px', marginBottom: '1rem' }}></div>
-              <div className="skeleton-box" style={{ height: '200px' }}></div>
             </div>
-            
-            {/* Right Side Skeleton */}
             <div className="checkout-section">
               <div className="skeleton-box" style={{ height: '600px' }}></div>
             </div>
@@ -331,8 +297,8 @@ export default function ProductLandingPage() {
     return (
       <div className="landing-page-container">
         <div className="error-message">
-          <h2>পণ্য পাওয়া যায়নি</h2>
-          <p>দুঃখিত, এই পণ্যটি বর্তমানে উপলব্ধ নয়।</p>
+          <h2>পণ্য পাওয়া যায়নি</h2>
+          <p>দুঃখিত, এই পণ্যটি বর্তমানে উপলব্ধ নয়।</p>
           <button onClick={() => router.push('/products')} className="back-btn">
             অন্যান্য পণ্য দেখুন
           </button>
@@ -346,7 +312,7 @@ export default function ProductLandingPage() {
   const minPurchase = isWholesaler ? (product.minimum_purchase || 1) : 1;
 
   return (
-    <div className="landing-page-container">
+    <div className={`landing-page-container ${notoSansBengali.className}`}>
       {/* Lightbox */}
       {lightboxOpen && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
@@ -379,8 +345,6 @@ export default function ProductLandingPage() {
           
           {/* Product Images Gallery */}
           <div className="product-gallery-section modern-box">
-            {/* <div className="decorative-shape shape-1"></div> */}
-            {/* <div className="decorative-shape shape-2"></div> */}
             <h2 className="section-title-shape">পণ্যের ছবি</h2>
             <div className="image-gallery-grid">
               {allImages.length > 0 ? (
@@ -408,7 +372,6 @@ export default function ProductLandingPage() {
 
           {/* Product Info */}
           <div className="product-info modern-box section-bg-1">
-            {/* <div className="decorative-shape shape-3"></div> */}
             <h1 className="product-title">{product.name}</h1>
             
             {product.brand && (
@@ -445,7 +408,6 @@ export default function ProductLandingPage() {
           {/* Product Description */}
           {product.description && (
             <div className="product-description modern-box section-bg-2">
-              {/* <div className="decorative-shape shape-4"></div> */}
               <h2 className="section-title-shape">পণ্যের বিবরণ</h2>
               <div dangerouslySetInnerHTML={{ __html: product.description }} />
             </div>
@@ -454,7 +416,6 @@ export default function ProductLandingPage() {
           {/* Landing Page Sections */}
           {product.landing_features && product.landing_features.trim() !== '' && (
             <div className="landing-section modern-box section-bg-3">
-              {/* <div className="decorative-shape shape-1"></div> */}
               <h2 className="section-title-shape">আমাদের বৈশিষ্ট্যসমূহ</h2>
               <div dangerouslySetInnerHTML={{ __html: product.landing_features }} />
             </div>
@@ -462,15 +423,13 @@ export default function ProductLandingPage() {
 
           {product.landing_how_to_use && product.landing_how_to_use.trim() !== '' && (
             <div className="landing-section modern-box section-bg-1">
-              {/* <div className="decorative-shape shape-2"></div> */}
-              <h2 className="section-title-shape">ব্যবহারের নিয়ম</h2>
+              <h2 className="section-title-shape">ব্যবহারের নিয়ম</h2>
               <div dangerouslySetInnerHTML={{ __html: product.landing_how_to_use }} />
             </div>
           )}
 
           {product.landing_why_choose && product.landing_why_choose.trim() !== '' && (
             <div className="landing-section modern-box section-bg-2">
-              {/* <div className="decorative-shape shape-3"></div> */}
               <h2 className="section-title-shape">কেন এই পণ্যটি কিনবেন?</h2>
               <div dangerouslySetInnerHTML={{ __html: product.landing_why_choose }} />
             </div>
@@ -479,7 +438,6 @@ export default function ProductLandingPage() {
           {/* Specifications */}
           {product.specifications && product.specifications.length > 0 && (
             <div className="specifications modern-box section-bg-3">
-              {/* <div className="decorative-shape shape-4"></div> */}
               <h2 className="section-title-shape">স্পেসিফিকেশন</h2>
               <table className="spec-table">
                 <tbody>
@@ -494,16 +452,15 @@ export default function ProductLandingPage() {
             </div>
           )}
 
-          {/* Customer Reviews Section */}
+          {/* Customer Reviews Section (Static for now) */}
           <div className="reviews-section modern-box section-bg-1">
-            {/* <div className="decorative-shape shape-1"></div> */}
             <h2 className="section-title-shape">কাস্টমার রিভিউ</h2>
             <div className="reviews-grid">
               <div className="review-card">
                 <div className="review-header">
-                  <div className="reviewer-avatar">র</div>
+                  <div className="reviewer-avatar">R</div>
                   <div className="reviewer-info">
-                    <h4>রহিম উদ্দিন</h4>
+                    <h4>Rahim Uddin</h4>
                     <div className="stars">★★★★★</div>
                   </div>
                 </div>
@@ -511,23 +468,23 @@ export default function ProductLandingPage() {
               </div>
               <div className="review-card">
                 <div className="review-header">
-                  <div className="reviewer-avatar">ক</div>
+                  <div className="reviewer-avatar">K</div>
                   <div className="reviewer-info">
-                    <h4>করিম আহমেদ</h4>
+                    <h4>Karim Ahmed</h4>
                     <div className="stars">★★★★★</div>
                   </div>
                 </div>
-                <p className="review-text">যেমনটা ছবিতে দেখেছি ঠিক তেমনটাই পেয়েছি। আমি সন্তুষ্ট।</p>
+                <p className="review-text">যেমনটা ছবিতে দেখেছি ঠিক তেমনটাই পেয়েছি। আমি সন্তুষ্ট।</p>
               </div>
               <div className="review-card">
                 <div className="review-header">
-                  <div className="reviewer-avatar">স</div>
+                  <div className="reviewer-avatar">S</div>
                   <div className="reviewer-info">
-                    <h4>সুমাইয়া আক্তার</h4>
+                    <h4>Sumaiya Akter</h4>
                     <div className="stars">★★★★☆</div>
                   </div>
                 </div>
-                <p className="review-text">প্রোডাক্ট কোয়ালিটি ভালো, তবে প্যাকেজিং আরও ভালো হতে পারতো।</p>
+                <p className="review-text">প্রোডাক্ট কোয়ালিটি ভালো, তবে প্যাকেজিং আরও ভালো হতে পারতো।</p>
               </div>
             </div>
           </div>
@@ -537,14 +494,13 @@ export default function ProductLandingPage() {
         {/* Right Side - Checkout Form */}
         <div className="checkout-section">
           <div className="checkout-card modern-box sticky-form">
-            {/* <div className="decorative-shape shape-2"></div> */}
-            <h2 className="checkout-title section-title-shape py-1 px-3">অর্ডার করতে ফর্মটি পূরণ করুন</h2>
+            <h2 className="checkout-title section-title-shape">অর্ডার করতে ফর্মটি পূরণ করুন</h2>
             
             {isWholesaler && (
               <div className="wholesaler-info">
                 <p className="wholesaler-badge-large">পাইকারি ক্রেতা</p>
                 <p className="min-purchase-info">
-                  সর্বনিম্ন ক্রয়: {minPurchase} টি
+                  সর্বনিম্ন ক্রয়: {minPurchase} টি
                 </p>
               </div>
             )}
@@ -586,7 +542,7 @@ export default function ProductLandingPage() {
               </div>
 
               {/* Total Price */}
-              <div className="total-price total-price-rose">
+              <div className="total-price text-[var(--color-button-primary)]">
                 <span>মোট:</span>
                 <span className="total-amount">
                   {Tk_icon && <Tk_icon size={22} className="mr-1" />}

@@ -229,7 +229,7 @@ const ShippingSelector = memo(({
             Retry Check
           </button>
           <button
-            onClick={() => window.open('mailto:support@icommerce.com?subject=Shipping Support Needed', '_blank')}
+            onClick={() => window.open('mailto:support@chinakroy.com?subject=Shipping Support Needed', '_blank')}
             className="px-4 py-3 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
           >
             Contact Support

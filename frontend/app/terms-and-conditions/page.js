@@ -1,10 +1,10 @@
 // app/terms-and-conditions/page.js
 export const metadata = {
-  title: 'Terms and Conditions | iCommerce - Multivendor E-commerce Platform',
-  description: 'Read the terms and conditions for using iCommerce, a multivendor e-commerce platform connecting buyers and sellers across Bangladesh.',
+  title: 'Terms and Conditions | ChinaKroy - Multivendor E-commerce Platform',
+  description: 'Read the terms and conditions for using ChinaKroy, a multivendor e-commerce platform connecting buyers and sellers across Bangladesh.',
   keywords: 'terms and conditions, user agreement, seller agreement, buyer policy, e-commerce terms',
   openGraph: {
-    title: 'Terms and Conditions | iCommerce',
+    title: 'Terms and Conditions | ChinaKroy',
     description: 'Terms and conditions for using our multivendor e-commerce platform',
     type: 'website',
     locale: 'en_US',
@@ -44,7 +44,7 @@ export default function TermsAndConditions() {
             </h2>
             <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
               <p>
-                Welcome to <span className="font-semibold text-blue-600 dark:text-blue-400">iCommerce</span>, a multivendor e-commerce platform operated in Bangladesh. These Terms and Conditions govern your use of our website, mobile application, and services.
+                Welcome to <span className="font-semibold text-blue-600 dark:text-blue-400">ChinaKroy</span>, a multivendor e-commerce platform operated in Bangladesh. These Terms and Conditions govern your use of our website, mobile application, and services.
               </p>
               <p>
                 By accessing or using our platform, you agree to be bound by these terms. If you disagree with any part of these terms, you may not access our service.
@@ -66,7 +66,7 @@ export default function TermsAndConditions() {
                 <ul className="space-y-2 sm:space-y-3 text-gray-700 dark:text-gray-300">
                   <li className="flex flex-col sm:flex-row sm:items-start">
                     <span className="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px] sm:min-w-[140px] mb-1 sm:mb-0">"Platform":</span>
-                    <span className="flex-1">Refers to the iCommerce website, mobile application, and all associated services</span>
+                    <span className="flex-1">Refers to the ChinaKroy website, mobile application, and all associated services</span>
                   </li>
                   <li className="flex flex-col sm:flex-row sm:items-start">
                     <span className="font-semibold text-blue-600 dark:text-blue-400 min-w-[100px] sm:min-w-[140px] mb-1 sm:mb-0">"Vendor/Seller":</span>
@@ -236,7 +236,7 @@ export default function TermsAndConditions() {
             </h2>
             <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
               <p>
-                All platform content including logos, design, text, graphics, software, and functionality are owned by iCommerce or our licensors and are protected by copyright, trademark, and other intellectual property laws.
+                All platform content including logos, design, text, graphics, software, and functionality are owned by ChinaKroy or our licensors and are protected by copyright, trademark, and other intellectual property laws.
               </p>
               <p>
                 Vendors retain ownership of their product listings but grant us a license to display, promote, and distribute their content on our platform. Vendors must have rights to all content they upload.
@@ -430,7 +430,7 @@ export default function TermsAndConditions() {
                   <div className="space-y-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                     <p className="flex items-center flex-wrap">
                       <span className="font-medium mr-2">Email:</span>
-                      <a href="mailto:support@icommerce.com" className="text-blue-600 dark:text-blue-400 hover:underline">support@icommerce.com</a>
+                      <a href="mailto:support@chinakroy.com" className="text-blue-600 dark:text-blue-400 hover:underline">support@chinakroy.com</a>
                     </p>
                     <p className="flex items-center flex-wrap">
                       <span className="font-medium mr-2">Phone:</span>
@@ -441,7 +441,7 @@ export default function TermsAndConditions() {
                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-4 sm:p-5 border border-purple-200 dark:border-purple-800">
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm sm:text-base">Business Address</h4>
                   <div className="space-y-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
-                    <p>iCommerce Limited</p>
+                    <p>ChinaKroy Limited</p>
                     <p>Dhaka, Bangladesh</p>
                     <p>Business Hours: 9 AM - 6 PM (GMT+6)</p>
                   </div>
@@ -456,7 +456,7 @@ export default function TermsAndConditions() {
         <div className="mt-8 sm:mt-12 text-center">
           <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-pink-500/20 rounded-lg p-4 sm:p-6 border border-blue-200 dark:border-blue-800">
             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-              By using iCommerce, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.
+              By using ChinaKroy, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.
             </p>
             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 sm:mt-3">
               Thank you for being part of our multivendor e-commerce community!

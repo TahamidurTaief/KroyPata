@@ -68,7 +68,7 @@ const CategoryCarousel = ({ categories = [], onCategoryChange, selectedCategory 
   };
 
   return (
-    <section className="w-full bg-[var(--color-second-bg)] py-4 md:py-6">
+    <section className="w-full bg-[var(--color-background)] py-4 md:py-6">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mb-4 md:mb-5">

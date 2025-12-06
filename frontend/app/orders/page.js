@@ -5,16 +5,16 @@ import ProtectedRoute from "../Components/Auth/ProtectedRoute";
 
 // Metadata for the page
 export const metadata = {
-  title: 'My Orders - ICommerce | Track Your Orders',
-  description: 'View and track your orders. Check order status, delivery information, and order history on ICommerce.',
+  title: 'My Orders - ChinaKroy | Track Your Orders',
+  description: 'View and track your orders. Check order status, delivery information, and order history on ChinaKroy.',
   keywords: 'my orders, order tracking, order history, purchase history, delivery status',
   
   // Open Graph metadata
   openGraph: {
-    title: 'My Orders - ICommerce',
-    description: 'View and track your orders on ICommerce',
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com'}/orders`,
-    siteName: 'ICommerce',
+    title: 'My Orders - ChinaKroy',
+    description: 'View and track your orders on ChinaKroy',
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com'}/orders`,
+    siteName: 'ChinaKroy',
     locale: 'en_US',
     type: 'website',
   },
@@ -22,15 +22,15 @@ export const metadata = {
   // Twitter Card metadata
   twitter: {
     card: 'summary',
-    title: 'My Orders - ICommerce',
-    description: 'View and track your orders on ICommerce',
-    creator: '@icommerce',
-    site: '@icommerce',
+    title: 'My Orders - ChinaKroy',
+    description: 'View and track your orders on ChinaKroy',
+    creator: '@chinakroy',
+    site: '@chinakroy',
   },
   
   // Canonical URL
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com'}/orders`,
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com'}/orders`,
   },
   
   // Robots - protected page, don't index

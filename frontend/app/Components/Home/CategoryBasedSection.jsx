@@ -67,7 +67,7 @@ const CategoryBasedSection = () => {
   }, [router]);
 
   return (
-    <section className="w-full bg-[var(--color-second-bg)] py-8 md:py-12 lg:py-16">
+    <section className="w-full bg-[var(--color-background)] py-8 md:py-12 lg:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6 md:mb-8 lg:mb-10 text-center">

@@ -1,6 +1,6 @@
 /**
  * Performance and SEO Optimization Utilities
- * For iCommerce Navbar and Components
+ * For ChinaKroy Navbar and Components
  */
 
 // Preload critical fonts
@@ -127,7 +127,7 @@ export const generateProductSchema = (product) => {
       "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       "seller": {
         "@type": "Organization",
-        "name": "iCommerce"
+        "name": "ChinaKroy"
       }
     }
   };

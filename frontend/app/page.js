@@ -6,18 +6,18 @@ export const revalidate = 60;
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Special Offers & Deals | iCommerce - Your Premier Shopping Destination',
+  title: 'Special Offers & Deals | ChinaKroy - Your Premier Shopping Destination',
   description: 'Discover amazing deals and exclusive offers on premium products. Save up to 60% on fashion, electronics, and more. Free shipping available.',
   keywords: 'special offers, deals, discounts, coupons, sale, fashion, electronics, free shipping',
   openGraph: {
-    title: 'Special Offers & Deals | iCommerce',
+    title: 'Special Offers & Deals | ChinaKroy',
     description: 'Discover amazing deals and exclusive offers on premium products. Save up to 60% on fashion, electronics, and more.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Special Offers & Deals | iCommerce',
+    title: 'Special Offers & Deals | ChinaKroy',
     description: 'Discover amazing deals and exclusive offers on premium products. Save up to 60% on fashion, electronics, and more.',
   },
   alternates: {

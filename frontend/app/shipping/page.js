@@ -25,7 +25,7 @@ export default function ShippingPage() {
       setLoading(true);
       
       // Use API URL from .env.local
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.chinakroy.com';
       const response = await fetch(`${apiBaseUrl}/api/orders/shipping-methods/`, {
         method: 'GET',
         headers: {
@@ -101,8 +101,8 @@ export default function ShippingPage() {
                     <strong>Troubleshooting:</strong>
                   </p>
                   <ul className="text-sm text-red-600 dark:text-red-400 list-disc list-inside space-y-1">
-                    <li>Make sure the Django backend server is running on port 8000</li>
-                    <li>Check if the API endpoint is accessible: <code className="bg-red-100 dark:bg-red-900/40 px-1 rounded">http://localhost:8000/api/orders/shipping-methods/</code></li>
+                    <li>Make sure the Django backend server is running</li>
+                    <li>Check if the API endpoint is accessible: <code className="bg-red-100 dark:bg-red-900/40 px-1 rounded">/api/orders/shipping-methods/</code></li>
                     <li>Verify CORS settings in Django backend</li>
                     <li>Check browser console for detailed error messages</li>
                   </ul>
@@ -132,15 +132,15 @@ export default function ShippingPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       {/* SEO Meta Tags */}
       <Head>
-        <title>Shipping Methods & Pricing | iCommerce Bangladesh</title>
+        <title>Shipping Methods & Pricing | ChinaKroy Bangladesh</title>
         <meta name="description" content="View all available shipping methods, pricing tiers, and delivery information. Choose from multiple shipping options including door-to-door delivery, pick-up points, and international shipping from China to Bangladesh." />
         <meta name="keywords" content="shipping methods, delivery options, shipping rates, Bangladesh shipping, door to door delivery, pick up point, China to Bangladesh shipping, shipping costs, ecommerce shipping" />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Shipping Methods & Pricing | iCommerce" />
+        <meta property="og:title" content="Shipping Methods & Pricing | ChinaKroy" />
         <meta property="og:description" content="Explore our comprehensive shipping options with transparent pricing and flexible delivery choices." />
         <meta property="og:type" content="website" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="canonical" href="https://icommerce.com/shipping" />
+        <link rel="canonical" href="https://chinakroy.com/shipping" />
       </Head>
 
       {/* Structured Data for SEO */}
@@ -155,7 +155,7 @@ export default function ShippingPage() {
               "description": "View all available shipping methods, pricing tiers, and delivery information",
               "provider": {
                 "@type": "Organization",
-                "name": "iCommerce",
+                "name": "ChinaKroy",
               },
               "about": {
                 "@type": "Service",

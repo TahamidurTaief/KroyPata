@@ -50,6 +50,21 @@ export const API_BASE_URL = (() => {
   return (envUrl || 'https://api.chinakroy.com').replace(/\/+$/, '');
 })();
 
+// Helper to fix image URLs
+export const fixImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://127.0.0.1:8000')) {
+    return url.replace('http://127.0.0.1:8000', API_BASE_URL);
+  }
+  if (url.startsWith('http://localhost:8000')) {
+    return url.replace('http://localhost:8000', API_BASE_URL);
+  }
+  if (url.startsWith('/')) {
+    return `${API_BASE_URL}${url}`;
+  }
+  return url;
+};
+
 // Debug API calls
 const DEBUG_API = false;
 
@@ -361,7 +376,7 @@ async function fetchAPI(endpoint, options = {}) {
     // Check if it's a network error
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       return { 
-        error: `Network error connecting to ${API_BASE_URL}. Please check if the backend server is running on port 8000.`,
+        error: `Network error connecting to ${API_BASE_URL}. Please check if the backend server is running.`,
         code: 'NETWORK_ERROR',
         endpoint: endpoint
       };
@@ -481,6 +496,18 @@ export const getProducts = async (filters = {}, page = 1, pageSize = 24) => {
                 count: result.count,
                 resultsLength: result.results?.length
             });
+            
+            // Fix image URLs in results
+            if (result.results && Array.isArray(result.results)) {
+                result.results = result.results.map(product => ({
+                    ...product,
+                    image: fixImageUrl(product.image),
+                    image_url: fixImageUrl(product.image_url),
+                    thumbnail_url: fixImageUrl(product.thumbnail_url),
+                    images: product.images ? product.images.map(img => fixImageUrl(img)) : []
+                }));
+            }
+            
             return result;
         }
         
@@ -498,9 +525,22 @@ export const getProducts = async (filters = {}, page = 1, pageSize = 24) => {
 };
 
 
-export const getProductBySlug = cache(async (slug) => fetchAPI(`/api/products/products/${slug}/`, {
-  next: { revalidate: 120 } // Cache for 2 minutes
-}));
+export const getProductBySlug = cache(async (slug) => {
+  const product = await fetchAPI(`/api/products/products/${slug}/`, {
+    next: { revalidate: 120 } // Cache for 2 minutes
+  });
+  
+  if (product && !product.error) {
+    return {
+      ...product,
+      image: fixImageUrl(product.image),
+      image_url: fixImageUrl(product.image_url),
+      thumbnail_url: fixImageUrl(product.thumbnail_url),
+      images: product.images ? product.images.map(img => fixImageUrl(img)) : []
+    };
+  }
+  return product;
+});
 
 export const getCategories = cache(async () => {
   try {
@@ -1458,30 +1498,45 @@ export const getOfferCategories = cache(async () => {
 
 export const getHeroBanners = cache(async () => {
   if (DEBUG_API) console.log('🌐 Fetching hero banners...');
-  return fetchAPI('/api/website/hero-banners/');
+  const data = await fetchAPI('/api/website/hero-banners/');
+  const results = Array.isArray(data) ? data : (data?.results || []);
+  return results.map(banner => ({
+    ...banner,
+    image_url_final: fixImageUrl(banner.image_url_final || banner.image)
+  }));
 });
 
 export const getHorizontalBanners = cache(async () => {
   try {
     if (DEBUG_API) console.log('🌐 Fetching horizontal banners...');
-    return await fetchAPI('/api/website/horizontal-banners/', {
+    const data = await fetchAPI('/api/website/horizontal-banners/', {
       next: { revalidate: 300 } // Cache for 5 minutes
     });
+    const results = Array.isArray(data) ? data : (data?.results || []);
+    return results.map(banner => ({
+      ...banner,
+      image_url_final: fixImageUrl(banner.image_url_final || banner.image)
+    }));
   } catch (error) {
     console.error('Error fetching horizontal banners:', error);
-    return { results: [], count: 0 };
+    return [];
   }
 });
 
 export const getOfferBanners = cache(async () => {
   try {
     if (DEBUG_API) console.log('🌐 Fetching offer banners...');
-    return await fetchAPI('/api/website/offer-banners/', {
+    const data = await fetchAPI('/api/website/offer-banners/', {
       next: { revalidate: 300 } // Cache for 5 minutes
     });
+    const results = Array.isArray(data) ? data : (data?.results || []);
+    return results.map(banner => ({
+      ...banner,
+      image_url_final: fixImageUrl(banner.image_url_final || banner.image)
+    }));
   } catch (error) {
     console.error('Error fetching offer banners:', error);
-    return { results: [], count: 0 };
+    return [];
   }
 });
 

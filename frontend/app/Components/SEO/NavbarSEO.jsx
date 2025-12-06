@@ -5,13 +5,13 @@ import Head from 'next/head';
  * Optimizes metadata for better search engine visibility
  */
 export default function NavbarSEO({ 
-  title = "iCommerce - Best Online Shopping in Bangladesh",
+  title = "ChinaKroy - Best Online Shopping in Bangladesh",
   description = "Shop the latest products at the best prices. Wide selection of electronics, clothing, home goods, and more. Wholesale prices available for bulk buyers.",
   keywords = "online shopping bangladesh, ecommerce bd, wholesale products, best deals, electronics, clothing, home goods",
   ogImage = "/img/og-image.jpg",
   canonicalUrl
 }) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com';
   const fullCanonicalUrl = canonicalUrl || siteUrl;
 
   return (
@@ -36,7 +36,7 @@ export default function NavbarSEO({
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={`${siteUrl}${ogImage}`} />
-      <meta property="og:site_name" content="iCommerce" />
+      <meta property="og:site_name" content="ChinaKroy" />
       <meta property="og:locale" content="en_US" />
       
       {/* Twitter */}
@@ -50,7 +50,7 @@ export default function NavbarSEO({
       <meta name="theme-color" content="#000000" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      <meta name="apple-mobile-web-app-title" content="iCommerce" />
+      <meta name="apple-mobile-web-app-title" content="ChinaKroy" />
       
       {/* Preconnect to external domains */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -67,7 +67,7 @@ export default function NavbarSEO({
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "iCommerce",
+            "name": "ChinaKroy",
             "url": siteUrl,
             "logo": `${siteUrl}/img/logo.png`,
             "contactPoint": {
@@ -78,9 +78,9 @@ export default function NavbarSEO({
               "availableLanguage": ["en", "bn"]
             },
             "sameAs": [
-              "https://www.facebook.com/icommerce",
-              "https://twitter.com/icommerce",
-              "https://www.instagram.com/icommerce"
+              "https://www.facebook.com/chinakroy",
+              "https://twitter.com/chinakroy",
+              "https://www.instagram.com/chinakroy"
             ]
           })
         }}
@@ -93,7 +93,7 @@ export default function NavbarSEO({
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": "iCommerce",
+            "name": "ChinaKroy",
             "url": siteUrl,
             "potentialAction": {
               "@type": "SearchAction",
@@ -120,7 +120,7 @@ export function generateProductSEO(product) {
   const availability = product.stock > 0 ? "InStock" : "OutOfStock";
 
   return {
-    title: `${product.name} | iCommerce`,
+    title: `${product.name} | ChinaKroy`,
     description: product.short_description || product.description?.replace(/<[^>]*>/g, '').substring(0, 160),
     keywords: `${product.name}, ${product.category?.name || ''}, ${product.brand_name || ''}, buy online bangladesh`,
     ogImage: product.thumbnail_url || product.image_url,
@@ -133,7 +133,7 @@ export function generateProductSEO(product) {
       "sku": product.sku || product.id,
       "brand": {
         "@type": "Brand",
-        "name": product.brand_name || "iCommerce"
+        "name": product.brand_name || "ChinaKroy"
       },
       "offers": {
         "@type": "Offer",
@@ -143,7 +143,7 @@ export function generateProductSEO(product) {
         "availability": `https://schema.org/${availability}`,
         "seller": {
           "@type": "Organization",
-          "name": "iCommerce"
+          "name": "ChinaKroy"
         }
       },
       "aggregateRating": product.average_rating ? {

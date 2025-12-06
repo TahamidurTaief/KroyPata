@@ -272,7 +272,7 @@ export default function OrderListDisplay() {
           <div class="header">
             <div class="company-info">
               <img src="/img/logo_light.svg" alt="Logo" class="company-logo" style="width: 150px; height: 60px; object-fit: contain;" />
-              <p style="margin-top: 12px; font-size: 13px; color: #374151;">Email: support@icommerce.com</p>
+              <p style="margin-top: 12px; font-size: 13px; color: #374151;">Email: support@chinakroy.com</p>
               <p style="font-size: 13px; color: #374151;">Phone: +880 1XXX-XXXXXX</p>
               <p style="font-size: 13px; color: #374151;">Dhaka, Bangladesh</p>
             </div>
@@ -336,7 +336,7 @@ export default function OrderListDisplay() {
           <!-- Footer -->
           <div class="footer">
             <p><strong>Thank you for your order!</strong></p>
-            <p>For any queries regarding this invoice, please contact us at <strong>support@icommerce.com</strong></p>
+            <p>For any queries regarding this invoice, please contact us at <strong>support@chinakroy.com</strong></p>
             <p style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af;">
               Developed by <a href="https://www.exeyezone.com" target="_blank" style="color: #f43f5e; font-weight: 600; text-decoration: none;">exeyezone</a>
             </p>

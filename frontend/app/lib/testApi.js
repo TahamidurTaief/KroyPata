@@ -2,7 +2,7 @@
 // Note: Despite the name "testApi", this file provides essential runtime functionality
 
 export const testApiConnectivity = async () => {
-  const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+  const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.chinakroy.com').replace(/\/+$/, '');
   
   try {
     console.log('🧪 Testing API connectivity to:', API_BASE_URL);
@@ -23,7 +23,7 @@ export const testApiConnectivity = async () => {
 
 // Enhanced fetch with better error handling
 export const safeFetchWithFallback = async (endpoint) => {
-  const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+  const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.chinakroy.com').replace(/\/+$/, '');
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   
   try {

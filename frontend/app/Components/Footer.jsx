@@ -241,14 +241,24 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar: Copyright and Links */}
+        {/* Bottom Bar: Copyright and Developer Credit */}
         <div className="mt-16 pt-6 border-t border-[var(--border)] flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-center sm:text-left">
-            © {new Date().getFullYear()} icommerce. All rights reserved.
+            © {new Date().getFullYear()} China Kroy. All rights reserved.
           </p>
-          <div className="flex sm:justify-end space-x-6">
-            <Link href="/sitemap" className="text-sm transition hover:text-[var(--foreground)]">Sitemap</Link>
-            <Link href="/faq" className="text-sm transition hover:text-[var(--foreground)]">FAQ</Link>
+          <div className="flex sm:justify-end">
+            <p className="text-sm">
+              Developed By{' '}
+              <a
+                href="https://exeyezone.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-rose-500 font-semibold transition-all duration-300 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:rounded animate-pulse hover:animate-none"
+                aria-label="Visit exeyezone"
+              >
+                exeyezone
+              </a>
+            </p>
           </div>
         </div>
       </div>
