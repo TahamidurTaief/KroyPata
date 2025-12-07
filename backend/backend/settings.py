@@ -19,16 +19,17 @@ ALLOWED_HOSTS = ["*"]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-    "http://192.168.1.6:3000",
-    "http://10.17.90.39:3000",
 
-    "http://chinakroy.com",    # HTTP আছে
+    # Main Domain
     "https://chinakroy.com",
-    "http://api.chinakroy.com",
+    "https://www.chinakroy.com",
+    "http://chinakroy.com",
+
+    # API Domain
     "https://api.chinakroy.com",
-    "https://chinakroy.vercel.app",
+
+    # Vercel App (HTTPS)
+    "https://chinakroy.vercel.app", 
 ]
 
 
@@ -219,12 +220,10 @@ CORS_ALLOWED_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://chinakroy.com",
     "https://chinakroy.com",
-    "http://api.chinakroy.com",
+    "https://www.chinakroy.com",
     "https://api.chinakroy.com",
     "https://chinakroy.vercel.app",
-    "http://chinakroy.vercel.app",
 ]
 
 CSRF_COOKIE_SECURE = True  # Ensures the CSRF cookie is only sent over HTTPS
@@ -381,7 +380,7 @@ LOGGING = {
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # # SSL redirect
-# SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = True
 
 
 # # HTTP Strict Transport Security (HSTS)
