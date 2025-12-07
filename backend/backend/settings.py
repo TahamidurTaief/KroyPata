@@ -23,9 +23,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3001",
     "http://192.168.1.6:3000",
     "http://10.17.90.39:3000",
+
+    "http://chinakroy.com",    # HTTP আছে
     "https://chinakroy.com",
-    "https://www.chinakroy.com",
+    "http://api.chinakroy.com",
     "https://api.chinakroy.com",
+    "https://chinakroy.vercel.app",
 ]
 
 
@@ -220,6 +223,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://chinakroy.com",
     "http://api.chinakroy.com",
     "https://api.chinakroy.com",
+    "https://chinakroy.vercel.app",
+    "http://chinakroy.vercel.app",
 ]
 
 CSRF_COOKIE_SECURE = True  # Ensures the CSRF cookie is only sent over HTTPS
@@ -387,5 +392,5 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Cross-site request forgery (CSRF) protection
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True  # শুধুমাত্র HTTPS এ cookie পাঠায়
+SESSION_COOKIE_SECURE = True  # শুধুমাত্র HTTPS এ session পাঠায়
