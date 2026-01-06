@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { toast } from 'react-toastify';
 import Tk_icon from '@/app/Components/Common/Tk_icon';
 import { API_BASE_URL } from '@/app/lib/api';
+import { initFacebookPixel, trackPixelEvent } from '@/app/utils/facebookPixel';
 import './landing.css';
 
 export default function ProductLandingPage() {
@@ -17,6 +18,7 @@ export default function ProductLandingPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -82,6 +84,39 @@ export default function ProductLandingPage() {
     }
   }, [params.slug]);
 
+  // Facebook Pixel: Load pixel conditionally for landing page
+  useEffect(() => {
+    const loadPixel = async () => {
+      if (!product?.slug || typeof window === 'undefined') return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/products/products/${product.slug}/pixel-verify/`);
+        if (!response.ok) return;
+        
+        const pixelConfig = await response.json();
+        
+        if (pixelConfig.pixel_enabled && pixelConfig.pixel_id && pixelConfig.verification_token) {
+          initFacebookPixel(pixelConfig.pixel_id);
+          
+          const effectiveProduct = selectedVariant || product;
+          trackPixelEvent('ViewContent', {
+            content_ids: [effectiveProduct.id || product.id],
+            content_type: 'product',
+            content_name: product.name,
+            value: effectiveProduct.price || product.price,
+            currency: 'BDT'
+          });
+        }
+      } catch (error) {
+        console.error('Pixel load error:', error);
+      }
+    };
+    
+    if (product) {
+      loadPixel();
+    }
+  }, [product?.slug, selectedVariant]);
+
   const checkUser = async () => {
     try {
       const token = localStorage.getItem('access_token');
@@ -144,9 +179,21 @@ export default function ProductLandingPage() {
       
       setProduct(data);
       
-      // Set minimum quantity for wholesalers
-      if (data._user_context?.is_approved_wholesaler && data.minimum_purchase) {
-        setFormData(prev => ({ ...prev, quantity: data.minimum_purchase }));
+      // Initialize selected variant
+      if (data.variants && data.variants.length > 0) {
+        const defaultVar = data.variants.find(v => v.is_default && v.is_active) || data.variants.find(v => v.is_active);
+        if (defaultVar) {
+          setSelectedVariant(defaultVar);
+          // Set minimum quantity for wholesalers based on variant
+          if (data._user_context?.is_approved_wholesaler && defaultVar.minimum_purchase) {
+            setFormData(prev => ({ ...prev, quantity: defaultVar.minimum_purchase }));
+          }
+        }
+      } else {
+        // Set minimum quantity for wholesalers from product
+        if (data._user_context?.is_approved_wholesaler && data.minimum_purchase) {
+          setFormData(prev => ({ ...prev, quantity: data.minimum_purchase }));
+        }
       }
       
       setLoading(false);
@@ -163,12 +210,13 @@ export default function ProductLandingPage() {
   };
 
   const handleQuantityChange = (delta) => {
+    const effectiveProduct = selectedVariant || product;
     const isWholesaler = product?._user_context?.is_approved_wholesaler;
-    const minPurchase = isWholesaler ? (product?.minimum_purchase || 1) : 1;
+    const minPurchase = isWholesaler ? (effectiveProduct?.minimum_purchase || 1) : 1;
     
     setFormData(prev => {
       const newQuantity = Math.max(minPurchase, prev.quantity + delta);
-      return { ...prev, quantity: Math.min(newQuantity, product?.stock || 999) };
+      return { ...prev, quantity: Math.min(newQuantity, effectiveProduct?.stock || 999) };
     });
   };
 
@@ -183,6 +231,12 @@ export default function ProductLandingPage() {
       return;
     }
     
+    // Validate variant selection if product has variants
+    if (product.variants && product.variants.length > 0 && !selectedVariant) {
+      toast.error('অনুগ্রহ করে একটি ভ্যারিয়েন্ট নির্বাচন করুন');
+      return;
+    }
+    
     setSubmitting(true);
     
     try {
@@ -194,6 +248,7 @@ export default function ProductLandingPage() {
       
       const orderData = {
         product: product.id,
+        variant: selectedVariant?.id || null,
         quantity: formData.quantity,
         full_name: formData.full_name,
         email: formData.email,
@@ -205,14 +260,22 @@ export default function ProductLandingPage() {
       console.log('Submitting order:', orderData);
       console.log('API URL:', `${API_BASE}/api/products/landing-orders/`);
       
-      const response = await fetch(
-        `${API_BASE}/api/products/landing-orders/`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(orderData)
-        }
-      );
+      // Track Lead/Purchase event
+      const effectiveProduct = selectedVariant || product;
+      trackPixelEvent('Lead', {
+        content_ids: [effectiveProduct.id || product.id],
+        content_name: product.name,
+        content_type: 'product',
+        value: getTotalPrice(),
+        currency: 'BDT',
+        predicted_ltv: getTotalPrice()
+      });
+      
+      const response = await fetch(`${API_BASE}/api/products/landing-orders/`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(orderData)
+      });
       
       console.log('Response status:', response.status);
       const result = await response.json();
@@ -267,26 +330,34 @@ export default function ProductLandingPage() {
   const getDisplayPrice = () => {
     if (!product) return 0;
     
+    const effectiveProduct = selectedVariant || product;
     const isWholesaler = product._user_context?.is_approved_wholesaler;
     
-    if (isWholesaler && product.wholesale_price) {
-      return product.wholesale_price;
+    if (isWholesaler && effectiveProduct.wholesale_price) {
+      return effectiveProduct.wholesale_price;
     }
     
-    return product.discount_price || product.price;
+    return effectiveProduct.discount_price || effectiveProduct.price;
   };
 
   const getTotalPrice = () => {
     return getDisplayPrice() * formData.quantity;
   };
 
-  // Get all images (thumbnail + additional images)
+  // Get all images (variant images if selected, otherwise product images)
   const getAllImages = () => {
     if (!product) return [];
     const images = [];
-    if (product.thumbnail_url) images.push(product.thumbnail_url);
-    if (product.additional_images) {
-      images.push(...product.additional_images.map(img => img.image));
+    
+    // Use variant images if available
+    if (selectedVariant?.images && selectedVariant.images.length > 0) {
+      images.push(...selectedVariant.images.map(img => img.image));
+    } else {
+      // Fallback to product images
+      if (product.thumbnail_url) images.push(product.thumbnail_url);
+      if (product.additional_images) {
+        images.push(...product.additional_images.map(img => img.image));
+      }
     }
     return images;
   };
@@ -342,8 +413,9 @@ export default function ProductLandingPage() {
   }
 
   const allImages = getAllImages();
+  const effectiveProduct = selectedVariant || product;
   const isWholesaler = product._user_context?.is_approved_wholesaler;
-  const minPurchase = isWholesaler ? (product.minimum_purchase || 1) : 1;
+  const minPurchase = isWholesaler ? (effectiveProduct.minimum_purchase || 1) : 1;
 
   return (
     <div className="landing-page-container">
@@ -406,6 +478,8 @@ export default function ProductLandingPage() {
             </div>
           </div>
 
+{/* Variant selection moved to the Order Summary (checkout form) for a streamlined flow */}
+
           {/* Product Info */}
           <div className="product-info modern-box section-bg-1">
             {/* <div className="decorative-shape shape-3"></div> */}
@@ -429,10 +503,10 @@ export default function ProductLandingPage() {
               )}
             </div>
             
-            {product.stock > 0 ? (
+            {effectiveProduct.stock > 0 ? (
               <div className="stock-status in-stock">
                 <span className="status-icon">✓</span>
-                <span>স্টকে আছে ({product.stock} টি)</span>
+                <span>স্টকে আছে ({effectiveProduct.stock} টি)</span>
               </div>
             ) : (
               <div className="stock-status out-of-stock">
@@ -551,6 +625,105 @@ export default function ProductLandingPage() {
             
             <form onSubmit={handleSubmit} className="checkout-form">
               
+              {/* Variant Selection - Modern & Focused */}
+              {product.variants && product.variants.length > 0 && (
+                <div className="form-group">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="font-bold text-base">ভ্যারিয়েন্ট নির্বাচন করুন *</label>
+                    <span className="text-xs text-[var(--muted-foreground)] bg-[var(--muted)] px-2 py-1 rounded-full">আবশ্যক</span>
+                  </div>
+                  <div className="space-y-2.5">
+                    {product.variants
+                      .filter(v => v.is_active)
+                      .sort((a, b) => {
+                        if (a.is_default && !b.is_default) return -1;
+                        if (!a.is_default && b.is_default) return 1;
+                        if (a.stock > 0 && b.stock <= 0) return -1;
+                        if (a.stock <= 0 && b.stock > 0) return 1;
+                        const nameA = `${a.color?.name || ''} ${a.size?.name || ''}`.trim();
+                        const nameB = `${b.color?.name || ''} ${b.size?.name || ''}`.trim();
+                        return nameA.localeCompare(nameB);
+                      })
+                      .map((variant) => {
+                        const isSelected = selectedVariant?.id === variant.id;
+                        const isOutOfStock = variant.stock <= 0;
+                        return (
+                          <button
+                            key={variant.id}
+                            type="button"
+                            disabled={isOutOfStock}
+                            onClick={() => {
+                              setSelectedVariant(variant);
+                              const minQ = isWholesaler ? (variant.minimum_purchase || 1) : 1;
+                              if (formData.quantity < minQ) {
+                                setFormData(prev => ({ ...prev, quantity: minQ }));
+                              }
+                            }}
+                            className={`w-full p-3.5 rounded-xl border-2 transition-all duration-200 text-left relative
+                              ${isSelected 
+                                ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-md' 
+                                : isOutOfStock
+                                  ? 'bg-[var(--muted)]/50 border-[var(--border)] opacity-60 cursor-not-allowed'
+                                  : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--primary)] hover:shadow-sm'
+                              }`}
+                          >
+                            {/* Selection Check Mark */}
+                            {isSelected && (
+                              <div className="absolute top-3 right-3">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            )}
+
+                            <div className="flex items-start justify-between gap-2 pr-7">
+                              <div className="flex-1 min-w-0">
+                                {/* Variant Name with Color Dot */}
+                                <div className="flex items-center gap-2 mb-1.5">
+                                  {variant.color && (
+                                    <div 
+                                      className={`w-4 h-4 rounded-full border-2 shadow-sm flex-shrink-0 ${isSelected ? 'border-white' : 'border-gray-300'}`}
+                                      style={{ backgroundColor: variant.color.hex_code }}
+                                      title={variant.color.name}
+                                    />
+                                  )}
+                                  <span className={`font-semibold text-sm leading-tight ${
+                                    isSelected ? 'text-white' : 'text-[var(--foreground)]'
+                                  }`}>
+                                    {variant.color?.name}{variant.color && variant.size && ' • '}{variant.size?.name}
+                                  </span>
+                                </div>
+                                
+                                {/* Price and Stock */}
+                                <div className="flex items-center gap-3 flex-wrap">
+                                  <div className={`flex items-center gap-1 font-bold text-base ${
+                                    isSelected ? 'text-white' : 'text-[var(--primary)]'
+                                  }`}>
+                                    {Tk_icon && <Tk_icon size={14} className={isSelected ? 'text-white' : 'text-[var(--primary)]'} />}
+                                    <span>{(variant.discount_price || variant.price).toLocaleString()}</span>
+                                  </div>
+                                  
+                                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                    isSelected 
+                                      ? 'bg-white/20 text-white' 
+                                      : variant.stock > 0 
+                                        ? 'bg-green-500/10 text-green-600' 
+                                        : 'bg-red-500/10 text-red-600'
+                                  }`}>
+                                    {variant.stock > 0 ? `স্টকে ${variant.stock} টি` : 'স্টক আউট'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })
+                    }
+                  </div>
+                </div>
+              )}
+
+
               {/* Quantity Selector */}
               <div className="form-group">
                 <label>পরিমাণ</label>
@@ -568,17 +741,17 @@ export default function ProductLandingPage() {
                     value={formData.quantity}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
-                      quantity: Math.max(minPurchase, Math.min(parseInt(e.target.value) || minPurchase, product.stock))
+                      quantity: Math.max(minPurchase, Math.min(parseInt(e.target.value) || minPurchase, effectiveProduct.stock))
                     }))}
                     min={minPurchase}
-                    max={product.stock}
+                    max={effectiveProduct.stock}
                     className="qty-input"
                   />
                   <button
                     type="button"
                     className="qty-btn"
                     onClick={() => handleQuantityChange(1)}
-                    disabled={formData.quantity >= product.stock}
+                    disabled={formData.quantity >= effectiveProduct.stock}
                   >
                     +
                   </button>
@@ -672,7 +845,7 @@ export default function ProductLandingPage() {
               <button
                 type="submit"
                 className="submit-btn"
-                disabled={submitting || product.stock === 0}
+                disabled={submitting || effectiveProduct.stock === 0}
               >
                 {submitting ? 'অর্ডার প্রসেস হচ্ছে...' : 'অর্ডার কনফার্ম করুন'}
               </button>

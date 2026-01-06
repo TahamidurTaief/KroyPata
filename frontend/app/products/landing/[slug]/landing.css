@@ -718,3 +718,79 @@ html.dark .form-textarea:focus {
     background: var(--color-second-bg);
   }
 }
+
+/* Variant Card Styles - modern, rounded-xl, interactive */
+.variant-card {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+  border-radius: 12px; /* rounded-xl */
+  background: var(--color-second-bg);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+  min-width: 160px;
+  text-align: left;
+}
+
+.variant-card .variant-main {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .variant-card .variant-main { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; }
+}
+
+.variant-card .variant-title {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+.variant-card .variant-price {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+.variant-card .variant-stock {
+  display:block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  opacity:0.95;
+}
+
+.variant-card:hover:not(.out-of-stock) {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(16,24,40,0.06);
+}
+
+.variant-card:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(34,197,94,0.12);
+}
+
+.variant-card.selected {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+  box-shadow: 0 8px 20px rgba(76,175,80,0.18);
+}
+
+.variant-card.selected .variant-price,
+.variant-card.selected .variant-title,
+.variant-card.selected .variant-stock {
+  color: rgba(255,255,255,0.95);
+}
+
+.variant-card.out-of-stock {
+  opacity: 0.6;
+  filter: grayscale(0.06);
+}
+
+@media (max-width: 640px) {
+  .variant-card { min-width: 140px; padding: 0.6rem 0.9rem; }
+}

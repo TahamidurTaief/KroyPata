@@ -1,14 +1,18 @@
 "use client";
-import { Plus, Minus } from "lucide-react";
+import { useEffect } from "react";
+import { Plus, Minus, Check, Store } from "lucide-react";
 import Tk_icon from "../Common/Tk_icon";
 import { useWholesalePricingLogic, validateMinimumPurchase } from "../Common/WholesalePricingNew";
 import { useAuth } from "@/app/contexts/AuthContext";
-import { FaStore } from 'react-icons/fa';
 
 // This component provides the order action panel. It now focuses on quantity
 // and the primary add-to-cart action, with shipping removed for a cleaner flow.
 export default function PaymentDetails({ 
-  product, 
+  product,
+  selectedVariant,
+  setSelectedVariant,
+  setSelectedColor,
+  setSelectedSize,
   quantity, 
   setQuantity, 
   isInCart, 
@@ -17,22 +21,35 @@ export default function PaymentDetails({
   handleBuyNow
 }) {
   const { user } = useAuth();
-  const { isUsingWholesalePrice, minimumPurchase } = useWholesalePricingLogic(product);
-  const inStock = product.stock > 0 && product.is_active;
+  const effectiveProduct = selectedVariant ? { ...product, ...selectedVariant } : product;
+  const { isUsingWholesalePrice, minimumPurchase } = useWholesalePricingLogic(effectiveProduct);
+  const inStock = effectiveProduct.stock > 0 && effectiveProduct.is_active;
   
+  // Ensure a default variant is selected on mount if none is provided
+  useEffect(() => {
+    if (!selectedVariant && product?.variants && product.variants.length > 0) {
+      const defaultVar = product.variants.find(v => v.is_default && v.is_active) || product.variants.find(v => v.is_active);
+      if (defaultVar) {
+        if (setSelectedVariant) setSelectedVariant(defaultVar);
+        if (setSelectedColor && defaultVar.color) setSelectedColor(defaultVar.color);
+        if (setSelectedSize && defaultVar.size) setSelectedSize(defaultVar.size);
+      }
+    }
+  }, [product, selectedVariant, setSelectedVariant, setSelectedColor, setSelectedSize]);
+
   // Use wholesale price if available and user is wholesaler
   const price = isUsingWholesalePrice 
-    ? parseFloat(product.wholesale_price) 
-    : parseFloat(product.discount_price) || parseFloat(product.price) || 0;
+    ? parseFloat(effectiveProduct.wholesale_price) 
+    : parseFloat(effectiveProduct.discount_price) || parseFloat(effectiveProduct.price) || 0;
   const subtotal = price * quantity;
   
   // Validate minimum purchase requirements
-  const minimumPurchaseValidation = validateMinimumPurchase(product, quantity, user);
+  const minimumPurchaseValidation = validateMinimumPurchase(effectiveProduct, quantity, user);
 
   const handleQuantityChange = (amount) => {
     const newQuantity = quantity + amount;
     const minQuantity = isUsingWholesalePrice ? minimumPurchase : 1;
-    if (newQuantity >= minQuantity && newQuantity <= (product.stock || 99)) {
+    if (newQuantity >= minQuantity && newQuantity <= (effectiveProduct.stock || 99)) {
       setQuantity(newQuantity);
     }
   };
@@ -40,9 +57,109 @@ export default function PaymentDetails({
   return (
     <div className="bg-[var(--card)] p-6 rounded-xl shadow-lg sticky top-24">
       <div className="space-y-4">
+        {/* Variant Selection - Simple, Clean, Focused Design */}
+        {product.variants && product.variants.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-bold text-base text-[var(--foreground)]">Select Variant</h4>
+              <span className="text-xs text-[var(--muted-foreground)] bg-[var(--muted)] px-2 py-1 rounded-full">Required</span>
+            </div>
+            <div className="space-y-2.5">
+              {product.variants
+                .filter(v => v.is_active)
+                .sort((a, b) => {
+                  // Sort by: 1) default first, 2) in stock, 3) name
+                  if (a.is_default && !b.is_default) return -1;
+                  if (!a.is_default && b.is_default) return 1;
+                  if (a.stock > 0 && b.stock <= 0) return -1;
+                  if (a.stock <= 0 && b.stock > 0) return 1;
+                  const nameA = `${a.color?.name || ''} ${a.size?.name || ''}`.trim();
+                  const nameB = `${b.color?.name || ''} ${b.size?.name || ''}`.trim();
+                  return nameA.localeCompare(nameB);
+                })
+                .map((variant) => {
+                  const isSelected = selectedVariant?.id === variant.id;
+                  const isOutOfStock = variant.stock <= 0;
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      aria-pressed={isSelected}
+                      disabled={isOutOfStock}
+                      onClick={() => {
+                        if (setSelectedVariant) setSelectedVariant(variant);
+                        if (setSelectedColor && variant.color) setSelectedColor(variant.color);
+                        if (setSelectedSize && variant.size) setSelectedSize(variant.size);
+                        const isWholesaler = user?.user_type === 'WHOLESALER';
+                        const minQ = isWholesaler ? (variant.minimum_purchase || product.minimum_purchase || 1) : 1;
+                        if (quantity < minQ) setQuantity(minQ);
+                      }}
+                      className={`w-full p-3.5 rounded-xl border-2 transition-all duration-200 text-left relative
+                        ${isSelected 
+                          ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-md' 
+                          : isOutOfStock
+                            ? 'bg-[var(--muted)]/50 border-[var(--border)] opacity-60 cursor-not-allowed'
+                            : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--primary)] hover:shadow-sm'
+                        }`}
+                    >
+                      {/* Selection indicator */}
+                      {isSelected && (
+                        <div className="absolute top-3 right-3">
+                          <Check size={16} className="text-white" strokeWidth={3} />
+                        </div>
+                      )}
+
+                      <div className="flex items-start justify-between gap-2 pr-7">
+                        <div className="flex-1 min-w-0">
+                          {/* Variant name with color indicator */}
+                          <div className="flex items-center gap-2 mb-1.5">
+                            {variant.color && (
+                              <div 
+                                className={`w-4 h-4 rounded-full border-2 shadow-sm flex-shrink-0 ${isSelected ? 'border-white' : 'border-gray-300'}`}
+                                style={{ backgroundColor: variant.color.hex_code }}
+                                title={variant.color.name}
+                              />
+                            )}
+                            <span className={`font-semibold text-sm leading-tight ${
+                              isSelected ? 'text-white' : 'text-[var(--foreground)]'
+                            }`}>
+                              {variant.color?.name}{variant.color && variant.size && ' • '}{variant.size?.name}
+                            </span>
+                          </div>
+                          
+                          {/* Price and stock info */}
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <div className={`flex items-center gap-1 font-bold text-base ${
+                              isSelected ? 'text-white' : 'text-[var(--primary)]'
+                            }`}>
+                              <Tk_icon size={14} className={isSelected ? 'text-white' : 'text-[var(--primary)]'} />
+                              <span>{(variant.discount_price || variant.price).toLocaleString()}</span>
+                            </div>
+                            
+                            {/* Stock badge */}
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              isSelected 
+                                ? 'bg-white/20 text-white' 
+                                : variant.stock > 0 
+                                  ? 'bg-green-500/10 text-green-600' 
+                                  : 'bg-red-500/10 text-red-600'
+                            }`}>
+                              {variant.stock > 0 ? `${variant.stock} in stock` : 'Out of stock'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              }
+            </div>
+          </div>
+        )} 
+
         {/* Availability Status */}
         <div className={`text-sm font-bold py-2 px-3 rounded-md text-center ${inStock ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-          {inStock ? `In Stock (${product.stock} available)` : 'Out of Stock'}
+          {inStock ? `In Stock (${effectiveProduct.stock} available)` : 'Out of Stock'}
         </div>
 
         {/* Quantity Selector */}
@@ -67,7 +184,7 @@ export default function PaymentDetails({
             <button 
               onClick={() => handleQuantityChange(1)} 
               className="p-2 rounded-md hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
-              disabled={quantity >= (product.stock || 99)}
+              disabled={quantity >= (effectiveProduct.stock || 99)}
             >
               <Plus size={16} />
             </button>
@@ -99,7 +216,7 @@ export default function PaymentDetails({
           <div className="flex items-center justify-between text-sm">
             <span className="text-[var(--muted-foreground)]">Price Type:</span>
             <span className="bg-blue-500/10 text-blue-500 px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-              <FaStore size={10} />
+              <Store size={10} />
               Wholesale
             </span>
           </div>

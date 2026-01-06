@@ -13,6 +13,8 @@ import { validateMinimumPurchase } from "../Common/WholesalePricingNew";
 import RelatedProducts from "./RelatedProducts";
 import EnhancedSectionRenderer from "../Common/EnhancedSectionRenderer";
 import { getProductBySlug } from "@/app/lib/api";
+import { API_BASE_URL } from "@/app/lib/api";
+import { initFacebookPixel, trackPixelEvent } from "@/app/utils/facebookPixel";
 
 // This component is the main client-side orchestrator for the product detail page.
 // It manages all state and logic, passing props down to the display components.
@@ -24,7 +26,10 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
   const [product, setProduct] = useState(initialProduct);
   const [isLoadingAuthProduct, setIsLoadingAuthProduct] = useState(false);
   
-  // State for selected product variants (color, size)
+  // State for selected product variant
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  
+  // State for selected product variants (color, size) - kept for backward compatibility
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
   
@@ -32,14 +37,25 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
   const [quantity, setQuantity] = useState(1);
   const [isInCart, setIsInCart] = useState(false);
   
+  // Initialize selected variant on product load
+  useEffect(() => {
+    if (product?.variants && product.variants.length > 0) {
+      const defaultVar = product.variants.find(v => v.is_default && v.is_active) || product.variants.find(v => v.is_active);
+      if (defaultVar) {
+        setSelectedVariant(defaultVar);
+        if (defaultVar.color) setSelectedColor(defaultVar.color);
+        if (defaultVar.size) setSelectedSize(defaultVar.size);
+      }
+    }
+  }, [product]);
+  
   // Set default quantity based on wholesale user and minimum purchase
   useEffect(() => {
-    if (user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0) {
-      const minimumPurchase = product?.minimum_purchase || 1;
-      // Only update if current quantity is less than minimum
-      setQuantity(prevQuantity => prevQuantity < minimumPurchase ? minimumPurchase : prevQuantity);
+    const minPurchase = selectedVariant?.minimum_purchase || product?.minimum_purchase || 1;
+    if (user?.user_type === 'WHOLESALER' && (selectedVariant?.wholesale_price > 0 || product?.wholesale_price > 0)) {
+      setQuantity(prevQuantity => prevQuantity < minPurchase ? minPurchase : prevQuantity);
     }
-  }, [user?.user_type, product?.wholesale_price, product?.minimum_purchase]); // Remove quantity from dependencies
+  }, [user?.user_type, selectedVariant, product?.wholesale_price, product?.minimum_purchase]);
   
   // Get message context methods
   const { showSuccess, showError } = useMessage();
@@ -73,7 +89,7 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
   }, [isAuthenticated, user?.user_type, product.slug, isLoadingAuthProduct]);
 
   // A unique ID for the product variant to manage cart state accurately
-  const variantId = `${product.id}-${selectedColor?.id || 'c'}-${selectedSize?.id || 's'}`;
+  const variantId = selectedVariant?.id || `${product.id}-${selectedColor?.id || 'c'}-${selectedSize?.id || 's'}`;
 
   // Effect to check if the current product variant is in the cart on load or when variants change
   useEffect(() => {
@@ -101,10 +117,54 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
     }
   }, [variantId]);
 
+  // Facebook Pixel: Load pixel conditionally based on product configuration
+  useEffect(() => {
+    const loadPixel = async () => {
+      if (!product?.slug || typeof window === 'undefined') return;
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/products/products/${product.slug}/pixel-verify/`);
+        if (!response.ok) return;
+        
+        const pixelConfig = await response.json();
+        
+        if (pixelConfig.pixel_enabled && pixelConfig.pixel_id && pixelConfig.verification_token) {
+          initFacebookPixel(pixelConfig.pixel_id);
+          
+          const effectiveProduct = selectedVariant || product;
+          trackPixelEvent('ViewContent', {
+            content_ids: [effectiveProduct.id || product.id],
+            content_type: 'product',
+            content_name: product.name,
+            value: effectiveProduct.price || product.price,
+            currency: 'BDT'
+          });
+        }
+      } catch (error) {
+        console.error('Pixel load error:', error);
+      }
+    };
+    
+    loadPixel();
+  }, [product?.slug, selectedVariant]);
+
   // Handler to add the selected product variant to the cart
   const handleAddToCart = () => {
-    // Check minimum purchase requirements for wholesale users
-    const validation = validateMinimumPurchase(product, quantity, user);
+    // Validate variant selection if product has variants
+    if (product?.variants && product.variants.length > 0 && !selectedVariant) {
+      showError('Please select a variant before adding to cart', 'Variant Required');
+      showModal({
+        status: 'error',
+        title: 'Variant Selection Required',
+        message: 'Please select a product variant (color, size, etc.) before adding to cart.',
+        primaryActionText: 'OK'
+      });
+      return;
+    }
+    
+    // Use variant data if available
+    const productData = selectedVariant ? { ...product, ...selectedVariant } : product;
+    const validation = validateMinimumPurchase(productData, quantity, user);
     
     // If validation fails for wholesale users, show error
     if (!validation.isValid && user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0) {
@@ -119,12 +179,23 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
       return;
     }
     
+    // Track AddToCart event
+    const effectiveProduct = selectedVariant || product;
+    trackPixelEvent('AddToCart', {
+      content_ids: [effectiveProduct.id || product.id],
+      content_type: 'product',
+      content_name: product.name,
+      value: (effectiveProduct.price || product.price) * quantity,
+      currency: 'BDT'
+    });
+    
     const result = addToCart(product, {
       quantity,
       selectedColor,
       selectedSize,
-      variantId,
-      user  // Pass user data for wholesale pricing
+      variantId: selectedVariant?.id || variantId,
+      variant: selectedVariant,
+      user
     });
     
     if (result.success) {
@@ -195,8 +266,20 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
       return;
     }
 
-    // Check minimum purchase requirements for wholesale users
-    const validation = validateMinimumPurchase(product, quantity, user);
+    // Validate variant selection if product has variants
+    if (product?.variants && product.variants.length > 0 && !selectedVariant) {
+      showError('Please select a variant before proceeding', 'Variant Required');
+      showModal({
+        status: 'error',
+        title: 'Variant Selection Required',
+        message: 'Please select a product variant (color, size, etc.) before proceeding to checkout.',
+        primaryActionText: 'OK'
+      });
+      return;
+    }
+
+    const productData = selectedVariant ? { ...product, ...selectedVariant } : product;
+    const validation = validateMinimumPurchase(productData, quantity, user);
     
     if (!validation.isValid && user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0) {
       showError(validation.message, 'Minimum Order Not Met');
@@ -209,27 +292,33 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
       return;
     }
 
-    // Store the buy now product in sessionStorage
+    const effectivePrice = selectedVariant ? (
+      user?.user_type === 'WHOLESALER' && selectedVariant.wholesale_price > 0
+        ? parseFloat(selectedVariant.wholesale_price)
+        : parseFloat(selectedVariant.discount_price) || parseFloat(selectedVariant.price)
+    ) : (
+      user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0
+        ? parseFloat(product.wholesale_price)
+        : parseFloat(product.discount_price) || parseFloat(product.price) || 0
+    );
+    
     const buyNowItem = {
       product_id: product.id,
       productId: product.id,
       id: product.id,
+      variant_id: selectedVariant?.id || null,
       name: product.name,
-      price: user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0 
-        ? parseFloat(product.wholesale_price)
-        : parseFloat(product.discount_price) || parseFloat(product.price) || 0,
-      unit_price: user?.user_type === 'WHOLESALER' && product?.wholesale_price > 0 
-        ? parseFloat(product.wholesale_price)
-        : parseFloat(product.discount_price) || parseFloat(product.price) || 0,
+      price: effectivePrice,
+      unit_price: effectivePrice,
       quantity: quantity,
       image: product.thumbnail_url || product.image_url || product.image || '',
       slug: product.slug,
-      stock: product.stock,
+      stock: selectedVariant?.stock || product.stock,
       color_id: selectedColor?.id || null,
       selectedColor: selectedColor,
       size_id: selectedSize?.id || null,
       selectedSize: selectedSize,
-      variantId: variantId
+      variantId: selectedVariant?.id || variantId
     };
 
     sessionStorage.setItem('buyNowItem', JSON.stringify(buyNowItem));
@@ -239,10 +328,13 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
   };
   
   // Memoize the list of all product images to prevent unnecessary recalculations
-  const allImages = useMemo(() => 
-    [product.thumbnail_url, ...(product.additional_images?.map(img => img.image) || [])].filter(Boolean),
-    [product]
-  );
+  const allImages = useMemo(() => {
+    // Use variant images if available, otherwise product images
+    if (selectedVariant?.images && selectedVariant.images.length > 0) {
+      return selectedVariant.images.map(img => img.image).filter(Boolean);
+    }
+    return [product.thumbnail_url, ...(product.additional_images?.map(img => img.image) || [])].filter(Boolean);
+  }, [product, selectedVariant]);
 
   return (
     <motion.div 
@@ -268,6 +360,8 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
         >
           <ProductInfo 
             product={product}
+            selectedVariant={selectedVariant}
+            setSelectedVariant={setSelectedVariant}
             selectedColor={selectedColor}
             setSelectedColor={setSelectedColor}
             selectedSize={selectedSize}
@@ -281,6 +375,10 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
         >
           <PaymentDetails
             product={product}
+            selectedVariant={selectedVariant}
+            setSelectedVariant={setSelectedVariant}
+            setSelectedColor={setSelectedColor}
+            setSelectedSize={setSelectedSize}
             quantity={quantity}
             setQuantity={setQuantity}
             isInCart={isInCart}

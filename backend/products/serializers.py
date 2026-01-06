@@ -92,6 +92,174 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['id', 'user', 'rating', 'comment', 'created_at']
 
+
+class VariantImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = VariantImage
+        fields = ['id', 'image', 'is_primary', 'order']
+    
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image and hasattr(obj.image, 'url'):
+            return request.build_absolute_uri(obj.image.url)
+        return None
+
+
+class ProductVariantSerializer(serializers.ModelSerializer):
+    color = ColorSerializer(read_only=True)
+    size = SizeSerializer(read_only=True)
+    images = VariantImageSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = ProductVariant
+        fields = [
+            'id', 'sku', 'color', 'size', 'material',
+            'price', 'discount_price', 'wholesale_price', 'minimum_purchase',
+            'stock', 'weight', 'is_active', 'is_default', 'images'
+        ]
+    
+    def to_representation(self, instance):
+        """Hide wholesale pricing from non-approved wholesalers"""
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        
+        is_approved_wholesaler = False
+        if (request and hasattr(request, 'user') and request.user and request.user.is_authenticated):
+            if request.user.user_type == 'WHOLESALER':
+                try:
+                    if hasattr(request.user, 'wholesaler_profile'):
+                        if request.user.wholesaler_profile.approval_status == 'APPROVED':
+                            is_approved_wholesaler = True
+                except:
+                    pass
+        
+        if not is_approved_wholesaler:
+            data.pop('wholesale_price', None)
+            data.pop('minimum_purchase', None)
+        
+        return data
+
+
+class ProductListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for product list view with variant support"""
+    shop = ShopSerializer(read_only=True)
+    brand = BrandSerializer(read_only=True)
+    sub_category = SubCategorySerializer(read_only=True)
+    thumbnail_url = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    default_variant = serializers.SerializerMethodField()
+    
+    # Display prices from default variant if available
+    display_price = serializers.SerializerMethodField()
+    display_discount_price = serializers.SerializerMethodField()
+    display_wholesale_price = serializers.SerializerMethodField()
+    display_minimum_purchase = serializers.SerializerMethodField()
+    display_stock = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'shop', 'brand', 'name', 'slug', 'sub_category',
+            'price', 'discount_price', 'wholesale_price', 'minimum_purchase', 'stock',
+            'display_price', 'display_discount_price', 'display_wholesale_price', 
+            'display_minimum_purchase', 'display_stock',
+            'thumbnail_url', 'rating', 'review_count', 'is_active',
+            'default_variant', 'enable_landing_page',
+            'enable_facebook_pixel', 'facebook_pixel_id'
+        ]
+        # SECURITY: facebook_pixel_access_token is NEVER exposed via API
+    
+    def get_thumbnail_url(self, obj):
+        request = self.context.get('request')
+        if obj.thumbnail and hasattr(obj.thumbnail, 'url'):
+            return request.build_absolute_uri(obj.thumbnail.url)
+        return None
+    
+    def get_rating(self, obj):
+        from django.db.models import Avg
+        return obj.reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+    
+    def get_review_count(self, obj):
+        return obj.reviews.count()
+    
+    def get_default_variant(self, obj):
+        # Get default variant or first active variant
+        variant = obj.variants.filter(is_active=True, is_default=True).first()
+        if not variant:
+            variant = obj.variants.filter(is_active=True).first()
+        
+        if variant:
+            return ProductVariantSerializer(variant, context=self.context).data
+        return None
+    
+    def get_display_price(self, obj):
+        variant = obj.variants.filter(is_active=True, is_default=True).first()
+        if not variant:
+            variant = obj.variants.filter(is_active=True).first()
+        return float(variant.price) if variant else float(obj.price)
+    
+    def get_display_discount_price(self, obj):
+        variant = obj.variants.filter(is_active=True, is_default=True).first()
+        if not variant:
+            variant = obj.variants.filter(is_active=True).first()
+        if variant and variant.discount_price:
+            return float(variant.discount_price)
+        return float(obj.discount_price) if obj.discount_price else None
+    
+    def get_display_wholesale_price(self, obj):
+        request = self.context.get('request')
+        is_approved_wholesaler = False
+        
+        if (request and hasattr(request, 'user') and request.user and request.user.is_authenticated):
+            if request.user.user_type == 'WHOLESALER':
+                try:
+                    if hasattr(request.user, 'wholesaler_profile'):
+                        if request.user.wholesaler_profile.approval_status == 'APPROVED':
+                            is_approved_wholesaler = True
+                except:
+                    pass
+        
+        if not is_approved_wholesaler:
+            return None
+        
+        variant = obj.variants.filter(is_active=True, is_default=True).first()
+        if not variant:
+            variant = obj.variants.filter(is_active=True).first()
+        if variant and variant.wholesale_price:
+            return float(variant.wholesale_price)
+        return float(obj.wholesale_price) if obj.wholesale_price else None
+    
+    def get_display_minimum_purchase(self, obj):
+        request = self.context.get('request')
+        is_approved_wholesaler = False
+        
+        if (request and hasattr(request, 'user') and request.user and request.user.is_authenticated):
+            if request.user.user_type == 'WHOLESALER':
+                try:
+                    if hasattr(request.user, 'wholesaler_profile'):
+                        if request.user.wholesaler_profile.approval_status == 'APPROVED':
+                            is_approved_wholesaler = True
+                except:
+                    pass
+        
+        if not is_approved_wholesaler:
+            return None
+        
+        variant = obj.variants.filter(is_active=True, is_default=True).first()
+        if not variant:
+            variant = obj.variants.filter(is_active=True).first()
+        return variant.minimum_purchase if variant else obj.minimum_purchase
+    
+    def get_display_stock(self, obj):
+        variant = obj.variants.filter(is_active=True, is_default=True).first()
+        if not variant:
+            variant = obj.variants.filter(is_active=True).first()
+        return variant.stock if variant else obj.stock
+
+
 class ProductSerializer(serializers.ModelSerializer):
     shop = ShopSerializer(read_only=True)
     brand = BrandSerializer(read_only=True)
@@ -105,17 +273,22 @@ class ProductSerializer(serializers.ModelSerializer):
     thumbnail_url = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    variants = ProductVariantSerializer(many=True, read_only=True)
+    default_variant = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
             'id', 'shop', 'brand', 'name', 'slug', 'description', 'sub_category', 'shipping_category',
             'price', 'discount_price', 'wholesale_price', 'minimum_purchase', 'affiliate_commission_rate', 'stock', 'is_active',
-            'weight', 'length', 'width', 'height',  # Added physical properties for shipping
+            'weight', 'length', 'width', 'height',
             'thumbnail_url', 'specifications', 'additional_images',
             'colors', 'sizes', 'reviews', 'rating', 'review_count',
-            'enable_landing_page', 'landing_features', 'landing_how_to_use', 'landing_why_choose'  # Landing page fields
+            'variants', 'default_variant',
+            'enable_landing_page', 'landing_features', 'landing_how_to_use', 'landing_why_choose',
+            'enable_facebook_pixel', 'facebook_pixel_id'
         ]
+        # SECURITY: facebook_pixel_access_token is NEVER exposed via API
         
     def get_thumbnail_url(self, obj):
         request = self.context.get('request')
@@ -129,6 +302,16 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_review_count(self, obj):
         return obj.reviews.count()
+    
+    def get_default_variant(self, obj):
+        # Get default variant or first active variant
+        variant = obj.variants.filter(is_active=True, is_default=True).first()
+        if not variant:
+            variant = obj.variants.filter(is_active=True).first()
+        
+        if variant:
+            return ProductVariantSerializer(variant, context=self.context).data
+        return None
     
     def to_representation(self, instance):
         """

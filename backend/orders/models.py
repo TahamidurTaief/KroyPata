@@ -703,6 +703,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', db_index=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, db_index=True)
+    variant = models.ForeignKey('products.ProductVariant', on_delete=models.SET_NULL, null=True, blank=True, db_index=True, help_text="Product variant if applicable")
     color = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True, blank=True)
     size = models.ForeignKey(Size, on_delete=models.SET_NULL, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
@@ -711,9 +712,12 @@ class OrderItem(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['order', 'product'], name='orderitem_order_product_idx'),
+            models.Index(fields=['variant'], name='orderitem_variant_idx'),
         ]
 
     def __str__(self):
+        if self.variant:
+            return f"{self.quantity} of {self.product.name} ({self.variant})"
         return f"{self.quantity} of {self.product.name}"
 
 class OrderUpdate(models.Model):

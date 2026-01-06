@@ -47,13 +47,51 @@ class ProductAdditionalImageInline(TabularInline):
     model = ProductAdditionalImage
     extra = 1
 
+class VariantImageInline(TabularInline):
+    model = VariantImage
+    extra = 1
+    fields = ('image', 'is_primary', 'order')
+
+class ProductVariantInline(TabularInline):
+    model = ProductVariant
+    extra = 0
+    fields = ('sku', 'color', 'size', 'material', 'price', 'discount_price', 'wholesale_price', 'minimum_purchase', 'stock', 'weight', 'is_active', 'is_default')
+    readonly_fields = ('sku',)
+
+@admin.register(ProductVariant)
+class ProductVariantAdmin(ModelAdmin):
+    list_display = ('__str__', 'product', 'sku', 'color', 'size', 'material', 'price', 'stock', 'is_default', 'is_active')
+    list_filter = ('is_active', 'is_default', 'color', 'size', 'product__sub_category')
+    search_fields = ('sku', 'product__name', 'material')
+    readonly_fields = ('sku', 'created_at', 'updated_at')
+    inlines = [VariantImageInline]
+    
+    fieldsets = (
+        ('Product & Identification', {
+            'fields': ('product', 'sku', 'is_default', 'is_active')
+        }),
+        ('Variant Attributes', {
+            'fields': ('color', 'size', 'material', 'weight')
+        }),
+        ('Pricing', {
+            'fields': ('price', 'discount_price', 'wholesale_price', 'minimum_purchase')
+        }),
+        ('Stock', {
+            'fields': ('stock',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
 @admin.register(Product)
 class ProductAdmin(ModelAdmin):
     list_display = ('name', 'brand', 'shop', 'sub_category', 'shipping_category', 'price', 'wholesale_price', 'minimum_purchase', 'stock', 'is_active', 'enable_landing_page')
     list_filter = ('is_active', 'enable_landing_page', 'brand', 'shop', 'sub_category', 'shipping_category', 'colors', 'sizes')
     search_fields = ('name', 'slug', 'brand__name')
     prepopulated_fields = {'slug': ('name',)}
-    inlines = [ProductSpecificationInline, ProductAdditionalImageInline]
+    inlines = [ProductVariantInline, ProductSpecificationInline, ProductAdditionalImageInline]
     filter_horizontal = ('colors', 'sizes')
     
     fieldsets = (
@@ -69,6 +107,11 @@ class ProductAdmin(ModelAdmin):
         ('Landing Page Settings', {
             'fields': ('enable_landing_page', 'landing_features', 'landing_how_to_use', 'landing_why_choose'),
             'classes': ('collapse',)
+        }),
+        ('Facebook Pixel Tracking', {
+            'fields': ('enable_facebook_pixel', 'facebook_pixel_id', 'facebook_pixel_access_token'),
+            'classes': ('collapse',),
+            'description': '🔒 Configure product-specific Facebook Pixel. Access token is secured and not exposed via API.'
         }),
         ('Physical Properties', {
             'fields': ('weight', 'length', 'width', 'height'),

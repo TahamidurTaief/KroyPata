@@ -48,16 +48,18 @@ export const addToCart = (product, options = {}) => {
       selectedColor = null,
       selectedSize = null,
       variantId = null,
-      user = null  // Accept user data to determine pricing
+      variant = null,
+      user = null
     } = options;
 
     // Get current cart
     const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
     
-    // Get appropriate pricing based on user type
-    const pricingInfo = getProductPrice(product, user);
+    // Use variant data if available, otherwise use product data
+    const effectiveProduct = variant ? { ...product, ...variant } : product;
+    const pricingInfo = getProductPrice(effectiveProduct, user);
     
-    // Create unique variant ID if not provided
+    // Create unique variant ID
     const itemVariantId = variantId || `${product.id}_${selectedColor?.id || 'default'}_${selectedSize?.id || 'default'}`;
     
     // Check if item already exists in cart
@@ -67,40 +69,37 @@ export const addToCart = (product, options = {}) => {
       // Update quantity if item exists
       cartItems[existingItemIndex].quantity += quantity;
     } else {
-      // Add new item to cart with appropriate pricing
+      // Add new item to cart with variant data
       const newItem = {
         id: product.id,
-        productId: product.id,  // Ensure backend compatibility
-        product_id: product.id,  // Additional backend compatibility
+        productId: product.id,
+        product_id: product.id,
         variantId: itemVariantId,
+        variant_id: variant?.id || null,
         name: product.name,
         slug: product.slug,
-        price: pricingInfo.price,  // Use the appropriate price (wholesale or regular/discount)
+        price: pricingInfo.price,
         quantity: quantity,
         thumbnail_url: product.thumbnail_url,
         selectedColor: selectedColor,
         selectedSize: selectedSize,
         color_id: selectedColor?.id || null,
         size_id: selectedSize?.id || null,
-        // Enhanced pricing info for cart display
-        original_price: parseFloat(product.price || 0),
-        discount_price: parseFloat(product.discount_price || 0),
-        wholesale_price: parseFloat(product.wholesale_price || 0),
+        original_price: parseFloat(effectiveProduct.price || 0),
+        discount_price: parseFloat(effectiveProduct.discount_price || 0),
+        wholesale_price: parseFloat(effectiveProduct.wholesale_price || 0),
         is_wholesale: pricingInfo.isWholesale,
         price_label: pricingInfo.label,
         unit_price: pricingInfo.price,
-        stock: product.stock || 0,
-        // Ensure we have all required fields for the cart display
+        stock: effectiveProduct.stock || 0,
         image: product.thumbnail_url,
         product_image: product.thumbnail_url,
         product_name: product.name,
-        // Add weight and dimensions for shipping calculations
-        weight: parseFloat(product.weight || 0),
+        weight: parseFloat(effectiveProduct.weight || 0),
         length: parseFloat(product.length || 0),
         width: parseFloat(product.width || 0),
         height: parseFloat(product.height || 0),
-        // Add minimum purchase requirement
-        minimum_purchase: parseInt(product.minimum_purchase || 1)
+        minimum_purchase: parseInt(effectiveProduct.minimum_purchase || 1)
       };
       
       cartItems.push(newItem);

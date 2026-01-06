@@ -1,25 +1,26 @@
 "use client";
-import { Badge, Star, Check } from "lucide-react";
+import { Badge, Star, Check, ArrowRight, Store, Box } from "lucide-react";
 import Tk_icon from "../Common/Tk_icon";
 import { useRouter } from "next/navigation";
-import { FiArrowRight } from "react-icons/fi";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { WholesalePricingDisplay, useWholesalePricingLogic } from "../Common/WholesalePricingNew";
-import { FaStore, FaBox } from 'react-icons/fa';
 
 // This component displays the core product details, including name, price, rating,
 // and variant selectors (color, size).
-export default function ProductInfo({ product, selectedColor, setSelectedColor, selectedSize, setSelectedSize }) {
+export default function ProductInfo({ product, selectedVariant, setSelectedVariant, selectedColor, setSelectedColor, selectedSize, setSelectedSize }) {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
+  
+  // Get effective product data from variant or product
+  const effectiveProduct = selectedVariant ? { ...product, ...selectedVariant } : product;
   
   // Debug the product data
   console.log('🔍 ProductInfo Debug:', {
     productName: product?.name,
-    wholesalePrice: product?.wholesale_price,
+    selectedVariant,
+    effectiveWholesalePrice: effectiveProduct?.wholesale_price,
     userType: user?.user_type,
-    isAuthenticated,
-    fullProduct: product
+    isAuthenticated
   });
   
   // Use the new wholesale pricing logic
@@ -29,7 +30,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
     isUsingWholesalePrice,
     hasWholesalePrice,
     minimumPurchase
-  } = useWholesalePricingLogic(product);
+  } = useWholesalePricingLogic(effectiveProduct);
   
   const rating = product.rating || 4.5; // Default rating if none provided
   const reviewCount = product.review_count || 0;
@@ -72,10 +73,10 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
       <div className="flex flex-col gap-3 pt-2">
         {/* Use the new wholesale pricing display */}
         <WholesalePricingDisplay 
-          product={product} 
+          product={effectiveProduct} 
           size="large"
           showLabels={true}
-          forceShowUnavailable={true} // Show unavailable message on product detail page
+          forceShowUnavailable={true}
           hideUnavailableOnUnauthenticated={false}
         />
         
@@ -83,7 +84,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
         {isUsingWholesalePrice && (
           <div className="bg-[var(--primary)]/10 p-4 rounded-lg border border-[var(--primary)]/20">
             <div className="flex items-start gap-2">
-              <FaStore className="text-[var(--primary)] text-lg mt-0.5" />
+              <Store className="text-[var(--primary)] text-lg mt-0.5" />
               <div className="text-sm text-[var(--primary)]">
                 <span className="font-medium">Wholesale Benefits:</span> 
                 <ul className="mt-1 text-xs space-y-1">
@@ -96,7 +97,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
                 {minimumPurchase > 1 && (
                   <div className="mt-2 p-2 bg-orange-500/10 rounded border-l-4 border-orange-500/50">
                     <div className="flex items-center gap-1 text-orange-500">
-                      <FaBox className="text-orange-500" size={14} />
+                      <Box className="text-orange-500" size={14} />
                       <span className="text-xs font-medium">
                         Minimum Order: {minimumPurchase} units required for wholesale pricing
                       </span>
@@ -131,9 +132,9 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-muted-foreground">Stock:</span>
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-[#22c55e]' : 'bg-red-500'}`}></div>
-            <span className={`font-medium ${product.stock > 0 ? 'text-[#16a34a]' : 'text-red-500'}`}>
-              {product.stock > 0 ? `${product.stock} items available` : 'Out of stock'}
+            <div className={`w-2 h-2 rounded-full ${effectiveProduct.stock > 0 ? 'bg-[#22c55e]' : 'bg-red-500'}`}></div>
+            <span className={`font-medium ${effectiveProduct.stock > 0 ? 'text-[#16a34a]' : 'text-red-500'}`}>
+              {effectiveProduct.stock > 0 ? `${effectiveProduct.stock} items available` : 'Out of stock'}
             </span>
           </div>
         </div>
@@ -149,21 +150,51 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
           className="inline-flex items-center gap-2 text-[var(--primary)] hover:text-[var(--primary)]/80 font-medium text-sm transition-all group mt-2"
         >
           See More Details
-          <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+          <ArrowRight className="transition-transform group-hover:translate-x-1" />
         </button>
+      )}
+
+      {/* Selected Variant Summary (appears when variants exist) */}
+      {product.variants && product.variants.length > 0 && selectedVariant && (
+        <div className="mt-4 p-3 rounded-md bg-[var(--card)] border border-[var(--border)]">
+          <h4 className="font-semibold mb-2">Selected Variant</h4>
+          <div className="flex items-center gap-4">
+            {selectedVariant.color && (
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full border" style={{ backgroundColor: selectedVariant.color.hex_code }} />
+                <div className="text-sm">{selectedVariant.color.name}</div>
+              </div>
+            )}
+            {selectedVariant.size && (
+              <div className="px-3 py-1 rounded-md border text-sm font-medium">{selectedVariant.size.name}</div>
+            )}
+            <div className="text-sm text-[var(--muted-foreground)]">Price: {(selectedVariant.discount_price || selectedVariant.price).toLocaleString()}</div>
+          </div>
+        </div>
       )}
 
       <div className="my-4"></div>
 
-      {/* Color Selector */}
-      {product.colors?.length > 0 && (
+      {/* Variant selection moved to Order Summary (Payment panel) for quicker checkout */}
+
+      {/* Color Selector - Show only if no variants */}
+      {(!product.variants || product.variants.length === 0) && product.colors?.length > 0 && (
         <div className="space-y-3">
           <h3 className="font-semibold text-lg">Color: <span className="font-normal text-[var(--muted-foreground)]">{selectedColor?.name || 'N/A'}</span></h3>
           <div className="flex flex-wrap gap-3">
             {product.colors.map((color) => (
               <button 
                 key={color.id} 
-                onClick={() => setSelectedColor(color)} 
+                onClick={() => {
+                  setSelectedColor(color);
+                  if (product.variants?.length > 0 && setSelectedVariant) {
+                    const matchingVariant = product.variants.find(v => 
+                      v.is_active && v.color?.id === color.id && 
+                      (!selectedSize || v.size?.id === selectedSize.id)
+                    );
+                    if (matchingVariant) setSelectedVariant(matchingVariant);
+                  }
+                }} 
                 className={`w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center
                   ${selectedColor?.id === color.id 
                     ? 'ring-1 ring-offset-2 ring-[var(--primary)] border-transparent' 
@@ -179,15 +210,24 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor, 
         </div>
       )}
 
-      {/* Size Selector */}
-      {product.sizes?.length > 0 && (
+      {/* Size Selector - Show only if no variants */}
+      {(!product.variants || product.variants.length === 0) && product.sizes?.length > 0 && (
         <div className="space-y-3">
           <h3 className="font-semibold text-lg">Size: <span className="font-normal text-[var(--muted-foreground)]">{selectedSize?.name || 'N/A'}</span></h3>
           <div className="flex flex-wrap gap-3">
             {product.sizes.map((size) => (
               <button 
                 key={size.id} 
-                onClick={() => setSelectedSize(size)} 
+                onClick={() => {
+                  setSelectedSize(size);
+                  if (product.variants?.length > 0 && setSelectedVariant) {
+                    const matchingVariant = product.variants.find(v => 
+                      v.is_active && v.size?.id === size.id && 
+                      (!selectedColor || v.color?.id === selectedColor.id)
+                    );
+                    if (matchingVariant) setSelectedVariant(matchingVariant);
+                  }
+                }} 
                 className={`px-3 py-1 rounded-sm lato border-2 font-medium transition-all text-base
                   ${selectedSize?.id === size.id 
                     ? 'bg-[var(--primary)] text-white border-[var(--primary)]' 

@@ -175,6 +175,27 @@ class Product(models.Model):
         blank=True,
         help_text="Commission percentage for affiliates (e.g., 5.00 for 5%)"
     )
+    
+    # Facebook Pixel Configuration
+    facebook_pixel_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Product-specific Facebook Pixel ID"
+    )
+    facebook_pixel_access_token = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="Facebook Pixel Access Token (kept secure, not exposed via API)"
+    )
+    enable_facebook_pixel = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Enable Facebook Pixel tracking for this product"
+    )
+    
     stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True, db_index=True)
     
@@ -300,6 +321,112 @@ class Review(models.Model):
 
 # NOTE: Category-level minimum order quantity model removed.
 # The per-product `minimum_purchase` field on `Product` is used instead.
+
+
+class ProductVariant(models.Model):
+    """Product variants for different configurations (color, size, etc.)"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants', db_index=True)
+    sku = models.CharField(max_length=100, unique=True, blank=True, help_text="Stock Keeping Unit")
+    
+    # Variant attributes
+    color = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True, blank=True, related_name='variants')
+    size = models.ForeignKey(Size, on_delete=models.SET_NULL, null=True, blank=True, related_name='variants')
+    material = models.CharField(max_length=100, blank=True, null=True, help_text="e.g., Cotton, Leather")
+    
+    # Variant-specific pricing
+    price = models.DecimalField(max_digits=10, decimal_places=2, db_index=True)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    wholesale_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        null=True, 
+        blank=True,
+        help_text="Special price for wholesale orders"
+    )
+    minimum_purchase = models.PositiveIntegerField(
+        default=1,
+        help_text="Minimum quantity required for wholesale orders"
+    )
+    
+    # Variant-specific stock and physical properties
+    stock = models.PositiveIntegerField(default=0)
+    weight = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, help_text="Weight in kg")
+    
+    # Variant status
+    is_active = models.BooleanField(default=True, db_index=True)
+    is_default = models.BooleanField(default=False, help_text="Default variant for this product")
+    
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_default', '-created_at']
+        indexes = [
+            models.Index(fields=['product', 'is_active'], name='variant_product_active_idx'),
+            models.Index(fields=['product', 'is_default'], name='variant_product_default_idx'),
+        ]
+        unique_together = [['product', 'color', 'size', 'material']]
+    
+    def __str__(self):
+        parts = [self.product.name]
+        if self.color:
+            parts.append(self.color.name)
+        if self.size:
+            parts.append(self.size.name)
+        if self.material:
+            parts.append(self.material)
+        return ' - '.join(parts)
+    
+    def save(self, *args, **kwargs):
+        # Auto-generate SKU if not provided
+        if not self.sku:
+            import random
+            base_sku = f"{self.product.id.hex[:8].upper()}"
+            suffix = f"{random.randint(1000, 9999)}"
+            self.sku = f"VAR-{base_sku}-{suffix}"
+            
+            counter = 1
+            while ProductVariant.objects.filter(sku=self.sku).exclude(pk=self.pk).exists():
+                suffix = f"{random.randint(1000, 9999)}"
+                self.sku = f"VAR-{base_sku}-{suffix}-{counter}"
+                counter += 1
+        
+        # If this is set as default, unset other defaults
+        if self.is_default:
+            ProductVariant.objects.filter(product=self.product, is_default=True).exclude(pk=self.pk).update(is_default=False)
+        
+        super().save(*args, **kwargs)
+
+
+class VariantImage(models.Model):
+    """Images specific to product variants"""
+    variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='products/variants/')
+    is_primary = models.BooleanField(default=False)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-is_primary', 'order']
+    
+    def __str__(self):
+        return f"Image for {self.variant}"
+    
+    def save(self, *args, **kwargs):
+        # Optimize variant image before saving
+        if self.image and hasattr(self.image, 'file'):
+            try:
+                optimized = ImageOptimizer.optimize_product_image(self.image.file)
+                if optimized:
+                    self.image.file = optimized
+            except Exception as e:
+                print(f"Error optimizing variant image: {e}")
+        
+        # If this is set as primary, unset other primary images for this variant
+        if self.is_primary:
+            VariantImage.objects.filter(variant=self.variant, is_primary=True).exclude(pk=self.pk).update(is_primary=False)
+        
+        super().save(*args, **kwargs)
 
 
 class LandingPageOrder(models.Model):

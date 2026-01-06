@@ -155,9 +155,11 @@ const CheckoutContent = () => {
         items: cartItems.map(item => {
           // Get the product ID - it could be stored in multiple fields
           const productId = item.product_id || item.productId || item.product?.id || item.id;
+          const variantId = item.variant_id || null;
           
           return {
-            product: productId,  // Send as-is (UUID string or number)
+            product: productId,
+            variant: variantId,
             color: item.color_id || item.selectedColor?.id || null,
             size: item.size_id || item.selectedSize?.id || null,
             quantity: parseInt(item.quantity) || 1,

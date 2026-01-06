@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 # New serializers for order creation with atomic transactions
 class OrderItemCreateSerializer(serializers.Serializer):
     """Serializer for order items (write-only)"""
-    product = serializers.UUIDField()  # Changed from IntegerField to UUIDField
+    product = serializers.UUIDField()
+    variant = serializers.UUIDField(allow_null=True, required=False)
     color = serializers.IntegerField(allow_null=True, required=False)
     size = serializers.IntegerField(allow_null=True, required=False)
     quantity = serializers.IntegerField(min_value=1)
@@ -33,6 +34,16 @@ class OrderItemCreateSerializer(serializers.Serializer):
             return value
         except Product.DoesNotExist:
             raise serializers.ValidationError("Product does not exist.")
+    
+    def validate_variant(self, value):
+        """Validate that variant exists if provided"""
+        if value is not None:
+            try:
+                from products.models import ProductVariant
+                ProductVariant.objects.get(id=value)
+            except:
+                raise serializers.ValidationError("Product variant does not exist.")
+        return value
     
     def validate_color(self, value):
         """Validate that color exists if provided"""
@@ -405,13 +416,30 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                                     logger.warning(f"Size not found: {item_data['size']}")
                                     pass
                             
+                            # Get variant if specified
+                            variant = None
+                            if item_data.get('variant'):
+                                try:
+                                    from products.models import ProductVariant
+                                    variant = ProductVariant.objects.get(id=item_data['variant'])
+                                except:
+                                    logger.warning(f"Variant not found: {item_data['variant']}")
+                                    pass
+                            
+                            # Determine unit price from variant or product
+                            if variant:
+                                unit_price = variant.price
+                            else:
+                                unit_price = product.price
+                            
                             order_item = OrderItem.objects.create(
                                 order=order,
                                 product=product,
+                                variant=variant,
                                 color=color,
                                 size=size,
                                 quantity=item_data['quantity'],
-                                unit_price=product.price
+                                unit_price=unit_price
                             )
                             order_items.append(order_item)
                         
@@ -820,17 +848,23 @@ class CouponValidationSerializer(serializers.Serializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.StringRelatedField()
+    variant = serializers.SerializerMethodField()
     color = serializers.StringRelatedField()
     size = serializers.StringRelatedField()
     
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'color', 'size', 'quantity', 'unit_price']
+        fields = ['id', 'product', 'variant', 'color', 'size', 'quantity', 'unit_price']
+    
+    def get_variant(self, obj):
+        if obj.variant:
+            return str(obj.variant)
+        return None
 
 class OrderItemCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ['product', 'color', 'size', 'quantity', 'unit_price']
+        fields = ['product', 'variant', 'color', 'size', 'quantity', 'unit_price']
 
 class OrderPaymentSerializer(serializers.ModelSerializer):
     payment_method_display = serializers.CharField(source='get_payment_method_display', read_only=True)

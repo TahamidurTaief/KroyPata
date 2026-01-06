@@ -30,6 +30,8 @@ CORS_ALLOWED_ORIGINS = [
 
     # Vercel App (HTTPS)
     "https://chinakroy.vercel.app", 
+
+    "http://127.0.0.1:8000",
 ]
 
 
@@ -224,10 +226,14 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.chinakroy.com",
     "https://api.chinakroy.com",
     "https://chinakroy.vercel.app",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
 ]
 
-CSRF_COOKIE_SECURE = True  # Ensures the CSRF cookie is only sent over HTTPS
-CSRF_COOKIE_HTTPONLY = True  # Prevents JavaScript access to CSRF cookie
+# ==== DEV MODE: CSRF Security Disabled ====
+# CSRF_COOKIE_SECURE = True  # Ensures the CSRF cookie is only sent over HTTPS (ENABLE IN PRODUCTION)
+# CSRF_COOKIE_HTTPONLY = True  # Prevents JavaScript access to CSRF cookie (ENABLE IN PRODUCTION)
 
 
 
@@ -372,24 +378,30 @@ LOGGING = {
 
 
 
-# # Cross-site Scripting (XSS)
-# SECURE_BROWSER_XSS_FILTER = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
+# ========================================
+# DEV MODE: ALL SECURITY FEATURES DISABLED
+# ========================================
+# WARNING: Enable these settings in production!
+# These are commented out for local development only.
+
+# Cross-site Scripting (XSS) Protection
+# SECURE_BROWSER_XSS_FILTER = True  # (ENABLE IN PRODUCTION)
+# SECURE_CONTENT_TYPE_NOSNIFF = True  # (ENABLE IN PRODUCTION)
 
 # Trust the X-Forwarded-Proto header for SSL (required for Vercel/Proxies)
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # (ENABLE IN PRODUCTION)
 
-# # SSL redirect
-SECURE_SSL_REDIRECT = True
+# SSL Redirect - Forces HTTPS
+SECURE_SSL_REDIRECT = False  # DEV MODE: Disabled to allow HTTP requests
+# SECURE_SSL_REDIRECT = True  # (ENABLE IN PRODUCTION)
 
+# HTTP Strict Transport Security (HSTS)
+# SECURE_HSTS_SECONDS = 86400  # (ENABLE IN PRODUCTION)
+# SECURE_HSTS_PRELOAD = True  # (ENABLE IN PRODUCTION)
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # (ENABLE IN PRODUCTION)
 
-# # HTTP Strict Transport Security (HSTS)
-# SECURE_HSTS_SECONDS = 86400
-# SECURE_HSTS_PRELOAD = True
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-
-
-
-# Cross-site request forgery (CSRF) protection
-CSRF_COOKIE_SECURE = True  # শুধুমাত্র HTTPS এ cookie পাঠায়
-SESSION_COOKIE_SECURE = True  # শুধুমাত্র HTTPS এ session পাঠায়
+# Cookie Security
+CSRF_COOKIE_SECURE = False  # DEV MODE: Allows cookies over HTTP
+SESSION_COOKIE_SECURE = False  # DEV MODE: Allows session cookies over HTTP
+# CSRF_COOKIE_SECURE = True  # (ENABLE IN PRODUCTION) - Only send CSRF cookie over HTTPS
+# SESSION_COOKIE_SECURE = True  # (ENABLE IN PRODUCTION) - Only send session cookie over HTTPS

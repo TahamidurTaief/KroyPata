@@ -1,10 +1,14 @@
 # products/views.py
 import logging
+import hashlib
+import time
 from rest_framework import viewsets, permissions
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from .models import Product, Category, SubCategory, Color, Brand, Size, LandingPageOrder
 from django.db.models import Count
 from .serializers import (ProductSerializer, CategorySerializer, SubCategorySerializer, 
@@ -36,13 +40,23 @@ class ProductViewSet(viewsets.ModelViewSet):
         'specifications',
         'additional_images',
         'shipping_category__allowed_shipping_methods',
-        'shipping_category__allowed_shipping_methods__shipping_tiers'
+        'shipping_category__allowed_shipping_methods__shipping_tiers',
+        'variants__color',
+        'variants__size',
+        'variants__images'
     ).order_by('-created_at')
     serializer_class = ProductSerializer
-    permission_classes = [permissions.AllowAny]  # Changed to AllowAny for public read access
+    permission_classes = [permissions.AllowAny]
     filterset_class = ProductFilter
     lookup_field = 'slug'
     pagination_class = StandardResultsSetPagination
+    
+    def get_serializer_class(self):
+        """Use lightweight serializer for list view"""
+        from .serializers import ProductListSerializer
+        if self.action == 'list':
+            return ProductListSerializer
+        return ProductSerializer
 
     def get_permissions(self):
         """
@@ -114,6 +128,46 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:
             from rest_framework.exceptions import ValidationError
             raise ValidationError("You do not have a shop to add products to.")
+    
+    @action(detail=True, methods=['get'], url_path='pixel-verify')
+    def pixel_verify(self, request, slug=None):
+        """
+        Secure endpoint to verify Facebook Pixel configuration for a product.
+        Returns pixel status but never exposes access token.
+        """
+        try:
+            product = self.get_object()
+            
+            pixel_enabled = (
+                product.enable_facebook_pixel and 
+                product.facebook_pixel_id and 
+                product.facebook_pixel_access_token
+            )
+            
+            if not pixel_enabled:
+                return Response({
+                    'pixel_enabled': False,
+                    'message': 'Facebook Pixel not configured for this product'
+                }, status=status.HTTP_200_OK)
+            
+            timestamp = str(int(time.time()))
+            verification_hash = hashlib.sha256(
+                f"{product.facebook_pixel_id}{product.slug}{timestamp}".encode()
+            ).hexdigest()[:16]
+            
+            return Response({
+                'pixel_enabled': True,
+                'pixel_id': product.facebook_pixel_id,
+                'verification_token': verification_hash,
+                'timestamp': timestamp
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error in pixel_verify: {str(e)}", exc_info=True)
+            return Response(
+                {'error': 'Pixel verification failed'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class CategoryViewSet(viewsets.ModelViewSet):
     # Annotate with product & subcategory counts for richer frontend data

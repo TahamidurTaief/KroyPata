@@ -7,7 +7,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useThemeAssets } from "@/app/hooks/useThemeAssets";
 
-export default function ImageGallery({ images, productName }) {
+export default function ImageGallery({ images, productName, onImageClick }) {
   const { noImagePlaceholder, fallbackPlaceholder, mounted } = useThemeAssets();
   const [imageError, setImageError] = useState(false);
   
@@ -20,6 +20,13 @@ export default function ImageGallery({ images, productName }) {
   };
 
   const [selectedImage, setSelectedImage] = useState(getInitialImage());
+  
+  // Update selected image when images prop changes
+  useState(() => {
+    if (images && images.length > 0 && images[0]) {
+      setSelectedImage(images[0]);
+    }
+  }, [images]);
 
   const getImageSrc = (imageSrc) => {
     if (imageError || !imageSrc) {
@@ -50,7 +57,10 @@ export default function ImageGallery({ images, productName }) {
         {images.map((img, index) => (
           <button
             key={index}
-            onClick={() => setSelectedImage(img)}
+            onClick={() => {
+              setSelectedImage(img);
+              if (onImageClick) onImageClick(img);
+            }}
             className={`relative w-16 h-16 min-w-[2rem] rounded-lg overflow-hidden border-2 transition-all duration-200 ${
               selectedImage === img
                 ? "border-[var(--primary)] ring-2 ring-[var(--primary)]"

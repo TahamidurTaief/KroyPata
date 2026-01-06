@@ -1,0 +1,69 @@
+﻿
+> frontend@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.32
+  - Environments: .env.local, .env.production
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/22) ...
+   Generating static pages (5/22) 
+   Generating static pages (10/22) 
+   Generating static pages (16/22) 
+node.exe : Failed to fetch categories for sitemap, skipping: (intermediate value).map is 
+not a function
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Failed to fetch... not a function:String) [],  
+   RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ Γ£ô Generating static pages (22/22)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+Γöî Γùï /                                    43.4 kB         206 kB
+Γö£ Γùï /_not-found                          876 B          88.1 kB
+Γö£ Γùï /admin                               484 B          96.4 kB
+Γö£ ╞Æ /api/checkout/calculation            0 B                0 B
+Γö£ ╞Æ /api/checkout/complete               0 B                0 B
+Γö£ ╞Æ /api/checkout/shipping-analysis      0 B                0 B
+Γö£ ╞Æ /api/coupons                         0 B                0 B
+Γö£ ╞Æ /api/coupons/validate                0 B                0 B
+Γö£ ╞Æ /api/health                          0 B                0 B
+Γö£ ╞Æ /api/orders/submit                   0 B                0 B
+Γö£ ╞Æ /api/payment/accounts                0 B                0 B
+Γö£ Γùï /cart                                14.3 kB         173 kB
+Γö£ Γùï /categories                          6.09 kB         165 kB
+Γö£ Γùï /checkout                            8.59 kB         168 kB
+Γö£ Γùï /checkout/demo                       13.1 kB         150 kB
+Γö£ Γùï /checkout/enhanced                   10.6 kB         140 kB
+Γö£ Γùï /confirmation                        4.27 kB         130 kB
+Γö£ Γùï /login                               2.39 kB         153 kB
+Γö£ Γùï /orders                              16.1 kB         156 kB
+Γö£ Γùï /products                            9.22 kB         175 kB
+Γö£ ΓùÅ /products/[slug]                     14.6 kB         174 kB
+Γö£ ╞Æ /products/landing/[slug]             7.3 kB          115 kB
+Γö£ Γùï /products/landing/confirmation       2.08 kB         100 kB
+Γö£ Γùï /robots.txt                          0 B                0 B
+Γö£ Γùï /shipping                            5.85 kB        95.3 kB
+Γö£ Γùï /signup                              2.79 kB         154 kB
+Γö£ Γùï /sitemap.xml                         0 B                0 B
+Γö£ Γùï /terms-and-conditions                165 B          87.4 kB
+Γöö Γùï /wholesaler                          3.62 kB         154 kB
++ First Load JS shared by all            87.2 kB
+  Γö£ chunks/2117-db843f73cd7f9203.js      31.6 kB
+  Γö£ chunks/fd9d1056-02193e117cbdb11d.js  53.6 kB
+  Γöö other shared chunks (total)          1.99 kB
+
+
+Γùï  (Static)   prerendered as static content
+ΓùÅ  (SSG)      prerendered as static HTML (uses getStaticProps)
+╞Æ  (Dynamic)  server-rendered on demand
+
