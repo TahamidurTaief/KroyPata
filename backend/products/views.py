@@ -397,7 +397,8 @@ class LandingPageOrderViewSet(viewsets.ModelViewSet):
         'product',
         'product__shop',
         'product__brand',
-        'user'
+        'user',
+        'shipping_method'
     ).order_by('-created_at')
     permission_classes = [permissions.AllowAny]
     pagination_class = StandardResultsSetPagination

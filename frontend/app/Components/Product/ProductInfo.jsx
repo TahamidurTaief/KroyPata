@@ -63,7 +63,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
           {[...Array(5)].map((_, i) => (
             <Star key={i} size={16} className={i < Math.round(rating) ? "fill-current" : "text-gray-300"} />
           ))}
-          <span className="text-muted-foreground ml-1">({reviewCount} reviews)</span>
+          {reviewCount > 0 && <span className="text-muted-foreground ml-1">({reviewCount} reviews)</span>}
         </div>
         <div className="h-4"></div>
         <span className="text-[var(--muted-foreground)]">Shop: <span className="font-medium text-[var(--primary)]">{product.shop?.name}</span></span>
@@ -126,33 +126,17 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
         )}
       </div>
 
-      {/* Stock Info */}
-      <div className="flex flex-col gap-3 py-4">
-        {/* Stock Status */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-muted-foreground">Stock:</span>
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${effectiveProduct.stock > 0 ? 'bg-[#22c55e]' : 'bg-red-500'}`}></div>
-            <span className={`font-medium ${effectiveProduct.stock > 0 ? 'text-[#16a34a]' : 'text-red-500'}`}>
-              {effectiveProduct.stock > 0 ? `${effectiveProduct.stock} items available` : 'Out of stock'}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Short description */}
       <p className="text-[var(--muted-foreground)] text-base leading-relaxed line-clamp-3" dangerouslySetInnerHTML={{ __html: product.description || "No description available." }} />
 
-      {/* See More Button for Landing Page */}
-      {product.enable_landing_page && (
-        <button
-          onClick={() => router.push(`/products/landing/${product.slug}`)}
-          className="inline-flex items-center gap-2 text-[var(--primary)] hover:text-[var(--primary)]/80 font-medium text-sm transition-all group mt-2"
-        >
-          See More Details
-          <ArrowRight className="transition-transform group-hover:translate-x-1" />
-        </button>
-      )}
+      {/* See More Details Button */}
+      <button
+        onClick={() => router.push(`/products/landing/${product.slug}`)}
+        className="inline-flex items-center gap-2 text-[var(--primary)] hover:text-[var(--primary)]/80 font-medium text-sm transition-all group mt-2"
+      >
+        See more details
+        <ArrowRight className="transition-transform group-hover:translate-x-1" />
+      </button>
 
       {/* Selected Variant Summary (appears when variants exist) */}
       {product.variants && product.variants.length > 0 && selectedVariant && (

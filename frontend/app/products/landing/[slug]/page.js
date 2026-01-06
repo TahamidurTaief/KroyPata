@@ -19,16 +19,24 @@ export default function ProductLandingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [shippingMethods, setShippingMethods] = useState([]);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
+  const [shippingCharge, setShippingCharge] = useState(0);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [orderResult, setOrderResult] = useState(null);
+  const [showShippingHelp, setShowShippingHelp] = useState(false);
   
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState('');
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   
   // Form state
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
     phone: '',
+    alternative_phone: '',
     detailed_address: '',
     quantity: 1,
     customer_notes: ''
@@ -79,10 +87,18 @@ export default function ProductLandingPage() {
     if (params.slug) {
       fetchProduct();
       checkUser();
+      fetchShippingMethods();
     } else {
       console.error('No slug in params');
     }
   }, [params.slug]);
+
+  // Calculate shipping charge when quantity or shipping method changes
+  useEffect(() => {
+    if (selectedShippingMethod && product) {
+      calculateShippingCharge();
+    }
+  }, [formData.quantity, selectedShippingMethod, product, selectedVariant]);
 
   // Facebook Pixel: Load pixel conditionally for landing page
   useEffect(() => {
@@ -116,6 +132,113 @@ export default function ProductLandingPage() {
       loadPixel();
     }
   }, [product?.slug, selectedVariant]);
+
+  const fetchShippingMethods = async () => {
+    try {
+      console.log('Fetching shipping methods from:', `${API_BASE}/api/orders/shipping-methods/`);
+      const response = await fetch(`${API_BASE}/api/orders/shipping-methods/`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Shipping methods response:', data);
+        // Backend already filters active methods, handle both paginated and non-paginated responses
+        const methods = data.results || data || [];
+        console.log('Shipping methods:', methods);
+        setShippingMethods(methods);
+        
+        // Auto-select first method if available
+        if (methods.length > 0) {
+          setSelectedShippingMethod(methods[0]);
+        }
+      } else {
+        console.error('Failed to fetch shipping methods:', response.status, response.statusText);
+        setShippingMethods([]);
+      }
+    } catch (error) {
+      console.error('Error fetching shipping methods:', error);
+      setShippingMethods([]);
+    }
+  };
+
+  const calculateShippingCharge = () => {
+    if (!selectedShippingMethod || !product) {
+      setShippingCharge(0);
+      return;
+    }
+
+    const effectiveProduct = selectedVariant || product;
+    const weight = parseFloat(effectiveProduct.weight) || 0;
+    const totalWeight = weight * formData.quantity;
+    const quantity = parseInt(formData.quantity) || 1;
+
+    console.log('Calculating shipping charge:', {
+      method: selectedShippingMethod.name,
+      quantity,
+      weight,
+      totalWeight,
+      pricingType: selectedShippingMethod.preferred_pricing_type
+    });
+
+    // Use preferred pricing type from shipping method
+    const pricingType = selectedShippingMethod.preferred_pricing_type || 'quantity';
+    const tiers = selectedShippingMethod.shipping_tiers || [];
+    
+    let calculatedCharge = 0;
+    
+    if (pricingType === 'weight' && totalWeight > 0) {
+      // Weight-based calculation
+      console.log('Weight-based tiers:', tiers.filter(t => t.pricing_type === 'weight'));
+      
+      const applicableTier = tiers
+        .filter(t => t.pricing_type === 'weight' && parseFloat(t.min_weight || 0) <= totalWeight)
+        .filter(t => !t.max_weight || parseFloat(t.max_weight) >= totalWeight)
+        .sort((a, b) => (b.priority || 0) - (a.priority || 0) || parseFloat(b.min_weight || 0) - parseFloat(a.min_weight || 0))[0];
+      
+      if (applicableTier) {
+        console.log('Applicable tier:', applicableTier);
+        calculatedCharge = parseFloat(applicableTier.base_price || 0);
+        if (applicableTier.has_incremental_pricing && totalWeight > parseFloat(applicableTier.min_weight || 0)) {
+          const excessWeight = totalWeight - parseFloat(applicableTier.min_weight || 0);
+          const incrementSize = parseFloat(applicableTier.increment_unit_size || 1);
+          const incrementPrice = parseFloat(applicableTier.increment_per_unit || 0);
+          const incrementUnits = Math.ceil(excessWeight / incrementSize);
+          calculatedCharge += incrementUnits * incrementPrice;
+          console.log('Incremental pricing applied:', { excessWeight, incrementUnits, additional: incrementUnits * incrementPrice });
+        }
+      } else {
+        calculatedCharge = parseFloat(selectedShippingMethod.price || 0);
+        console.log('Using base price (no tier matched):', calculatedCharge);
+      }
+    } else {
+      // Quantity-based calculation
+      console.log('Quantity-based tiers:', tiers.filter(t => t.pricing_type === 'quantity'));
+      
+      const applicableTier = tiers
+        .filter(t => t.pricing_type === 'quantity' && parseInt(t.min_quantity || 0) <= quantity)
+        .filter(t => !t.max_quantity || parseInt(t.max_quantity) >= quantity)
+        .sort((a, b) => (b.priority || 0) - (a.priority || 0) || parseInt(b.min_quantity || 0) - parseInt(a.min_quantity || 0))[0];
+      
+      if (applicableTier) {
+        console.log('Applicable tier:', applicableTier);
+        calculatedCharge = parseFloat(applicableTier.base_price || 0);
+        if (applicableTier.has_incremental_pricing && quantity > parseInt(applicableTier.min_quantity || 0)) {
+          const excessQty = quantity - parseInt(applicableTier.min_quantity || 0);
+          const incrementSize = parseFloat(applicableTier.increment_unit_size || 1);
+          const incrementPrice = parseFloat(applicableTier.increment_per_unit || 0);
+          const incrementUnits = Math.ceil(excessQty / incrementSize);
+          calculatedCharge += incrementUnits * incrementPrice;
+          console.log('Incremental pricing applied:', { excessQty, incrementUnits, additional: incrementUnits * incrementPrice });
+        }
+      } else {
+        calculatedCharge = parseFloat(selectedShippingMethod.price || 0);
+        console.log('Using base price (no tier matched):', calculatedCharge);
+      }
+    }
+    
+    // Fail-safe: ensure valid number
+    calculatedCharge = isNaN(calculatedCharge) || calculatedCharge < 0 ? 0 : calculatedCharge;
+    console.log('Final shipping charge:', calculatedCharge);
+    setShippingCharge(calculatedCharge);
+  };
 
   const checkUser = async () => {
     try {
@@ -231,6 +354,12 @@ export default function ProductLandingPage() {
       return;
     }
     
+    // Validate shipping method selection
+    if (!selectedShippingMethod) {
+      toast.error('অনুগ্রহ করে একটি শিপিং মেথড নির্বাচন করুন');
+      return;
+    }
+    
     // Validate variant selection if product has variants
     if (product.variants && product.variants.length > 0 && !selectedVariant) {
       toast.error('অনুগ্রহ করে একটি ভ্যারিয়েন্ট নির্বাচন করুন');
@@ -253,11 +382,21 @@ export default function ProductLandingPage() {
         full_name: formData.full_name,
         email: formData.email,
         phone: formData.phone,
+        alternative_phone: formData.alternative_phone || '',
         detailed_address: formData.detailed_address,
+        shipping_method: selectedShippingMethod.id,
         customer_notes: formData.customer_notes || ''
       };
       
-      console.log('Submitting order:', orderData);
+      console.log('Submitting order with data:', {
+        ...orderData,
+        calculated_shipping_charge: shippingCharge,
+        shipping_method_details: {
+          id: selectedShippingMethod.id,
+          name: selectedShippingMethod.name,
+          preferred_pricing_type: selectedShippingMethod.preferred_pricing_type
+        }
+      });
       console.log('API URL:', `${API_BASE}/api/products/landing-orders/`);
       
       // Track Lead/Purchase event
@@ -301,23 +440,16 @@ export default function ProductLandingPage() {
       
       toast.success(`অর্ডার সফল হয়েছে! অর্ডার #${result.order_number}`);
       
-      // Store order data in sessionStorage for confirmation page
-      sessionStorage.setItem('landingOrderConfirmation', JSON.stringify({
+      // Show success modal with order details
+      setOrderResult({
         order_number: result.order_number,
         product_name: product.name,
-        product_slug: product.slug,
         quantity: formData.quantity,
         unit_price: result.unit_price,
-        total_price: result.total_price,
-        status: result.status,
-        email: formData.email,
-        phone: formData.phone
-      }));
-      
-      // Redirect to landing confirmation page after a short delay
-      setTimeout(() => {
-        router.push('/products/landing/confirmation');
-      }, 1500);
+        shipping_charge: result.shipping_charge,
+        total_price: result.total_price
+      });
+      setShowSuccessModal(true);
       
     } catch (error) {
       console.error('Error placing order:', error);
@@ -333,15 +465,24 @@ export default function ProductLandingPage() {
     const effectiveProduct = selectedVariant || product;
     const isWholesaler = product._user_context?.is_approved_wholesaler;
     
+    let price = 0;
     if (isWholesaler && effectiveProduct.wholesale_price) {
-      return effectiveProduct.wholesale_price;
+      price = parseFloat(effectiveProduct.wholesale_price);
+    } else {
+      price = parseFloat(effectiveProduct.discount_price || effectiveProduct.price);
     }
     
-    return effectiveProduct.discount_price || effectiveProduct.price;
+    return isNaN(price) || price < 0 ? 0 : price;
   };
 
   const getTotalPrice = () => {
-    return getDisplayPrice() * formData.quantity;
+    const unitPrice = getDisplayPrice();
+    const quantity = parseInt(formData.quantity) || 1;
+    const shipping = parseFloat(shippingCharge) || 0;
+    const productTotal = unitPrice * quantity;
+    const total = productTotal + shipping;
+    
+    return isNaN(total) || total < 0 ? 0 : total;
   };
 
   // Get all images (variant images if selected, otherwise product images)
@@ -362,14 +503,128 @@ export default function ProductLandingPage() {
     return images;
   };
 
-  const openLightbox = (imgSrc) => {
+  const openLightbox = (imgSrc, index = 0) => {
     setLightboxImage(imgSrc);
+    setLightboxIndex(index);
     setLightboxOpen(true);
   };
 
   const closeLightbox = () => {
     setLightboxOpen(false);
     setLightboxImage('');
+    setLightboxIndex(0);
+  };
+  
+  const nextImage = () => {
+    const images = getAllImages();
+    const newIndex = (lightboxIndex + 1) % images.length;
+    setLightboxIndex(newIndex);
+    setLightboxImage(images[newIndex]);
+  };
+  
+  const prevImage = () => {
+    const images = getAllImages();
+    const newIndex = (lightboxIndex - 1 + images.length) % images.length;
+    setLightboxIndex(newIndex);
+    setLightboxImage(images[newIndex]);
+  };
+
+  // Shipping Help Modal Component
+  const ShippingHelpModal = () => {
+    if (!showShippingHelp || !selectedShippingMethod) return null;
+    
+    const effectiveProduct = selectedVariant || product;
+    
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={() => setShowShippingHelp(false)}>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full mx-4 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-5 text-white">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold flex items-center">
+                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                শিপিং তথ্য
+              </h3>
+              <button onClick={() => setShowShippingHelp(false)} className="text-white hover:bg-white/20 rounded-full p-1 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6 space-y-4">
+            {/* Method Name */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 rounded-lg p-4 border-l-4 border-blue-500">
+              <h4 className="font-bold text-gray-900 dark:text-white text-lg mb-1">{selectedShippingMethod.name}</h4>
+              {selectedShippingMethod.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">{selectedShippingMethod.description}</p>
+              )}
+            </div>
+            
+            {/* Current Calculation */}
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 dark:text-white mb-1">আপনার অর্ডারের জন্য</p>
+                  <div className="text-sm space-y-1">
+                    <p className="text-gray-700 dark:text-gray-300">পরিমাণ: <span className="font-semibold">{parseInt(formData.quantity) || 1} টি</span></p>
+                    {effectiveProduct?.weight && parseFloat(effectiveProduct.weight) > 0 && (
+                      <p className="text-gray-700 dark:text-gray-300">মোট ওজন: <span className="font-semibold">{(parseFloat(effectiveProduct.weight) * (parseInt(formData.quantity) || 1)).toFixed(2)} কেজি</span></p>
+                    )}
+                    <p className="text-gray-700 dark:text-gray-300">শিপিং চার্জ: <span className="font-bold text-green-600 dark:text-green-400">{Tk_icon && <Tk_icon size={14} className="inline" />} {(parseFloat(shippingCharge) || 0).toLocaleString('en-BD', { maximumFractionDigits: 2 })} টাকা</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Pricing Details */}
+            <div className="space-y-3">
+              <h5 className="font-bold text-gray-900 dark:text-white flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                মূল্য নির্ধারণ পদ্ধতি
+              </h5>
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="font-semibold">বেস মূল্য:</span> {Tk_icon && <Tk_icon size={13} className="inline" />} {selectedShippingMethod.price.toLocaleString()} টাকা
+                </p>
+                {selectedShippingMethod.preferred_pricing_type && (
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">মূল্য ভিত্তি:</span> {selectedShippingMethod.preferred_pricing_type === 'weight' ? 'ওজন ভিত্তিক' : 'পরিমাণ ভিত্তিক'}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {/* Delivery Time */}
+            {selectedShippingMethod.delivery_estimated_time && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                <p className="text-sm flex items-center text-gray-700 dark:text-gray-300">
+                  <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span><span className="font-semibold">ডেলিভারি সময়:</span> {selectedShippingMethod.delivery_estimated_time}</span>
+                </p>
+              </div>
+            )}
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setShowShippingHelp(false)}
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              বুঝেছি
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -417,20 +672,155 @@ export default function ProductLandingPage() {
   const isWholesaler = product._user_context?.is_approved_wholesaler;
   const minPurchase = isWholesaler ? (effectiveProduct.minimum_purchase || 1) : 1;
 
+  // Success Modal Component
+  const SuccessModal = () => {
+    if (!showSuccessModal || !orderResult) return null;
+    
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4" onClick={() => setShowSuccessModal(false)}>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-4 max-h-[80vh] overflow-hidden sm:max-w-lg md:max-w-xl" onClick={(e) => e.stopPropagation()}>
+          {/* Success Header */}
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center sticky top-0 z-10 rounded-t-2xl">
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+              <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">অর্ডার সফল হয়েছে! 🎉</h2>
+            <p className="text-green-50 text-sm">আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে</p>
+          </div>
+          
+          <div className="p-6 overflow-y-auto max-h-[60vh]">
+            {/* Order Number Badge */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 rounded-xl p-4 mb-4 text-center border-2 border-blue-200 dark:border-gray-600">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">অর্ডার নাম্বার</p>
+              <p className="text-2xl font-bold text-primary">{orderResult.order_number}</p>
+            </div>
+            
+            {/* Order Details Table */}
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 mb-4">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                অর্ডার বিবরণ
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-start py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">পণ্য</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white text-right max-w-[60%]">{orderResult.product_name}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">পরিমাণ</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">{orderResult.quantity} টি</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">প্রোডাক্ট মূল্য</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {Tk_icon && <Tk_icon size={14} className="inline mr-1" />}
+                    {(orderResult.unit_price * orderResult.quantity).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">শিপিং চার্জ</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {Tk_icon && <Tk_icon size={14} className="inline mr-1" />}
+                    {orderResult.shipping_charge.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-3">
+                  <span className="text-base font-bold text-gray-900 dark:text-white">মোট মূল্য</span>
+                  <span className="text-xl font-bold text-primary">
+                    {Tk_icon && <Tk_icon size={18} className="inline mr-1" />}
+                    {orderResult.total_price.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Info Message */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
+              <p className="text-sm text-blue-800 dark:text-blue-300 flex items-start">
+                <svg className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <span>আমাদের প্রতিনিধি শীঘ্রই আপনার সাথে যোগাযোগ করবেন এবং অর্ডারটি নিশ্চিত করবেন।</span>
+              </p>
+            </div>
+            
+            {/* Action Button */}
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                router.push('/products');
+              }}
+              className="w-full bg-gradient-to-r from-primary to-blue-600 text-white py-3.5 rounded-xl font-semibold hover:from-primary/90 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              আরও পণ্য দেখুন
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="landing-page-container">
+      {/* Success Modal */}
+      <SuccessModal />
+      
+      {/* Shipping Help Modal */}
+      <ShippingHelpModal />
+      
       {/* Lightbox */}
       {lightboxOpen && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <div className="lightbox-content" onClick={e => e.stopPropagation()}>
-            <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
+            <button className="lightbox-close" onClick={closeLightbox} aria-label="Close">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            {/* Navigation Buttons */}
+            {getAllImages().length > 1 && (
+              <>
+                <button 
+                  className="lightbox-nav lightbox-nav-prev" 
+                  onClick={prevImage}
+                  aria-label="Previous image"
+                >
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button 
+                  className="lightbox-nav lightbox-nav-next" 
+                  onClick={nextImage}
+                  aria-label="Next image"
+                >
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            )}
+            
+            {/* Image Counter */}
+            {getAllImages().length > 1 && (
+              <div className="lightbox-counter">
+                {lightboxIndex + 1} / {getAllImages().length}
+              </div>
+            )}
+            
             <Image 
               src={lightboxImage} 
               alt="Zoomed Product" 
-              width={1000} 
-              height={1000} 
+              width={1200} 
+              height={1200} 
               className="lightbox-img"
               style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+              priority
             />
           </div>
         </div>
@@ -460,7 +850,7 @@ export default function ProductLandingPage() {
                   <div 
                     key={index} 
                     className="gallery-item"
-                    onClick={() => openLightbox(img)}
+                    onClick={() => openLightbox(img, index)}
                   >
                     <Image
                       src={img}
@@ -724,47 +1114,173 @@ export default function ProductLandingPage() {
               )}
 
 
-              {/* Quantity Selector */}
-              <div className="form-group">
-                <label>পরিমাণ</label>
-                <div className="quantity-selector">
-                  <button
-                    type="button"
-                    className="qty-btn"
-                    onClick={() => handleQuantityChange(-1)}
-                    disabled={formData.quantity <= minPurchase}
-                  >
-                    −
-                  </button>
-                  <input
-                    type="number"
-                    value={formData.quantity}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      quantity: Math.max(minPurchase, Math.min(parseInt(e.target.value) || minPurchase, effectiveProduct.stock))
-                    }))}
-                    min={minPurchase}
-                    max={effectiveProduct.stock}
-                    className="qty-input"
-                  />
-                  <button
-                    type="button"
-                    className="qty-btn"
-                    onClick={() => handleQuantityChange(1)}
-                    disabled={formData.quantity >= effectiveProduct.stock}
-                  >
-                    +
-                  </button>
+              {/* Order Summary Section */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 mb-4 border-2 border-blue-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  অর্ডার সামারি
+                </h3>
+
+                {/* Quantity Selector */}
+                <div className="form-group mb-4">
+                  <label className="block mb-2 font-semibold">পরিমাণ</label>
+                  <div className="quantity-selector">
+                    <button
+                      type="button"
+                      className="qty-btn"
+                      onClick={() => handleQuantityChange(-1)}
+                      disabled={formData.quantity <= minPurchase}
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      value={formData.quantity}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        const validVal = isNaN(val) || val < minPurchase ? minPurchase : Math.min(val, effectiveProduct.stock);
+                        setFormData(prev => ({ ...prev, quantity: validVal }));
+                      }}
+                      onBlur={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (isNaN(val) || val < minPurchase) {
+                          setFormData(prev => ({ ...prev, quantity: minPurchase }));
+                        }
+                      }}
+                      min={minPurchase}
+                      max={effectiveProduct.stock}
+                      className="qty-input"
+                    />
+                    <button
+                      type="button"
+                      className="qty-btn"
+                      onClick={() => handleQuantityChange(1)}
+                      disabled={formData.quantity >= effectiveProduct.stock}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Shipping Method Selector */}
+                <div className="form-group mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block font-semibold">শিপিং মেথড নির্বাচন করুন *</label>
+                    {selectedShippingMethod && (
+                      <button
+                        type="button"
+                        onClick={() => setShowShippingHelp(true)}
+                        className="text-blue-500 hover:text-blue-700 transition-colors p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        title="শিপিং তথ্য দেখুন"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  {shippingMethods.length === 0 ? (
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-xl p-4 text-center">
+                      <svg className="w-12 h-12 mx-auto mb-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                      </svg>
+                      <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">কোন শিপিং মেথড পাওয়া যায়নি</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400">দয়া করে পরে আবার চেষ্টা করুন</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {shippingMethods.map((method) => (
+                        <button
+                          key={method.id}
+                          type="button"
+                          onClick={() => setSelectedShippingMethod(method)}
+                          className={`w-full p-3.5 rounded-xl border-2 transition-all text-left relative group ${
+                            selectedShippingMethod?.id === method.id
+                              ? 'border-primary bg-primary text-white shadow-lg scale-[1.02]'
+                              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-md'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-start gap-3 flex-1">
+                              <div className={`w-5 h-5 rounded-full border-2 mt-0.5 flex items-center justify-center flex-shrink-0 transition-all ${
+                                selectedShippingMethod?.id === method.id
+                                  ? 'border-white bg-white'
+                                  : 'border-gray-300 group-hover:border-primary'
+                              }`}>
+                                {selectedShippingMethod?.id === method.id && (
+                                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className={`font-semibold mb-1 ${
+                                  selectedShippingMethod?.id === method.id ? 'text-white' : 'text-gray-900 dark:text-white'
+                                }`}>{method.name}</div>
+                                {method.delivery_estimated_time && (
+                                  <div className={`text-xs flex items-center ${
+                                    selectedShippingMethod?.id === method.id ? 'text-white/90' : 'text-gray-600 dark:text-gray-400'
+                                  }`}>
+                                    <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {method.delivery_estimated_time}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className={`font-bold text-base flex items-center ml-2 ${
+                              selectedShippingMethod?.id === method.id ? 'text-white' : 'text-primary'
+                            }`}>
+                              {Tk_icon && <Tk_icon size={14} className="mr-1" />}
+                              {method.price.toLocaleString()}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {!selectedShippingMethod && (
+                    <p className="text-xs text-red-500 mt-1">অর্ডার সম্পন্ন করতে শিপিং মেথড নির্বাচন করুন</p>
+                  )}
+                </div>
+
+                {/* Price Breakdown */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-700 space-y-2.5">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">প্রোডাক্ট মূল্য:</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {Tk_icon && <Tk_icon size={14} className="inline mr-1" />}
+                      {(getDisplayPrice() * (parseInt(formData.quantity) || 1)).toLocaleString('en-BD', { maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">শিপিং চার্জ:</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {Tk_icon && <Tk_icon size={14} className="inline mr-1" />}
+                      {selectedShippingMethod ? (parseFloat(shippingCharge) || 0).toLocaleString('en-BD', { maximumFractionDigits: 2 }) : '---'}
+                    </span>
+                  </div>
+                  <div className="border-t-2 border-gray-200 dark:border-gray-700 pt-2.5 flex justify-between items-center">
+                    <span className="text-base font-bold text-gray-900 dark:text-white">মোট মূল্য:</span>
+                    <span className="text-lg font-bold text-primary">
+                      {Tk_icon && <Tk_icon size={18} className="inline mr-1" />}
+                      {getTotalPrice().toLocaleString('en-BD', { maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Total Price */}
-              <div className="total-price total-price-rose">
-                <span>মোট:</span>
-                <span className="total-amount">
-                  {Tk_icon && <Tk_icon size={22} className="mr-1" />}
-                  {getTotalPrice().toLocaleString()}
-                </span>
+              {/* Customer Information Section */}
+              <div className="mb-4">
+                <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  ক্রেতার তথ্য
+                </h3>
               </div>
 
               {/* Full Name */}
@@ -807,6 +1323,20 @@ export default function ProductLandingPage() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
+                  className="form-input"
+                  placeholder="01XXX-XXXXXX"
+                />
+              </div>
+
+              {/* Alternative Phone */}
+              <div className="form-group">
+                <label htmlFor="alternative_phone">বিকল্প নাম্বার (ঐচ্ছিক)</label>
+                <input
+                  type="tel"
+                  id="alternative_phone"
+                  name="alternative_phone"
+                  value={formData.alternative_phone}
+                  onChange={handleInputChange}
                   className="form-input"
                   placeholder="01XXX-XXXXXX"
                 />

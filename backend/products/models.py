@@ -445,15 +445,21 @@ class LandingPageOrder(models.Model):
     
     # Product and pricing
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='landing_orders', db_index=True)
+    variant = models.ForeignKey('ProductVariant', on_delete=models.PROTECT, related_name='landing_orders', null=True, blank=True, db_index=True, help_text="Selected product variant if applicable")
     quantity = models.PositiveIntegerField(default=1)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price at the time of order")
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Total price (unit_price * quantity)")
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Price at the time of order")
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Total price (unit_price * quantity + shipping)")
     
     # Customer information
     full_name = models.CharField(max_length=100, help_text="Customer's full name")
     email = models.EmailField(help_text="Customer's email address", db_index=True)
     phone = models.CharField(max_length=20, help_text="Customer's phone number")
+    alternative_phone = models.CharField(max_length=20, blank=True, null=True, help_text="Alternative contact number")
     detailed_address = models.TextField(help_text="Complete delivery address")
+    
+    # Shipping information
+    shipping_method = models.ForeignKey('orders.ShippingMethod', on_delete=models.PROTECT, null=True, blank=True, db_index=True, help_text="Selected shipping method")
+    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Shipping charge based on selected method")
     
     # User type tracking
     is_wholesaler = models.BooleanField(default=False, help_text="Whether this is a wholesale order")
@@ -493,6 +499,24 @@ class LandingPageOrder(models.Model):
         return f"{self.order_number} - {self.full_name} ({self.product.name})"
     
     def save(self, *args, **kwargs):
+        # Auto-set unit_price from product if not already set
+        if not self.unit_price or self.unit_price == 0:
+            if self.product:
+                # Use discount price if available, otherwise regular price
+                self.unit_price = self.product.discount_price or self.product.price
+        
+        # Auto-calculate shipping charge if shipping method is set but charge is 0
+        if self.shipping_method and (not self.shipping_charge or self.shipping_charge == 0):
+            # Calculate based on quantity and product weight
+            weight = self.product.weight or 0
+            total_weight = weight * self.quantity
+            
+            # Use shipping method's preferred pricing type
+            if self.shipping_method.preferred_pricing_type == 'weight' and total_weight > 0:
+                self.shipping_charge = self.shipping_method.get_price_for_weight(total_weight)
+            else:
+                self.shipping_charge = self.shipping_method.get_price_for_quantity(self.quantity)
+        
         # Generate order number if not set
         if not self.order_number:
             import datetime
@@ -515,8 +539,9 @@ class LandingPageOrder(models.Model):
                     self.order_number = f"{original_order_number}X{counter - 999}"
                     break
         
-        # Calculate total price
+        # Calculate total price (product + shipping)
         if self.unit_price and self.quantity:
-            self.total_price = self.unit_price * self.quantity
+            product_total = self.unit_price * self.quantity
+            self.total_price = product_total + (self.shipping_charge or 0)
         
         super().save(*args, **kwargs)

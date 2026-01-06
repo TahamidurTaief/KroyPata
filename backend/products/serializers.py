@@ -372,34 +372,48 @@ class LandingPageOrderSerializer(serializers.ModelSerializer):
     """Serializer for creating landing page orders"""
     product_name = serializers.CharField(source='product.name', read_only=True)
     product_slug = serializers.CharField(source='product.slug', read_only=True)
+    shipping_method_name = serializers.CharField(source='shipping_method.name', read_only=True, allow_null=True)
+    variant = serializers.PrimaryKeyRelatedField(
+        queryset=ProductVariant.objects.all(),
+        required=False,
+        allow_null=True
+    )
     
     class Meta:
         model = LandingPageOrder
         fields = [
-            'id', 'order_number', 'product', 'product_name', 'product_slug',
+            'id', 'order_number', 'product', 'variant', 'product_name', 'product_slug',
             'quantity', 'unit_price', 'total_price',
-            'full_name', 'email', 'phone', 'detailed_address',
+            'full_name', 'email', 'phone', 'alternative_phone', 'detailed_address',
+            'shipping_method', 'shipping_method_name', 'shipping_charge',
             'is_wholesaler', 'user', 'status',
             'customer_notes', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'order_number', 'total_price', 'created_at', 'updated_at', 'user', 'is_wholesaler', 'unit_price']
+        read_only_fields = ['id', 'order_number', 'created_at', 'updated_at', 'user', 'is_wholesaler']
     
     def validate(self, data):
         """Validate order data"""
         product = data.get('product')
+        variant = data.get('variant')
         quantity = data.get('quantity', 1)
         
         # Check if product is active
         if not product.is_active:
             raise serializers.ValidationError("This product is not available for purchase.")
         
-        # Check if product has landing page enabled
-        if not product.enable_landing_page:
-            raise serializers.ValidationError("This product does not have a landing page enabled.")
-        
-        # Check stock
-        if quantity > product.stock:
-            raise serializers.ValidationError(f"Only {product.stock} items available in stock.")
+        # Validate variant if provided
+        if variant:
+            if variant.product_id != product.id:
+                raise serializers.ValidationError("Variant does not belong to this product.")
+            if not variant.is_active:
+                raise serializers.ValidationError("Selected variant is not available.")
+            # Check variant stock
+            if quantity > variant.stock:
+                raise serializers.ValidationError(f"Only {variant.stock} items available in stock for this variant.")
+        else:
+            # Check product stock
+            if quantity > product.stock:
+                raise serializers.ValidationError(f"Only {product.stock} items available in stock.")
         
         # Get user from context if available
         request = self.context.get('request')
@@ -417,31 +431,80 @@ class LandingPageOrderSerializer(serializers.ModelSerializer):
                 except:
                     pass
         
+        # Determine effective product (variant or product)
+        effective_product = variant if variant else product
+        
         # Validate minimum purchase for wholesalers
         if is_wholesaler:
-            minimum_purchase = product.minimum_purchase or 1
+            minimum_purchase = effective_product.minimum_purchase or 1
             if quantity < minimum_purchase:
                 raise serializers.ValidationError(
                     f"Wholesale orders require a minimum purchase of {minimum_purchase} items."
                 )
             
             # Set wholesale price
-            if product.wholesale_price and product.wholesale_price >= 1:
-                data['unit_price'] = product.wholesale_price
+            wholesale_price = effective_product.wholesale_price if hasattr(effective_product, 'wholesale_price') else product.wholesale_price
+            if wholesale_price and wholesale_price >= 1:
+                data['unit_price'] = wholesale_price
                 data['is_wholesaler'] = True
             else:
                 raise serializers.ValidationError("Wholesale price is not available for this product.")
         else:
             # For regular customers, use discount price if available, otherwise regular price
-            if product.discount_price and product.discount_price > 0:
-                data['unit_price'] = product.discount_price
+            discount_price = effective_product.discount_price if hasattr(effective_product, 'discount_price') else None
+            regular_price = effective_product.price if hasattr(effective_product, 'price') else product.price
+            
+            if discount_price and discount_price > 0:
+                data['unit_price'] = discount_price
             else:
-                data['unit_price'] = product.price
+                data['unit_price'] = regular_price
             data['is_wholesaler'] = False
         
         # Store user in data if available
         if user:
             data['user'] = user
+        
+        # Validate and calculate shipping charge
+        shipping_method = data.get('shipping_method')
+        if shipping_method:
+            from orders.models import ShippingMethod
+            from decimal import Decimal
+            
+            # Check if shipping method is active
+            if not shipping_method.is_active:
+                raise serializers.ValidationError("Selected shipping method is not available.")
+            
+            # Get weight from variant or product
+            item_weight = effective_product.weight if hasattr(effective_product, 'weight') else product.weight
+            item_weight = item_weight or Decimal('0')
+            total_weight = item_weight * quantity
+            
+            # Check weight limit
+            if shipping_method.max_weight and total_weight > shipping_method.max_weight:
+                raise serializers.ValidationError(
+                    f"Total weight ({total_weight}kg) exceeds shipping method limit ({shipping_method.max_weight}kg)."
+                )
+            
+            # Check quantity limit
+            if shipping_method.max_quantity and quantity > shipping_method.max_quantity:
+                raise serializers.ValidationError(
+                    f"Quantity ({quantity}) exceeds shipping method limit ({shipping_method.max_quantity})."
+                )
+            
+            # Calculate shipping charge using existing logic
+            shipping_charge = shipping_method.get_price_for_cart(
+                quantity=quantity,
+                weight=float(total_weight),
+                pricing_type=shipping_method.preferred_pricing_type
+            )
+            data['shipping_charge'] = Decimal(str(shipping_charge))
+        else:
+            data['shipping_charge'] = Decimal('0')
+        
+        # Calculate total price
+        unit_price = data.get('unit_price', Decimal('0'))
+        shipping_charge = data.get('shipping_charge', Decimal('0'))
+        data['total_price'] = (unit_price * quantity) + shipping_charge
         
         return data
     
@@ -463,7 +526,8 @@ class LandingPageOrderListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'order_number', 'product_name', 'product_thumbnail',
             'quantity', 'unit_price', 'total_price',
-            'full_name', 'email', 'phone',
+            'full_name', 'email', 'phone', 'alternative_phone',
+            'shipping_charge',
             'is_wholesaler', 'status', 'status_display',
             'created_at', 'updated_at'
         ]

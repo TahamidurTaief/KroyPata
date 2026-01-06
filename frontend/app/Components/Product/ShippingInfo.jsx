@@ -113,14 +113,7 @@ const ShippingInfo = ({ shippingCategory, className = "" }) => {
         </div>
       )}
 
-      {allowedMethods.length === 0 && (
-        <div className="text-center py-8">
-          <div className="text-[var(--muted-foreground)] text-4xl mb-2">📦</div>
-          <p className="text-[var(--muted-foreground)]">
-            No shipping methods configured for this category
-          </p>
-        </div>
-      )}
+
     </motion.div>
   );
 };

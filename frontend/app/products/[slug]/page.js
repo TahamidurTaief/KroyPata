@@ -42,18 +42,20 @@ export async function generateMetadata({ params }) {
   const description = plainDescription.substring(0, 160) || `Buy ${product.name} at the best price on ChinaKroy`;
   const productImage = product.images?.[0] || product.image_url || product.image || '';
   const productUrl = `${baseUrl}/products/${slug}`;
+  const brandName = product.brand || 'ChinaKroy';
+  const price = product.discount_price || product.price || 0;
   
   return {
-    title: `${product.name} | ChinaKroy`,
+    title: `${product.name} | ChinaKroy - Best Deals on Quality Products`,
     description: description,
-    keywords: `${product.name}, ${product.sub_category?.name || ''}, ${product.sub_category?.category?.name || ''}, buy online, ecommerce`,
+    keywords: `${product.name}, ${product.sub_category?.name || ''}, ${product.sub_category?.category?.name || ''}, ${brandName}, buy online, ecommerce, best price, quality products, online shopping Bangladesh`,
     
     // Open Graph metadata
     openGraph: {
-      title: `${product.name} | ICommerce`,
+      title: `${product.name} | ChinaKroy`,
       description: description,
       url: productUrl,
-      siteName: 'ICommerce',
+      siteName: 'ChinaKroy',
       images: [
         {
           url: productImage,
@@ -69,11 +71,11 @@ export async function generateMetadata({ params }) {
     // Twitter Card metadata
     twitter: {
       card: 'summary_large_image',
-      title: `${product.name} | ICommerce`,
+      title: `${product.name} | ChinaKroy`,
       description: description,
       images: [productImage],
-      creator: '@icommerce',
-      site: '@icommerce',
+      creator: '@chinakroy',
+      site: '@chinakroy',
     },
     
     // Canonical URL
@@ -105,11 +107,13 @@ export default async function ProductDetailPage({ params }) {
   }
 
   // Get base URL from environment
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://icommerce.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://chinakroy.com';
   
   // Prepare structured data (JSON-LD)
   const plainDescription = product.description ? product.description.replace(/<[^>]*>?/gm, '') : '';
   const productImage = product.images?.[0] || product.image_url || product.image || '';
+  const brandName = product.brand || 'ChinaKroy';
+  const price = product.discount_price || product.price || 0;
   
   // Product Schema
   const productSchema = {
@@ -121,16 +125,20 @@ export default async function ProductDetailPage({ params }) {
     sku: product.sku || product.id,
     brand: {
       '@type': 'Brand',
-      name: product.brand || 'ICommerce',
+      name: brandName,
     },
-    ...(product.price && {
+    ...(price > 0 && {
       offers: {
         '@type': 'Offer',
         url: `${baseUrl}/products/${slug}`,
         priceCurrency: 'BDT',
-        price: product.price,
+        price: price,
         availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+        seller: {
+          '@type': 'Organization',
+          name: product.shop?.name || 'ChinaKroy',
+        },
       },
     }),
     ...(product.rating && {

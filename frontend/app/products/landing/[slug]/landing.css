@@ -86,21 +86,23 @@
   border: none;
   border-radius: 0;
   padding: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 @media (min-width: 769px) {
   .modern-box {
     background: var(--color-second-bg);
     border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 1.5rem;
+    border-radius: 12px;
+    padding: 2rem;
     margin-bottom: 2rem;
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
   
   .modern-box:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -149,103 +151,56 @@
 .gallery-item {
   position: relative;
   aspect-ratio: 1;
-  border-radius: 4px;
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease;
-  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+  border: 2px solid var(--color-border);
   background: var(--color-second-bg);
 }
 
 .gallery-item:hover {
-  transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: var(--color-button-primary);
 }
 
 html.dark .gallery-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .gallery-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .gallery-image {
+  transform: scale(1.1);
 }
 
 .zoom-icon {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.7);
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+  font-weight: 600;
 }
 
 .gallery-item:hover .zoom-icon {
   opacity: 1;
+  transform: scale(1.1);
 }
 
-/* Lightbox */
-.lightbox-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.lightbox-content {
-  position: relative;
-  max-width: 90%;
-  max-height: 90%;
-}
-
-.lightbox-close {
-  position: absolute;
-  top: -40px;
-  right: -40px;
-  background: white;
-  color: black;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
-}
-
-.lightbox-close:hover {
-  transform: rotate(90deg);
-}
-
-@media (max-width: 768px) {
-  .lightbox-close {
-    top: 10px;
-    right: 10px;
-    width: 35px;
-    height: 35px;
-    font-size: 1.5rem;
-  }
-}
-
-.lightbox-img {
-  border-radius: 8px;
-}
-
+/* Remove duplicate lightbox styles since we added them at the end */
 /* Product Info */
 .product-title {
   font-size: 1.75rem;
@@ -382,14 +337,15 @@ html.dark .gallery-item:hover {
 .review-card {
   background: var(--color-second-bg);
   border: 1px solid var(--color-border);
-  padding: 1rem;
-  border-radius: 8px;
-  transition: transform 0.2s;
+  padding: 1.25rem;
+  border-radius: 12px;
+  transition: all 0.3s;
 }
 
 .review-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  border-color: var(--color-button-primary);
 }
 
 html.dark .review-card:hover {
@@ -508,25 +464,26 @@ html.dark .review-card:hover {
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
   font-size: 1rem;
   color: var(--color-text-primary);
   background: var(--color-second-bg);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.3s;
 }
 
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
   border-color: var(--color-button-primary);
-  box-shadow: 0 0 0 3px rgba(224, 39, 56, 0.1);
+  box-shadow: 0 0 0 4px rgba(224, 39, 56, 0.1);
+  transform: translateY(-1px);
 }
 
 html.dark .form-input:focus,
 html.dark .form-textarea:focus {
-  box-shadow: 0 0 0 3px rgba(247, 65, 27, 0.2);
+  box-shadow: 0 0 0 4px rgba(247, 65, 27, 0.2);
 }
 
 .form-textarea {
@@ -605,25 +562,49 @@ html.dark .form-textarea:focus {
 /* Submit Button */
 .submit-btn {
   width: 100%;
-  padding: 1rem;
-  background: var(--color-button-primary);
+  padding: 1.125rem;
+  background: linear-gradient(135deg, var(--color-button-primary) 0%, #d42944 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 12px;
+  font-size: 1.125rem;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(224, 39, 56, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.submit-btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .submit-btn:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(224, 39, 56, 0.4);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background: linear-gradient(135deg, #999 0%, #777 100%);
+  box-shadow: none;
 }
 
 /* Loading & Error States */
@@ -793,4 +774,150 @@ html.dark .form-textarea:focus {
 
 @media (max-width: 640px) {
   .variant-card { min-width: 140px; padding: 0.6rem 0.9rem; }
+}
+
+/* Enhanced Lightbox Styles */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 95vw;
+  max-height: 95vh;
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 95vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 2rem;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(10px);
+  z-index: 10001;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(10px);
+  z-index: 10001;
+}
+
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-nav-prev {
+  left: 20px;
+}
+
+.lightbox-nav-next {
+  right: 20px;
+}
+
+.lightbox-counter {
+  position: absolute;
+  bottom: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  z-index: 10001;
+}
+
+@media (max-width: 768px) {
+  .lightbox-close {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+  }
+  
+  .lightbox-nav {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .lightbox-nav-prev {
+    left: 10px;
+  }
+  
+  .lightbox-nav-next {
+    right: 10px;
+  }
+  
+  .lightbox-counter {
+    bottom: 10px;
+    font-size: 0.875rem;
+    padding: 6px 16px;
+  }
 }

@@ -125,20 +125,26 @@ class ProductAdmin(ModelAdmin):
 
 @admin.register(LandingPageOrder)
 class LandingPageOrderAdmin(ModelAdmin):
-    list_display = ('order_number', 'full_name', 'product', 'quantity', 'total_price', 'is_wholesaler', 'status', 'created_at')
-    list_filter = ('status', 'is_wholesaler', 'created_at')
-    search_fields = ('order_number', 'full_name', 'email', 'phone', 'product__name')
+    list_display = ('order_number', 'full_name', 'product', 'quantity', 'unit_price', 'shipping_charge', 'total_price', 'is_wholesaler', 'status', 'created_at')
+    list_filter = ('status', 'is_wholesaler', 'shipping_method', 'created_at')
+    search_fields = ('order_number', 'full_name', 'email', 'phone', 'alternative_phone', 'product__name')
     readonly_fields = ('order_number', 'created_at', 'updated_at', 'total_price')
+    autocomplete_fields = ['product', 'user']
     
     fieldsets = (
         ('Order Information', {
             'fields': ('order_number', 'status', 'created_at', 'updated_at')
         }),
         ('Product Details', {
-            'fields': ('product', 'quantity', 'unit_price', 'total_price', 'is_wholesaler')
+            'fields': ('product', 'quantity', 'unit_price', 'is_wholesaler'),
+            'description': 'Unit price will be auto-set from product if left at 0'
+        }),
+        ('Shipping Details', {
+            'fields': ('shipping_method', 'shipping_charge', 'total_price'),
+            'description': 'Shipping charge will be auto-calculated if shipping method is selected. Total price updates automatically.'
         }),
         ('Customer Information', {
-            'fields': ('full_name', 'email', 'phone', 'detailed_address', 'user')
+            'fields': ('full_name', 'email', 'phone', 'alternative_phone', 'detailed_address', 'user')
         }),
         ('Notes', {
             'fields': ('customer_notes', 'admin_notes'),
@@ -146,6 +152,7 @@ class LandingPageOrderAdmin(ModelAdmin):
         }),
     )
     
-    def has_add_permission(self, request):
-        # Prevent adding orders from admin (orders should come from landing page)
-        return False
+    def save_model(self, request, obj, form, change):
+        # Ensure pricing is calculated before saving
+        obj.save()
+        super().save_model(request, obj, form, change)
