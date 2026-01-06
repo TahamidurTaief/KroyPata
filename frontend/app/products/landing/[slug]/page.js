@@ -764,8 +764,43 @@ export default function ProductLandingPage() {
     );
   };
 
+  // Mobile Floating Order Button Component
+  const MobileFloatingButton = () => {
+    const scrollToCheckout = () => {
+      const checkoutSection = document.querySelector('.checkout-section');
+      if (checkoutSection) {
+        checkoutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    return (
+      <button
+        onClick={scrollToCheckout}
+        className="md:hidden fixed bottom-20 right-3 z-40 bg-gradient-to-r from-primary to-blue-600 text-white px-4 py-2.5 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 flex items-center gap-1.5 font-bold text-sm"
+        style={{
+          animation: 'float 3s ease-in-out infinite'
+        }}
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        অর্ডার করুন
+      </button>
+    );
+  };
+
   return (
     <div className="landing-page-container">
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+      `}</style>
+      
+      {/* Mobile Floating Button */}
+      <MobileFloatingButton />
+      
       {/* Success Modal */}
       <SuccessModal />
       
@@ -774,11 +809,50 @@ export default function ProductLandingPage() {
       
       {/* Lightbox */}
       {lightboxOpen && (
-        <div className="lightbox-overlay" onClick={closeLightbox}>
-          <div className="lightbox-content" onClick={e => e.stopPropagation()}>
-            <button className="lightbox-close" onClick={closeLightbox} aria-label="Close">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+        <div className="lightbox-overlay" onClick={closeLightbox} style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          backgroundColor: 'rgba(0, 0, 0, 0.95)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div className="lightbox-content" onClick={e => e.stopPropagation()} style={{
+            position: 'relative',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <button className="lightbox-close" onClick={closeLightbox} aria-label="Close" style={{
+              position: 'absolute',
+              top: '-3rem',
+              right: '0',
+              zIndex: 10,
+              background: 'rgba(255, 255, 255, 0.15)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '3rem',
+              height: '3rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'white',
+              transition: 'background 0.2s ease',
+              backdropFilter: 'blur(8px)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
             
@@ -789,18 +863,60 @@ export default function ProductLandingPage() {
                   className="lightbox-nav lightbox-nav-prev" 
                   onClick={prevImage}
                   aria-label="Previous image"
+                  style={{
+                    position: 'absolute',
+                    left: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 10,
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '3rem',
+                    height: '3rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: 'white',
+                    transition: 'background 0.2s ease',
+                    backdropFilter: 'blur(8px)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
                 >
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <button 
                   className="lightbox-nav lightbox-nav-next" 
                   onClick={nextImage}
                   aria-label="Next image"
+                  style={{
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 10,
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '3rem',
+                    height: '3rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: 'white',
+                    transition: 'background 0.2s ease',
+                    backdropFilter: 'blur(8px)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
                 >
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" />
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
               </>
@@ -808,20 +924,40 @@ export default function ProductLandingPage() {
             
             {/* Image Counter */}
             {getAllImages().length > 1 && (
-              <div className="lightbox-counter">
+              <div className="lightbox-counter" style={{
+                position: 'absolute',
+                bottom: '1rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 10,
+                background: 'rgba(0, 0, 0, 0.6)',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                borderRadius: '2rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                backdropFilter: 'blur(8px)'
+              }}>
                 {lightboxIndex + 1} / {getAllImages().length}
               </div>
             )}
             
-            <Image 
-              src={lightboxImage} 
-              alt="Zoomed Product" 
-              width={1200} 
-              height={1200} 
-              className="lightbox-img"
-              style={{ objectFit: 'contain', width: '100%', height: '100%' }}
-              priority
-            />
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              borderRadius: '0.5rem',
+              overflow: 'hidden'
+            }}>
+              <Image 
+                src={lightboxImage} 
+                alt="Zoomed Product" 
+                fill
+                className="lightbox-img"
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </div>
           </div>
         </div>
       )}
@@ -840,30 +976,62 @@ export default function ProductLandingPage() {
         <div className="product-section">
           
           {/* Product Images Gallery */}
-          <div className="product-gallery-section modern-box">
-            {/* <div className="decorative-shape shape-1"></div> */}
-            {/* <div className="decorative-shape shape-2"></div> */}
-            <h2 className="section-title-shape">পণ্যের ছবি</h2>
-            <div className="image-gallery-grid">
+          <div className="product-gallery-section modern-box" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+            <h2 className="section-title-shape" style={{ marginBottom: '1.25rem', fontSize: '1.25rem', fontWeight: '700' }}>পণ্যের ছবি</h2>
+            <div className="image-gallery-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
               {allImages.length > 0 ? (
                 allImages.map((img, index) => (
                   <div 
                     key={index} 
                     className="gallery-item"
                     onClick={() => openLightbox(img, index)}
+                    style={{
+                      position: 'relative',
+                      paddingBottom: '100%',
+                      cursor: 'pointer',
+                      borderRadius: '1rem',
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.03)';
+                      e.currentTarget.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                    }}
                   >
                     <Image
                       src={img}
                       alt={`${product.name} ${index + 1}`}
-                      width={400}
-                      height={400}
+                      fill
+                      style={{ objectFit: 'cover' }}
                       className="gallery-image"
                     />
-                    <div className="zoom-icon">🔍</div>
+                    <div className="zoom-icon" style={{
+                      position: 'absolute',
+                      top: '0.5rem',
+                      right: '0.5rem',
+                      backgroundColor: 'rgba(255,255,255,0.9)',
+                      borderRadius: '50%',
+                      width: '2rem',
+                      height: '2rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1rem',
+                      opacity: '0',
+                      transition: 'opacity 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+                    >🔍</div>
                   </div>
                 ))
               ) : (
-                <div className="no-image">কোন ছবি নেই</div>
+                <div className="no-image" style={{ padding: '2rem', textAlign: 'center', gridColumn: '1 / -1' }}>কোন ছবি নেই</div>
               )}
             </div>
           </div>
@@ -871,35 +1039,34 @@ export default function ProductLandingPage() {
 {/* Variant selection moved to the Order Summary (checkout form) for a streamlined flow */}
 
           {/* Product Info */}
-          <div className="product-info modern-box section-bg-1">
-            {/* <div className="decorative-shape shape-3"></div> */}
-            <h1 className="product-title">{product.name}</h1>
+          <div className="product-info modern-box section-bg-1" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem' }}>
+            <h1 className="product-title" style={{ fontSize: '1.75rem', fontWeight: '700', marginBottom: '1rem', lineHeight: '1.3' }}>{product.name}</h1>
             
             {product.brand && (
-              <div className="product-brand">
-                <span className="label">ব্র্যান্ড:</span>
-                <span className="value">{product.brand.name}</span>
+              <div className="product-brand" style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span className="label" style={{ fontSize: '0.875rem', opacity: '0.7' }}>ব্র্যান্ড:</span>
+                <span className="value" style={{ fontSize: '1rem', fontWeight: '600' }}>{product.brand.name}</span>
               </div>
             )}
             
-            <div className="product-price">
-              <span className="price-label">মূল্য:</span>
-              <span className="price-value">
-                {Tk_icon && <Tk_icon size={20} className="mr-1" />}
+            <div className="product-price" style={{ marginBottom: '1rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span className="price-label" style={{ fontSize: '0.875rem', opacity: '0.7' }}>মূল্য:</span>
+              <span className="price-value" style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--primary, #0066cc)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                {Tk_icon && <Tk_icon size={22} className="mr-1" />}
                 {getDisplayPrice().toLocaleString()}
               </span>
               {isWholesaler && product.wholesale_price && (
-                <span className="wholesale-badge">পাইকারি মূল্য</span>
+                <span className="wholesale-badge" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: '1rem', backgroundColor: 'var(--primary, #0066cc)', color: 'white', fontWeight: '600' }}>পাইকারি মূল্য</span>
               )}
             </div>
             
             {effectiveProduct.stock > 0 ? (
-              <div className="stock-status in-stock">
+              <div className="stock-status in-stock" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '2rem', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'rgb(22, 163, 74)', fontSize: '0.875rem', fontWeight: '600' }}>
                 <span className="status-icon">✓</span>
                 <span>স্টকে আছে ({effectiveProduct.stock} টি)</span>
               </div>
             ) : (
-              <div className="stock-status out-of-stock">
+              <div className="stock-status out-of-stock" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '2rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'rgb(220, 38, 38)', fontSize: '0.875rem', fontWeight: '600' }}>
                 <span className="status-icon">✗</span>
                 <span>স্টক আউট</span>
               </div>
@@ -908,49 +1075,114 @@ export default function ProductLandingPage() {
 
           {/* Product Description */}
           {product.description && (
-            <div className="product-description modern-box section-bg-2">
-              {/* <div className="decorative-shape shape-4"></div> */}
-              <h2 className="section-title-shape">পণ্যের বিবরণ</h2>
-              <div dangerouslySetInnerHTML={{ __html: product.description }} />
+            <div className="product-description modern-box section-bg-2" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>পণ্যের বিবরণ</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.description }} style={{ fontSize: '0.9375rem' }} />
             </div>
           )}
 
           {/* Landing Page Sections */}
           {product.landing_features && product.landing_features.trim() !== '' && (
-            <div className="landing-section modern-box section-bg-3">
-              {/* <div className="decorative-shape shape-1"></div> */}
-              <h2 className="section-title-shape">আমাদের বৈশিষ্ট্যসমূহ</h2>
-              <div dangerouslySetInnerHTML={{ __html: product.landing_features }} />
+            <div className="landing-section modern-box section-bg-3" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>আমাদের বৈশিষ্ট্যসমূহ</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_features }} style={{ fontSize: '0.9375rem' }} />
             </div>
           )}
 
           {product.landing_how_to_use && product.landing_how_to_use.trim() !== '' && (
-            <div className="landing-section modern-box section-bg-1">
-              {/* <div className="decorative-shape shape-2"></div> */}
-              <h2 className="section-title-shape">ব্যবহারের নিয়ম</h2>
-              <div dangerouslySetInnerHTML={{ __html: product.landing_how_to_use }} />
+            <div className="landing-section modern-box section-bg-1" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>ব্যবহারের নিয়ম</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_how_to_use }} style={{ fontSize: '0.9375rem' }} />
             </div>
           )}
 
           {product.landing_why_choose && product.landing_why_choose.trim() !== '' && (
-            <div className="landing-section modern-box section-bg-2">
-              {/* <div className="decorative-shape shape-3"></div> */}
-              <h2 className="section-title-shape">কেন এই পণ্যটি কিনবেন?</h2>
-              <div dangerouslySetInnerHTML={{ __html: product.landing_why_choose }} />
+            <div className="landing-section modern-box section-bg-2" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>কেন এই পণ্যটি কিনবেন?</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_why_choose }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_benefits && product.landing_benefits.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-3" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>উপকারিতা</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_benefits }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_guarantee && product.landing_guarantee.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-1" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>গ্যারান্টি ও নিশ্চয়তা</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_guarantee }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_faq && product.landing_faq.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-2" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>সাধারণ প্রশ্নোত্তর (FAQ)</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_faq }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_testimonials && product.landing_testimonials.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-3" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>গ্রাহক মন্তব্য</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_testimonials }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_delivery_info && product.landing_delivery_info.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-1" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>ডেলিভারি তথ্য</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_delivery_info }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_payment_info && product.landing_payment_info.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-2" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>পেমেন্ট তথ্য</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_payment_info }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_return_policy && product.landing_return_policy.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-3" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>রিটার্ন পলিসি</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_return_policy }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_shipping_info && product.landing_shipping_info.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-1" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>শিপিং তথ্য</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_shipping_info }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_warranty && product.landing_warranty.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-2" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>ওয়ারেন্টি</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_warranty }} style={{ fontSize: '0.9375rem' }} />
+            </div>
+          )}
+
+          {product.landing_extra_info && product.landing_extra_info.trim() !== '' && (
+            <div className="landing-section modern-box section-bg-3" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem', lineHeight: '1.7' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>অতিরিক্ত তথ্য</h2>
+              <div dangerouslySetInnerHTML={{ __html: product.landing_extra_info }} style={{ fontSize: '0.9375rem' }} />
             </div>
           )}
 
           {/* Specifications */}
           {product.specifications && product.specifications.length > 0 && (
-            <div className="specifications modern-box section-bg-3">
-              {/* <div className="decorative-shape shape-4"></div> */}
-              <h2 className="section-title-shape">স্পেসিফিকেশন</h2>
-              <table className="spec-table">
+            <div className="specifications modern-box section-bg-3" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem' }}>
+              <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>স্পেসিফিকেশন</h2>
+              <table className="spec-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <tbody>
                   {product.specifications.map((spec, index) => (
-                    <tr key={index}>
-                      <td className="spec-name">{spec.name}</td>
-                      <td className="spec-value">{spec.value}</td>
+                    <tr key={index} style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                      <td className="spec-name" style={{ padding: '0.75rem 0.5rem', fontSize: '0.875rem', fontWeight: '600', opacity: '0.7', width: '40%' }}>{spec.name}</td>
+                      <td className="spec-value" style={{ padding: '0.75rem 0.5rem', fontSize: '0.9375rem' }}>{spec.value}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -959,39 +1191,38 @@ export default function ProductLandingPage() {
           )}
 
           {/* Customer Reviews Section */}
-          <div className="reviews-section modern-box section-bg-1">
-            {/* <div className="decorative-shape shape-1"></div> */}
-            <h2 className="section-title-shape">কাস্টমার রিভিউ</h2>
-            <div className="reviews-grid">
-              <div className="review-card">
-                <div className="review-header">
-                  <div className="reviewer-avatar">র</div>
-                  <div className="reviewer-info">
-                    <h4>রহিম উদ্দিন</h4>
-                    <div className="stars">★★★★★</div>
+          <div className="reviews-section modern-box section-bg-1" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '1rem' }}>
+            <h2 className="section-title-shape" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.25rem' }}>কাস্টমার রিভিউ</h2>
+            <div className="reviews-grid" style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+              <div className="review-card" style={{ padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'rgba(255,255,255,0.5)' }}>
+                <div className="review-header" style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div className="reviewer-avatar" style={{ width: '2.5rem', height: '2.5rem', borderRadius: '50%', backgroundColor: 'var(--primary, #0066cc)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1.125rem', flexShrink: 0 }}>র</div>
+                  <div className="reviewer-info" style={{ flex: 1 }}>
+                    <h4 style={{ fontSize: '0.9375rem', fontWeight: '600', marginBottom: '0.25rem' }}>রহিম উদ্দিন</h4>
+                    <div className="stars" style={{ color: '#fbbf24', fontSize: '0.875rem' }}>★★★★★</div>
                   </div>
                 </div>
-                <p className="review-text">খুবই ভালো মানের পণ্য। ডেলিভারি খুব ফাস্ট ছিল। ধন্যবাদ!</p>
+                <p className="review-text" style={{ fontSize: '0.875rem', lineHeight: '1.6', opacity: '0.85' }}>খুবই ভালো মানের পণ্য। ডেলিভারি খুব ফাস্ট ছিল। ধন্যবাদ!</p>
               </div>
-              <div className="review-card">
-                <div className="review-header">
-                  <div className="reviewer-avatar">ক</div>
-                  <div className="reviewer-info">
-                    <h4>করিম আহমেদ</h4>
-                    <div className="stars">★★★★★</div>
+              <div className="review-card" style={{ padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'rgba(255,255,255,0.5)' }}>
+                <div className="review-header" style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div className="reviewer-avatar" style={{ width: '2.5rem', height: '2.5rem', borderRadius: '50%', backgroundColor: 'var(--primary, #0066cc)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1.125rem', flexShrink: 0 }}>ক</div>
+                  <div className="reviewer-info" style={{ flex: 1 }}>
+                    <h4 style={{ fontSize: '0.9375rem', fontWeight: '600', marginBottom: '0.25rem' }}>করিম আহমেদ</h4>
+                    <div className="stars" style={{ color: '#fbbf24', fontSize: '0.875rem' }}>★★★★★</div>
                   </div>
                 </div>
-                <p className="review-text">যেমনটা ছবিতে দেখেছি ঠিক তেমনটাই পেয়েছি। আমি সন্তুষ্ট।</p>
+                <p className="review-text" style={{ fontSize: '0.875rem', lineHeight: '1.6', opacity: '0.85' }}>যেমনটা ছবিতে দেখেছি ঠিক তেমনটাই পেয়েছি। আমি সন্তুষ্ট।</p>
               </div>
-              <div className="review-card">
-                <div className="review-header">
-                  <div className="reviewer-avatar">স</div>
-                  <div className="reviewer-info">
-                    <h4>সুমাইয়া আক্তার</h4>
-                    <div className="stars">★★★★☆</div>
+              <div className="review-card" style={{ padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'rgba(255,255,255,0.5)' }}>
+                <div className="review-header" style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div className="reviewer-avatar" style={{ width: '2.5rem', height: '2.5rem', borderRadius: '50%', backgroundColor: 'var(--primary, #0066cc)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1.125rem', flexShrink: 0 }}>স</div>
+                  <div className="reviewer-info" style={{ flex: 1 }}>
+                    <h4 style={{ fontSize: '0.9375rem', fontWeight: '600', marginBottom: '0.25rem' }}>সুমাইয়া আক্তার</h4>
+                    <div className="stars" style={{ color: '#fbbf24', fontSize: '0.875rem' }}>★★★★☆</div>
                   </div>
                 </div>
-                <p className="review-text">প্রোডাক্ট কোয়ালিটি ভালো, তবে প্যাকেজিং আরও ভালো হতে পারতো।</p>
+                <p className="review-text" style={{ fontSize: '0.875rem', lineHeight: '1.6', opacity: '0.85' }}>প্রোডাক্ট কোয়ালিটি ভালো, তবে প্যাকেজিং আরও ভালো হতে পারতো।</p>
               </div>
             </div>
           </div>
@@ -999,10 +1230,9 @@ export default function ProductLandingPage() {
         </div>
 
         {/* Right Side - Checkout Form */}
-        <div className="checkout-section">
-          <div className="checkout-card modern-box sticky-form">
-            {/* <div className="decorative-shape shape-2"></div> */}
-            <h2 className="checkout-title section-title-shape py-1 px-3">অর্ডার করতে ফর্মটি পূরণ করুন</h2>
+        <div className="checkout-section" style={{ position: 'sticky', top: '1rem', alignSelf: 'flex-start' }}>
+          <div className="checkout-card modern-box sticky-form" style={{ padding: '1.5rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+            <h2 className="checkout-title section-title-shape py-1 px-3" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem', textAlign: 'center' }}>অর্ডার করতে ফর্মটি পূরণ করুন</h2>
             
             {isWholesaler && (
               <div className="wholesaler-info">

@@ -210,6 +210,7 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [offersModalOpen, setOffersModalOpen] = useState(false);
   
   // Refs for clicking outside and hover delays
   const catsRef = useRef(null);
@@ -261,10 +262,6 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
       setOverflowOffers([]);
       return;
     }
-
-    // Initially show all offers to measure them
-    setVisibleOffers(initialOfferCategories);
-    setOverflowOffers([]);
 
     const calculateVisibleOffers = () => {
       const container = navContainerRef.current;
@@ -323,19 +320,11 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
       const newVisibleOffers = initialOfferCategories.slice(0, visibleCount);
       const newOverflowOffers = initialOfferCategories.slice(visibleCount);
       
-      setVisibleOffers(prev => {
-        if (JSON.stringify(prev) !== JSON.stringify(newVisibleOffers)) {
-          return newVisibleOffers;
-        }
-        return prev;
-      });
-      
-      setOverflowOffers(prev => {
-        if (JSON.stringify(prev) !== JSON.stringify(newOverflowOffers)) {
-          return newOverflowOffers;
-        }
-        return prev;
-      });
+      // Compare lengths first before expensive JSON.stringify
+      if (visibleOffers.length !== newVisibleOffers.length || overflowOffers.length !== newOverflowOffers.length) {
+        setVisibleOffers(newVisibleOffers);
+        setOverflowOffers(newOverflowOffers);
+      }
     };
 
     // Delay calculation to ensure DOM is fully rendered
@@ -622,71 +611,61 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
       </header>
 
       {/* ==================== MOBILE HEADER ==================== */}
-      <header className={`lg:hidden sticky top-0 z-50 bg-[var(--card)] transition-all duration-200 ${isScrolled ? 'shadow-md' : ''}`}>
-        <div className="px-4 py-3 flex items-center justify-between gap-4">
-          
-          {/* Mobile Hamburger */}
-          <button 
-            onClick={() => setMobileSidebarOpen(true)}
-            className="p-2 -ml-2 text-[var(--foreground)]"
-          >
-            <IoMdMenu size={26} />
-          </button>
-
-          {/* Mobile Search Input */}
-          <div className="flex-1">
-            <SearchDropdown 
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              onClose={() => setSearchQuery("")}
-              placeholder="Search products..."
-            />
+      <div className="lg:hidden">
+        {/* Logo Section - Not Sticky */}
+        <div className="bg-[var(--card)] border-b border-[var(--border)]">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <Link href="/" className="flex items-center">
+              <Image
+                src={logoSrc || "/img/logo_light.svg"}
+                alt="Logo"
+                width={120}
+                height={35}
+                className="h-9 w-auto object-contain"
+                priority
+                unoptimized
+              />
+            </Link>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+            </div>
           </div>
+        </div>
 
-          {/* Mobile Cart */}
-          <Link href="/cart" className="relative p-2 -mr-2">
-             <CiShoppingCart size={26} className="text-[var(--foreground)]" />
-             {cartMounted && cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                  {cartCount}
-                </span>
-             )}
-          </Link>
-        </div>
-        
-        {/* Mobile Special Offers Scroll - Simple Text Buttons */}
-        <div className="flex items-center gap-4 px-4 pb-2 overflow-x-auto scrollbar-hide">
-           {initialOfferCategories.length > 0 ? (
-             initialOfferCategories.slice(0, 8).map((offer, idx) => (
-               <Link 
-                 key={offer.id}
-                 href={offer.link} 
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 className={`flex-shrink-0 text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                   offer.badge_text 
-                     ? 'text-red-600 dark:text-red-500' 
-                     : 'text-[var(--foreground)]'
-                 }`}
-               >
-                 {offer.icon_class && <i className={offer.icon_class} style={{ fontSize: '11px' }} />}
-                 <span className="whitespace-nowrap">{offer.title}</span>
-                 {offer.badge_text && (
-                   <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase font-bold tracking-wider">
-                     {offer.badge_text}
-                   </span>
-                 )}
-               </Link>
-             ))
-           ) : (
-             initialCategories.slice(0, 6).map((cat, i) => (
-               <Link key={i} href={`/categories?category=${cat.slug}`} className="flex-shrink-0 text-xs text-[var(--foreground)] font-medium whitespace-nowrap">
-                 {cat.name}
-               </Link>
-             ))
-           )}
-        </div>
-      </header>
+        {/* Main Navigation - Sticky */}
+        <header className={`sticky top-0 z-50 bg-[var(--card)] transition-all duration-200 ${isScrolled ? 'shadow-md' : ''}`}>
+          <div className="px-4 py-3 flex items-center justify-between gap-4">
+            
+            {/* Mobile Hamburger */}
+            <button 
+              onClick={() => setMobileSidebarOpen(true)}
+              className="p-2 -ml-2 text-[var(--foreground)]"
+            >
+              <IoMdMenu size={26} />
+            </button>
+
+            {/* Mobile Search Input */}
+            <div className="flex-1">
+              <SearchDropdown 
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onClose={() => setSearchQuery("")}
+                placeholder="Search products..."
+              />
+            </div>
+
+            {/* Mobile Cart */}
+            <Link href="/cart" className="relative p-2 -mr-2">
+              <CiShoppingCart size={26} className="text-[var(--foreground)]" />
+              {cartMounted && cartCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                    {cartCount}
+                  </span>
+              )}
+            </Link>
+          </div>
+        </header>
+      </div>
 
       {/* ==================== OVERLAYS / MODALS ==================== */}
       
@@ -697,10 +676,15 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
                <RiHome2Line size={24} />
                <span className="text-[10px] font-medium">Home</span>
             </Link>
-            <Link href="/categories" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/categories' ? 'text-red-500' : 'text-[var(--muted-foreground)]'}`}>
-               <IoMdMenu size={24} />
-               <span className="text-[10px] font-medium">Category</span>
-            </Link>
+            <button 
+              onClick={() => setOffersModalOpen(true)}
+              className={`flex flex-col items-center gap-1 p-2 ${offersModalOpen ? 'text-red-500' : 'text-[var(--muted-foreground)]'}`}
+            >
+               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+               </svg>
+               <span className="text-[10px] font-medium">Offers</span>
+            </button>
             <Link href="/cart" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/cart' ? 'text-red-500' : 'text-[var(--muted-foreground)]'}`}>
                <div className="relative">
                   <CiShoppingCart size={24} />
@@ -748,6 +732,114 @@ export default function NavbarClient({ initialCategories = [], initialOfferCateg
         categories={initialCategories}
         offerCategories={initialOfferCategories}
       />
+
+      {/* Offers Modal */}
+      <AnimatePresence>
+        {offersModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm lg:hidden"
+            onClick={() => setOffersModalOpen(false)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="absolute bottom-0 left-0 right-0 bg-[var(--card)] rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Handle Bar */}
+              <div className="flex justify-center py-3 border-b border-[var(--border)]">
+                <div className="w-12 h-1.5 bg-[var(--muted)] rounded-full" />
+              </div>
+
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-[var(--foreground)]">Special Offers</h2>
+                    <p className="text-xs text-[var(--muted-foreground)]">{initialOfferCategories.length} offers available</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setOffersModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-[var(--muted)] flex items-center justify-center hover:bg-[var(--muted)]/80 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Offers List */}
+              <div className="overflow-y-auto px-4 py-4 space-y-3" style={{ maxHeight: 'calc(85vh - 140px)' }}>
+                {initialOfferCategories.length > 0 ? (
+                  initialOfferCategories.map((offer, idx) => (
+                    <Link
+                      key={offer.id}
+                      href={offer.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setOffersModalOpen(false)}
+                      className="block bg-gradient-to-r from-[var(--card)] to-[var(--muted)]/30 rounded-2xl p-4 border border-[var(--border)] hover:border-red-500/50 transition-all duration-200 active:scale-[0.98]"
+                    >
+                      <div className="flex items-start gap-3">
+                        {offer.icon_class && (
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0">
+                            <i className={offer.icon_class} style={{ fontSize: '20px' }} />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h3 className={`font-bold text-base leading-tight ${
+                              offer.badge_text ? 'text-red-600 dark:text-red-500' : 'text-[var(--foreground)]'
+                            }`}>
+                              {offer.title}
+                            </h3>
+                            {offer.badge_text && (
+                              <span className="flex-shrink-0 text-[9px] px-2 py-1 rounded-full bg-red-500 text-white uppercase font-bold tracking-wider shadow-sm">
+                                {offer.badge_text}
+                              </span>
+                            )}
+                          </div>
+                          {offer.description && (
+                            <p className="text-sm text-[var(--muted-foreground)] leading-relaxed line-clamp-2">
+                              {offer.description}
+                            </p>
+                          )}
+                          <div className="mt-2 flex items-center text-xs text-red-600 dark:text-red-500 font-medium">
+                            <span>View Offer</span>
+                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--muted)] flex items-center justify-center">
+                      <svg className="w-8 h-8 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                    </div>
+                    <p className="text-[var(--muted-foreground)] text-sm">No special offers available</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </>
   );

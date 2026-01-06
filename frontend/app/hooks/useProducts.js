@@ -7,13 +7,41 @@ import { getProducts, getShippingCategories } from '@/app/lib/api';
 
 // SWR fetcher function for products with enhanced error handling
 const productsFetcher = async (key) => {
-  // Extract the actual parameters from the SWR key
-  const [, filters, page] = key;
+  console.log('📡 SWR Fetcher called with key:', key);
   
-  console.log('📡 SWR Fetcher called with:', { key, filters, page });
+  // Parse the key to extract filters and page
+  const match = key.match(/^products:(.*):page-(\d+)$/);
+  if (!match) {
+    throw new Error('Invalid SWR key format');
+  }
+  
+  const [, filterJson, pageStr] = match;
+  const filters = JSON.parse(filterJson);
+  const page = parseInt(pageStr, 10);
+  
+  // Convert comma-separated strings back to arrays
+  const processedFilters = {
+    category: filters.category || undefined,
+    subcategory: filters.subcategory || undefined,
+    subcategories: filters.subcategories ? filters.subcategories.split(',').filter(Boolean) : undefined,
+    brand: filters.brand || undefined,
+    brands: filters.brands ? filters.brands.split(',').filter(Boolean) : undefined,
+    colors: filters.colors ? filters.colors.split(',').filter(Boolean) : undefined,
+    shipping_categories: filters.shipping_categories ? filters.shipping_categories.split(',').filter(Boolean).map(Number) : undefined,
+    search: filters.search || undefined,
+    sort: filters.sort !== 'featured' ? filters.sort : undefined,
+    priceRange: filters.priceRange && filters.priceRange !== '0-1000' ? filters.priceRange.split('-').map(Number) : undefined,
+  };
+  
+  // Remove undefined values
+  const cleanFilters = Object.fromEntries(
+    Object.entries(processedFilters).filter(([_, v]) => v !== undefined && v !== '' && (!Array.isArray(v) || v.length > 0))
+  );
+  
+  console.log('📡 Processed filters:', { cleanFilters, page });
   
   try {
-    const result = await getProducts(filters, page);
+    const result = await getProducts(cleanFilters, page, 24); // Always use 24 items per page
     console.log('📡 SWR Fetcher result:', {
       hasError: !!result.error,
       hasData: !!result.results || !!result.count,
@@ -36,8 +64,37 @@ const productsFetcher = async (key) => {
 
 // Custom hook for fetching products with SWR
 export const useProducts = (filters = {}, page = 1) => {
-  // Create a stable key for SWR
-  const swrKey = React.useMemo(() => ['products', filters, page], [filters, page]);
+  // Create a stable, serialized key for SWR to avoid caching issues
+  // Sort object keys to ensure consistent stringification
+  const swrKey = React.useMemo(() => {
+    const normalizedFilters = {
+      brand: filters.brand || '',
+      brands: (filters.brands || []).sort().join(','),
+      category: filters.category || '',
+      colors: (filters.colors || []).sort().join(','),
+      priceRange: (filters.priceRange || [0, 1000]).join('-'),
+      search: filters.search || '',
+      shipping_categories: (filters.shipping_categories || []).sort().join(','),
+      sort: filters.sort || 'featured',
+      subcategories: (filters.subcategories || []).sort().join(','),
+      subcategory: filters.subcategory || '',
+    };
+    // Create a simple string key instead of array to ensure uniqueness
+    const filterKey = JSON.stringify(normalizedFilters);
+    return `products:${filterKey}:page-${page}`;
+  }, [
+    filters.category,
+    filters.subcategory,
+    filters.subcategories,
+    filters.brand,
+    filters.brands,
+    filters.colors,
+    filters.shipping_categories,
+    filters.search,
+    filters.sort,
+    filters.priceRange,
+    page
+  ]);
   
   const { data, error, isLoading, mutate } = useSWR(
     swrKey,
@@ -45,18 +102,15 @@ export const useProducts = (filters = {}, page = 1) => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
-      dedupingInterval: 30000, // 30 seconds
+      dedupingInterval: 2000, // Reduced to 2 seconds for faster filter updates
       shouldRetryOnError: true,
       errorRetryCount: 2,
       errorRetryInterval: 1000,
       onError: (error, key) => {
         console.error('🚨 SWR Error:', { key, error: error.message });
       },
-      // Add fallback data to prevent empty states
-      fallbackData: {
-        results: [],
-        count: 0
-      }
+      // Remove fallbackData to ensure real data is always fetched
+      keepPreviousData: true, // Show previous data while loading new data
     }
   );
 
