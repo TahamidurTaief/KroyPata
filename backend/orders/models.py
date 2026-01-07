@@ -5,6 +5,73 @@ from django.conf import settings
 from django.utils import timezone
 from products.models import Product, Color, Size
 from users.models import Address
+import random
+import string
+
+class ProductPreOrder(models.Model):
+    """Model for handling preorders when variant quantity is 0"""
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('CONFIRMED', 'Confirmed'),
+        ('PROCESSING', 'Processing'),
+        ('SHIPPED', 'Shipped'),
+        ('DELIVERED', 'Delivered'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    
+    order_number = models.CharField(max_length=20, unique=True, db_index=True)
+    product = models.ForeignKey('products.Product', on_delete=models.PROTECT, related_name='preorders')
+    variant = models.ForeignKey('products.ProductVariant', on_delete=models.PROTECT, related_name='preorders', null=True, blank=True)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    shipping_method = models.ForeignKey('ShippingMethod', on_delete=models.PROTECT, null=True, blank=True)
+    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    # Customer information
+    full_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    detailed_address = models.TextField()
+    
+    # Preorder-specific fields
+    preorder_note = models.TextField(blank=True, help_text="Additional notes for preorder")
+    expected_delivery_days = models.CharField(max_length=50, default="25–30 days", help_text="Expected delivery timeframe")
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at'], name='preorder_created_idx'),
+            models.Index(fields=['status', '-created_at'], name='preorder_status_created_idx'),
+            models.Index(fields=['product', '-created_at'], name='preorder_product_created_idx'),
+        ]
+    
+    def __str__(self):
+        return f"PreOrder {self.order_number} - {self.product.name}"
+    
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            self.order_number = self.generate_order_number()
+        super().save(*args, **kwargs)
+    
+    @staticmethod
+    def generate_order_number():
+        """Generate unique preorder number with PRE prefix"""
+        prefix = 'PRE'
+        timestamp = timezone.now().strftime('%Y%m%d')
+        random_suffix = ''.join(random.choices(string.digits, k=6))
+        order_number = f"{prefix}{timestamp}{random_suffix}"
+        
+        # Ensure uniqueness
+        while ProductPreOrder.objects.filter(order_number=order_number).exists():
+            random_suffix = ''.join(random.choices(string.digits, k=6))
+            order_number = f"{prefix}{timestamp}{random_suffix}"
+        
+        return order_number
 
 class ShippingCategory(models.Model):
     """Categories for products that determine available shipping methods"""

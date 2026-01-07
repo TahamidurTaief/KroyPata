@@ -41,18 +41,7 @@ AUTH_USER_MODEL = 'users.User'
 # Application definition
 
 INSTALLED_APPS = [
-    "unfold",  # Must be first
-    "unfold.contrib.filters",
-    "unfold.contrib.forms",
-    "unfold.contrib.import_export", # For import/export functionality
-    # "unfold.contrib.IntegerField",
-    # "unfold.contrib.navigations",
-    # "unfold.contrib.pretty_json",
-    # "unfold.contrib.SassCompiler",
-    # "unfold.contrib.TiptapEditor",
-    # "unfold.contrib.tinymce",  # Alternative rich text editor
-
-
+    'jazzmin',  # Must be before django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -105,7 +94,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -152,16 +141,166 @@ CACHES = {
 
 
 
-UNFOLD = {
-    "SITE_TITLE": "ICommerce Administration",
-    "SITE_HEADER": "ICommerce",
-    "SITE_SYMBOL": "store",  # Tabler icon name
-    "SIDEBAR": {
-        "show_search": True,
-        "show_all_applications": True,
+JAZZMIN_SETTINGS = {
+    "site_title": "KroyPata Admin",
+    "site_header": "KroyPata Administration",
+    "site_brand": "KroyPata Ecommerce",
+    "site_logo": None,
+    "login_logo": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": None,
+    "welcome_sign": "Welcome to KroyPata Admin Dashboard",
+    "copyright": "KroyPata Ecommerce Platform",
+    "search_model": ["auth.User", "products.Product", "orders.Order"],
+    "user_avatar": None,
+    
+    # Top Menu
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "View Site", "url": "https://chinakroy.com", "new_window": True},
+        {"model": "auth.User"},
+    ],
+    
+    # User Menu
+    "usermenu_links": [
+        {"model": "auth.user"},
+    ],
+    
+    # Side Menu
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    
+    # Ordering
+    "order_with_respect_to": [
+        "auth",
+        "users",
+        "products",
+        "orders",
+        "shops",
+        "website",
+        "sections",
+    ],
+    
+    # Custom icons for apps
+    "icons": {
+        # Auth & Users
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "users.User": "fas fa-user-circle",
+        "users.Address": "fas fa-map-marker-alt",
+        "users.WholesalerProfile": "fas fa-store",
+        "users.AffiliateProfile": "fas fa-handshake",
+        
+        # Products
+        "products": "fas fa-shopping-bag",
+        "products.Product": "fas fa-box",
+        "products.ProductVariant": "fas fa-boxes",
+        "products.Brand": "fas fa-tag",
+        "products.Category": "fas fa-th-large",
+        "products.SubCategory": "fas fa-th",
+        "products.Color": "fas fa-palette",
+        "products.Size": "fas fa-ruler",
+        "products.Review": "fas fa-star",
+        "products.ProductSpecification": "fas fa-list",
+        "products.ProductAdditionalImage": "fas fa-images",
+        "products.ProductAdditionalDescription": "fas fa-align-left",
+        "products.VariantImage": "fas fa-image",
+        "products.LandingPageOrder": "fas fa-file-invoice",
+        
+        # Orders
+        "orders": "fas fa-shopping-cart",
+        "orders.Order": "fas fa-receipt",
+        "orders.OrderItem": "fas fa-list-ul",
+        "orders.OrderPayment": "fas fa-credit-card",
+        "orders.OrderUpdate": "fas fa-history",
+        "orders.ShippingMethod": "fas fa-shipping-fast",
+        "orders.ShippingTier": "fas fa-layer-group",
+        "orders.ShippingCategory": "fas fa-truck",
+        "orders.FreeShippingRule": "fas fa-gift",
+        "orders.Coupon": "fas fa-ticket-alt",
+        "orders.CashOnDelivery": "fas fa-money-bill-wave",
+        "orders.ProductPreOrder": "fas fa-clock",
+        
+        # Shops
+        "shops": "fas fa-store-alt",
+        "shops.Shop": "fas fa-store",
+        
+        # Website
+        "website": "fas fa-globe",
+        "website.NavbarSettings": "fas fa-bars",
+        "website.OfferCategory": "fas fa-tags",
+        "website.HeroBanner": "fas fa-image",
+        "website.OfferBanner": "fas fa-ad",
+        "website.HorizontalPromoBanner": "fas fa-bullhorn",
+        "website.BlogPost": "fas fa-blog",
+        "website.FooterSection": "fas fa-sitemap",
+        "website.FooterLink": "fas fa-link",
+        "website.SocialMediaLink": "fas fa-share-alt",
+        "website.SiteSettings": "fas fa-cog",
+        
+        # Sections
+        "sections": "fas fa-layer-group",
+        "sections.Section": "fas fa-list-alt",
+        "sections.SectionItem": "fas fa-puzzle-piece",
+        "sections.PageSection": "fas fa-file",
+        
+        # Utils
+        "utils": "fas fa-tools",
+    },
+    
+    # Default icon
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    
+    # Related modal
+    "related_modal_active": False,
+    
+    # Custom links
+    "custom_links": {},
+    
+    # UI Tweaks
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "vertical_tabs"
     },
 }
 
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
 
 
 # Password validation

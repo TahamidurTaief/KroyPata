@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CheckoutProvider, useCheckout } from "@/app/contexts/CheckoutContext";
 import { useModal } from "@/app/contexts/ModalContext";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -11,10 +11,16 @@ import CheckoutForm from "@/app/Components/Cart/CheckoutForm";
 import OrderSummaryCard from "@/app/Components/Checkout/OrderSummaryCard";
 import PaymentSection from "@/app/Components/Checkout/PaymentSection";
 import ContextShippingMethodSelector from "@/app/Components/Checkout/ContextShippingMethodSelector";
-import { createOrderWithPayment, clearCart } from "@/app/lib/api";
+import { createOrderWithPayment, clearCart, API_BASE_URL } from "@/app/lib/api";
 
 // Wrapper component to use the context
 const CheckoutContent = () => {
+  const searchParams = useSearchParams();
+  const isPreorderMode = searchParams.get('mode') === 'preorder';
+  const preorderProductId = searchParams.get('product');
+  const preorderVariantId = searchParams.get('variant');
+  const preorderQuantity = parseInt(searchParams.get('quantity')) || 1;
+  
   const { 
     userDetails, 
     updateUserDetails, 
@@ -31,6 +37,8 @@ const CheckoutContent = () => {
   const [paymentMethodView, setPaymentMethodView] = useState("cod"); // Default to Cash on Delivery
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [preorderProduct, setPreorderProduct] = useState(null);
+  const [preorderVariant, setPreorderVariant] = useState(null);
   const [codDetails, setCodDetails] = useState({
     fullName: "",
     alternativePhone: "",
@@ -58,6 +66,33 @@ const CheckoutContent = () => {
       });
     }
   }, [user]);
+
+  // Fetch preorder product details if in preorder mode
+  useEffect(() => {
+    const fetchPreorderProduct = async () => {
+      if (isPreorderMode && preorderProductId) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/products/products/${preorderProductId}/`);
+          if (response.ok) {
+            const product = await response.json();
+            setPreorderProduct(product);
+            
+            // Find variant if specified
+            if (preorderVariantId && product.variants) {
+              const variant = product.variants.find(v => v.id === preorderVariantId);
+              if (variant) {
+                setPreorderVariant(variant);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch preorder product:', error);
+        }
+      }
+    };
+    
+    fetchPreorderProduct();
+  }, [isPreorderMode, preorderProductId, preorderVariantId]);
 
   // Update selected payment method when mobile banking method changes
   useEffect(() => {
@@ -127,6 +162,87 @@ const CheckoutContent = () => {
     setIsSubmitting(true);
     
     try {
+      // Handle preorder submission
+      if (isPreorderMode && preorderProduct) {
+        // Safety check: ensure variant has stock === 0 if specified
+        if (preorderVariantId && preorderVariant) {
+          const variantStock = preorderVariant.stock || 0;
+          if (variantStock > 0) {
+            showModal({
+              status: 'error',
+              title: 'Invalid Preorder',
+              message: 'This product is available for regular order. Please use the normal checkout process.',
+              primaryActionText: 'OK'
+            });
+            setIsSubmitting(false);
+            return;
+          }
+        }
+        
+        const effectiveProduct = preorderVariant || preorderProduct;
+        const unitPrice = parseFloat(effectiveProduct.discount_price || effectiveProduct.price || 0);
+        const shippingCost = selectedShippingMethod?.price ? parseFloat(selectedShippingMethod.price) : 0;
+        const totalPrice = (unitPrice * preorderQuantity) + shippingCost;
+        
+        const preorderData = {
+          product: preorderProductId,
+          variant: preorderVariantId || null,
+          quantity: preorderQuantity,
+          shipping_method: selectedShippingMethod?.id || null,
+          shipping_charge: shippingCost,
+          unit_price: unitPrice,
+          total_price: totalPrice,
+          full_name: userDetails.name,
+          email: userDetails.email,
+          phone: userDetails.phone,
+          detailed_address: `${userDetails.address}, ${userDetails.city}, ${userDetails.state}, ${userDetails.zipCode}, ${userDetails.country || 'Bangladesh'}`,
+          preorder_note: codDetails.notes || '',
+          expected_delivery_days: '25–30 days'
+        };
+        
+        const response = await fetch(`${API_BASE_URL}/api/orders/preorders/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(preorderData)
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Preorder submission failed');
+        }
+        
+        const result = await response.json();
+        
+        // Store preorder confirmation data
+        sessionStorage.setItem('preorderConfirmation', JSON.stringify({
+          orderNumber: result.order_number,
+          productName: preorderProduct.name,
+          quantity: preorderQuantity,
+          totalAmount: totalPrice,
+          shippingCharge: shippingCost,
+          expectedDelivery: '25–30 days',
+          createdAt: new Date().toISOString()
+        }));
+        
+        // Show success modal
+        showModal({
+          status: 'success',
+          title: 'Preorder Confirmed!',
+          message: `Your preorder has been successfully placed. Order number: ${result.order_number}. This item will be delivered within 25–30 days.`,
+          primaryActionText: 'View Orders',
+          onPrimaryAction: () => { router.push('/orders'); },
+          secondaryActionText: 'Continue Shopping',
+          onSecondaryAction: () => { router.push('/'); }
+        });
+        
+        // Redirect to home or orders page
+        setTimeout(() => router.push('/'), 2000);
+        return;
+      }
+      
+      // Regular order submission
       const cartSubtotal = orderTotals.subtotal;
       const shippingCost = selectedShippingMethod?.price ? parseFloat(selectedShippingMethod.price) : 0;
       const totalAmount = cartSubtotal + shippingCost;
@@ -252,10 +368,47 @@ const CheckoutContent = () => {
     <div className="min-h-screen bg-[var(--cart-bg)] py-12 font-sans">
       <div className="container mx-auto px-4 max-w-7xl">
         
+        {/* Preorder Hero Section */}
+        {isPreorderMode && (
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-l-4 border-blue-600 rounded-lg p-6 shadow-md">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-2">
+                  📦 Preorder Notice
+                </h3>
+                <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed">
+                  This product will be delivered within <strong>25–30 days</strong> as it is imported from China. 
+                  Your order will be confirmed once we receive your details, and we'll keep you updated throughout the shipping process.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100">
+                    ✅ Safe & Secure
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100">
+                    🚚 Direct Import
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100">
+                    📞 Customer Support
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Page Title */}
         <div className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-2">Checkout</h1>
-          <p className="text-text-secondary">Complete your order details below</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-2">
+            {isPreorderMode ? 'Preorder Checkout' : 'Checkout'}
+          </h1>
+          <p className="text-text-secondary">
+            {isPreorderMode ? 'Complete your preorder details below' : 'Complete your order details below'}
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8 items-start">

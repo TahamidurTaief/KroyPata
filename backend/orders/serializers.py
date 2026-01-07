@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from decimal import Decimal
 from .models import (
     Order, OrderItem, OrderUpdate, ShippingMethod, OrderPayment, Coupon, ShippingTier,
-    ShippingCategory, FreeShippingRule, CashOnDelivery
+    ShippingCategory, FreeShippingRule, CashOnDelivery, ProductPreOrder
 )
 from products.models import Product, Color, Size
 from products.serializers import ColorSerializer, SizeSerializer
@@ -894,3 +894,126 @@ class OrderSerializer(serializers.ModelSerializer):
             'shipping_address', 'delivery_address', 'shipping_method', 'tracking_number', 
             'ordered_at', 'items', 'updates', 'payment', 'cash_on_delivery'
         ]
+
+
+class ProductPreOrderSerializer(serializers.ModelSerializer):
+    """Serializer for creating preorders"""
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_slug = serializers.CharField(source='product.slug', read_only=True)
+    shipping_method_name = serializers.CharField(source='shipping_method.name', read_only=True, allow_null=True)
+    variant_display = serializers.SerializerMethodField(read_only=True)
+    
+    class Meta:
+        model = ProductPreOrder
+        fields = [
+            'id', 'order_number', 'product', 'variant', 'product_name', 'product_slug',
+            'variant_display', 'quantity', 'unit_price', 'total_price',
+            'full_name', 'email', 'phone', 'detailed_address',
+            'shipping_method', 'shipping_method_name', 'shipping_charge',
+            'preorder_note', 'expected_delivery_days',
+            'status', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'order_number', 'created_at', 'updated_at']
+    
+    def get_variant_display(self, obj):
+        if obj.variant:
+            parts = []
+            if obj.variant.color:
+                parts.append(obj.variant.color.name)
+            if obj.variant.size:
+                parts.append(obj.variant.size.name)
+            if obj.variant.material:
+                parts.append(obj.variant.material)
+            return ' - '.join(parts) if parts else None
+        return None
+    
+    def validate(self, data):
+        """Validate preorder data"""
+        product = data.get('product')
+        variant = data.get('variant')
+        quantity = data.get('quantity', 1)
+        
+        if quantity < 1:
+            raise serializers.ValidationError("Quantity must be at least 1.")
+        
+        # Check if product is active
+        if not product.is_active:
+            raise serializers.ValidationError("This product is not available for preorder.")
+        
+        # Validate variant if provided
+        if variant:
+            if variant.product_id != product.id:
+                raise serializers.ValidationError("Variant does not belong to this product.")
+            if not variant.is_active:
+                raise serializers.ValidationError("Selected variant is not available.")
+            
+            # SECURITY: Prevent preorder if stock > 0 (must be preorder-only)
+            variant_stock = getattr(variant, 'stock', 0)
+            if variant_stock > 0:
+                raise serializers.ValidationError("This variant is available for regular order. Preorder not allowed.")
+            
+            # Use variant pricing
+            discount_price = variant.discount_price
+            regular_price = variant.price
+            item_weight = variant.weight or Decimal('0')
+        else:
+            # No variant - check if any default variant exists with stock == 0
+            default_variant = product.variants.filter(is_active=True, is_default=True).first()
+            if default_variant:
+                default_stock = getattr(default_variant, 'stock', 0)
+                if default_stock > 0:
+                    raise serializers.ValidationError("This product is available for regular order. Preorder not allowed.")
+            
+            # Use product pricing
+            discount_price = product.discount_price
+            regular_price = product.price
+            item_weight = product.weight or Decimal('0')
+        
+        # Set unit price (use discount price if available)
+        if discount_price and discount_price > 0:
+            data['unit_price'] = discount_price
+        else:
+            data['unit_price'] = regular_price
+        
+        # Validate and calculate shipping charge
+        shipping_method = data.get('shipping_method')
+        if shipping_method:
+            # Check if shipping method is active
+            if not shipping_method.is_active:
+                raise serializers.ValidationError("Selected shipping method is not available.")
+            
+            total_weight = item_weight * quantity
+            
+            # Check weight limit
+            if shipping_method.max_weight and total_weight > shipping_method.max_weight:
+                raise serializers.ValidationError(
+                    f"Total weight ({total_weight}kg) exceeds shipping method limit ({shipping_method.max_weight}kg)."
+                )
+            
+            # Check quantity limit
+            if shipping_method.max_quantity and quantity > shipping_method.max_quantity:
+                raise serializers.ValidationError(
+                    f"Quantity ({quantity}) exceeds shipping method limit ({shipping_method.max_quantity})."
+                )
+            
+            # Calculate shipping charge using existing logic
+            shipping_charge = shipping_method.get_price_for_cart(
+                quantity=quantity,
+                weight=float(total_weight),
+                pricing_type=shipping_method.preferred_pricing_type
+            )
+            data['shipping_charge'] = Decimal(str(shipping_charge))
+        else:
+            data['shipping_charge'] = Decimal('0')
+        
+        # Calculate total price
+        unit_price = data.get('unit_price', Decimal('0'))
+        shipping_charge = data.get('shipping_charge', Decimal('0'))
+        data['total_price'] = (unit_price * quantity) + shipping_charge
+        
+        return data
+    
+    def create(self, validated_data):
+        """Create preorder"""
+        order = ProductPreOrder.objects.create(**validated_data)
+        return order

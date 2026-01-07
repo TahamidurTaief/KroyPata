@@ -1,17 +1,17 @@
 # shops/admin.py
 from django.contrib import admin
-from unfold.admin import ModelAdmin
 from import_export.admin import ImportExportModelAdmin
 from .models import Shop
 
 @admin.register(Shop)
-class ShopAdmin(ImportExportModelAdmin, ModelAdmin):
+class ShopAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'owner', 'is_active', 'is_verified', 'created_at')
     list_filter = ('is_active', 'is_verified', 'created_at')
-    search_fields = ('name', 'owner__email', 'owner__first_name', 'owner__last_name', 'slug')
+    search_fields = ('name', 'owner__email', 'owner__name', 'slug')
     ordering = ('-created_at',)
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ('created_at', 'updated_at')
+    autocomplete_fields = ['owner']
     
     fieldsets = (
         ('Basic Information', {

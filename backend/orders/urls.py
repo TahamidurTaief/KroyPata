@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     OrderViewSet, ShippingMethodViewSet, OrderPaymentViewSet, ShippingMethodListAPIView, 
     CouponViewSet, PaymentAccountsAPIView, ShippingCategoryViewSet, FreeShippingRuleViewSet,
-    analyze_cart_shipping, enhanced_checkout_calculation, debug_orders_api
+    analyze_cart_shipping, enhanced_checkout_calculation, debug_orders_api, ProductPreOrderViewSet
 )
 
 # Create router for ViewSets
@@ -15,6 +15,7 @@ router.register(r'shipping-methods', ShippingMethodViewSet, basename='shipping-m
 router.register(r'shipping-categories', ShippingCategoryViewSet, basename='shipping-category')
 router.register(r'free-shipping-rules', FreeShippingRuleViewSet, basename='free-shipping-rule')
 router.register(r'coupons', CouponViewSet, basename='coupon')
+router.register(r'preorders', ProductPreOrderViewSet, basename='preorder')
 
 app_name = 'orders'
 

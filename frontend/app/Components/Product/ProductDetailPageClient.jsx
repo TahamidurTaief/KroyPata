@@ -65,6 +65,12 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
   useEffect(() => {
     const fetchAuthenticatedProduct = async () => {
       if (isAuthenticated && user?.user_type === 'WHOLESALER' && !isLoadingAuthProduct) {
+        // Only fetch if we don't already have wholesale pricing data
+        if (product.wholesale_price !== undefined) {
+          console.log('✅ Product already has wholesale data, skipping fetch');
+          return;
+        }
+        
         setIsLoadingAuthProduct(true);
         try {
           console.log('🔄 Fetching authenticated product data for wholesaler...');
@@ -83,10 +89,8 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
       }
     };
 
-    // Add a small delay to ensure auth is settled
-    const timeoutId = setTimeout(fetchAuthenticatedProduct, 100);
-    return () => clearTimeout(timeoutId);
-  }, [isAuthenticated, user?.user_type, product.slug, isLoadingAuthProduct]);
+    fetchAuthenticatedProduct();
+  }, [isAuthenticated, user?.user_type, product.slug]);
 
   // A unique ID for the product variant to manage cart state accurately
   const variantId = selectedVariant?.id || `${product.id}-${selectedColor?.id || 'c'}-${selectedSize?.id || 's'}`;
@@ -250,6 +254,38 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
     }
   };
 
+  // Handler for Preorder Now button
+  const handlePreorderNow = () => {
+    // Validate that product is actually available for preorder (stock === 0)
+    const variantStock = selectedVariant ? (selectedVariant.stock || 0) : (product.stock || 0);
+    const isActuallyPreorder = variantStock === 0;
+    
+    if (!isActuallyPreorder) {
+      showError('This product is not available for preorder', 'Invalid Action');
+      return;
+    }
+    
+    if (product?.variants && product.variants.length > 0 && !selectedVariant) {
+      showError('Please select a variant before proceeding', 'Variant Required');
+      showModal({
+        status: 'error',
+        title: 'Variant Selection Required',
+        message: 'Please select a product variant before proceeding with preorder.',
+        primaryActionText: 'OK'
+      });
+      return;
+    }
+
+    const params = new URLSearchParams({
+      mode: 'preorder',
+      product: product.id,
+      ...(selectedVariant?.id && { variant: selectedVariant.id }),
+      quantity: quantity.toString()
+    });
+    
+    window.location.href = `/checkout?${params.toString()}`;
+  };
+
   // Handler for Buy Now button
   const handleBuyNow = () => {
     // Check if user is logged in
@@ -385,6 +421,7 @@ export default function ProductDetailPageClient({ product: initialProduct }) {
             handleAddToCart={handleAddToCart}
             handleRemoveFromCart={handleRemoveFromCart}
             handleBuyNow={handleBuyNow}
+            handlePreorderNow={handlePreorderNow}
           />
         </motion.div>
       </div>

@@ -14,13 +14,17 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
   // Get effective product data from variant or product
   const effectiveProduct = selectedVariant ? { ...product, ...selectedVariant } : product;
   
+  // Check if product is preorder-only (quantity === 0)
+  const isPreorderOnly = selectedVariant ? selectedVariant.quantity === 0 : false;
+  
   // Debug the product data
   console.log('🔍 ProductInfo Debug:', {
     productName: product?.name,
     selectedVariant,
     effectiveWholesalePrice: effectiveProduct?.wholesale_price,
     userType: user?.user_type,
-    isAuthenticated
+    isAuthenticated,
+    isPreorderOnly
   });
   
   // Use the new wholesale pricing logic
@@ -56,6 +60,14 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
       
       {/* Main product title */}
       <h1 className="text-xl lg:text-3xl font-semibold text-[var(--foreground)] leading-tight">{product.name}</h1>
+
+      {/* Preorder Badge */}
+      {isPreorderOnly && (
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+          <span className="text-blue-600 font-semibold text-sm">📦 Preorder Item</span>
+          <span className="text-blue-500/70 text-xs">Ships in 25–30 days</span>
+        </div>
+      )}
 
       {/* Rating and Shop Info */}
       <div className="flex items-center gap-4 text-sm">

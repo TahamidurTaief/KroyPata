@@ -351,6 +351,11 @@ class ProductVariant(models.Model):
     
     # Variant-specific stock and physical properties
     stock = models.PositiveIntegerField(default=0)
+    quantity = models.PositiveIntegerField(
+        default=1, 
+        help_text="Total available quantity. Set to 0 for preorder-only",
+        db_index=True
+    )
     weight = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, help_text="Weight in kg")
     
     # Variant status

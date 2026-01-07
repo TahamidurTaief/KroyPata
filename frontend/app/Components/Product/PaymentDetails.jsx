@@ -18,12 +18,17 @@ export default function PaymentDetails({
   isInCart, 
   handleAddToCart, 
   handleRemoveFromCart,
-  handleBuyNow
+  handleBuyNow,
+  handlePreorderNow
 }) {
   const { user } = useAuth();
   const effectiveProduct = selectedVariant ? { ...product, ...selectedVariant } : product;
   const { isUsingWholesalePrice, minimumPurchase } = useWholesalePricingLogic(effectiveProduct);
-  const inStock = effectiveProduct.stock > 0 && effectiveProduct.is_active;
+  
+  // Check if product is preorder-only (stock === 0 for variant)
+  const variantStock = selectedVariant ? (selectedVariant.stock || 0) : (product.stock || 0);
+  const isPreorderOnly = variantStock === 0;
+  const inStock = variantStock > 0 && effectiveProduct.is_active && !isPreorderOnly;
   
   // Ensure a default variant is selected on mount if none is provided
   useEffect(() => {
@@ -158,9 +163,15 @@ export default function PaymentDetails({
         )} 
 
         {/* Availability Status */}
-        <div className={`text-sm font-bold py-2 px-3 rounded-md text-center ${inStock ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-          {inStock ? `In Stock (${effectiveProduct.stock} available)` : 'Out of Stock'}
-        </div>
+        {isPreorderOnly ? (
+          <div className="text-sm font-bold py-2 px-3 rounded-md text-center bg-blue-500/10 text-blue-600">
+            ⏰ Available for Preorder • Ships in 25–30 days
+          </div>
+        ) : (
+          <div className={`text-sm font-bold py-2 px-3 rounded-md text-center ${inStock ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+            {inStock ? `✓ In Stock (${variantStock} available)` : '✗ Out of Stock'}
+          </div>
+        )}
 
         {/* Quantity Selector */}
         <div>
@@ -184,7 +195,7 @@ export default function PaymentDetails({
             <button 
               onClick={() => handleQuantityChange(1)} 
               className="p-2 rounded-md hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
-              disabled={quantity >= (effectiveProduct.stock || 99)}
+              disabled={!isPreorderOnly && quantity >= (variantStock || 99)}
             >
               <Plus size={16} />
             </button>
@@ -225,36 +236,52 @@ export default function PaymentDetails({
       
       {/* Action Buttons */}
       <div className="mt-6 space-y-3">
-        <button 
-          onClick={isInCart ? handleRemoveFromCart : handleAddToCart} 
-          disabled={!inStock || (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)} 
-          className={`w-full font-semibold py-2 text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100
-            ${isInCart 
-              ? 'bg-red-500 text-white hover:bg-red-500' 
-              : 'bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90'
-            }`}
-        >
-          {!inStock 
-            ? 'Out of Stock'
-            : (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)
-              ? `Need ${minimumPurchaseValidation.shortage} More Units`
-              : (isInCart ? 'Remove from Cart' : 'Add to Cart')
-          }
-        </button>
-        
-        {/* Buy Now Button */}
-        <button 
-          onClick={handleBuyNow} 
-          disabled={!inStock || (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)} 
-          className="w-full font-semibold py-2 text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 bg-orange-500 text-white hover:bg-orange-600"
-        >
-          {!inStock 
-            ? 'Out of Stock'
-            : (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)
-              ? `Need ${minimumPurchaseValidation.shortage} More Units`
-              : 'Buy Now'
-          }
-        </button>
+        {isPreorderOnly ? (
+          <>
+            <button 
+              onClick={handlePreorderNow}
+              className="w-full font-semibold py-3 text-lg rounded-lg transition-all duration-300 transform hover:scale-105 bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
+            >
+              Preorder Now
+            </button>
+            <p className="text-xs text-center text-[var(--muted-foreground)] leading-relaxed">
+              This item is imported from China and will be delivered within 25–30 days after order confirmation.
+            </p>
+          </>
+        ) : (
+          <>
+            <button 
+              onClick={isInCart ? handleRemoveFromCart : handleAddToCart} 
+              disabled={!inStock || (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)} 
+              className={`w-full font-semibold py-2 text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100
+                ${isInCart 
+                  ? 'bg-red-500 text-white hover:bg-red-500' 
+                  : 'bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90'
+                }`}
+            >
+              {!inStock 
+                ? 'Out of Stock'
+                : (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)
+                  ? `Need ${minimumPurchaseValidation.shortage} More Units`
+                  : (isInCart ? 'Remove from Cart' : 'Add to Cart')
+              }
+            </button>
+            
+            {/* Buy Now Button */}
+            <button 
+              onClick={handleBuyNow} 
+              disabled={!inStock || (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)} 
+              className="w-full font-semibold py-2 text-lg rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 bg-orange-500 text-white hover:bg-orange-600"
+            >
+              {!inStock 
+                ? 'Out of Stock'
+                : (isUsingWholesalePrice && !minimumPurchaseValidation.isValid)
+                  ? `Need ${minimumPurchaseValidation.shortage} More Units`
+                  : 'Buy Now'
+              }
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

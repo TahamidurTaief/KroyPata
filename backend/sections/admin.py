@@ -3,15 +3,10 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.utils.html import format_html
 from django.db import models
-from unfold.admin import ModelAdmin, TabularInline, StackedInline
-from unfold.contrib.filters.admin import RangeDateFilter
-from unfold.contrib.forms.widgets import WysiwygWidget, ArrayWidget
-from unfold.decorators import display
 from .models import Section, SectionItem, PageSection
 
 
-class SectionItemInline(TabularInline):
-    """Inline for managing section items"""
+class SectionItemInline(admin.TabularInline):
     model = SectionItem
     extra = 1
     fields = ('product', 'category', 'order', 'is_featured', 'custom_title', 'special_price')
@@ -20,15 +15,14 @@ class SectionItemInline(TabularInline):
         return super().get_queryset(request).select_related('product', 'category')
 
 
-class PageSectionInline(TabularInline):
-    """Inline for managing page section assignments"""
+class PageSectionInline(admin.TabularInline):
     model = PageSection
     extra = 1
     fields = ('page_name', 'is_active', 'order', 'items_per_row', 'show_title', 'show_subtitle', 'show_view_all')
 
 
 @admin.register(Section)
-class SectionAdmin(ModelAdmin):
+class SectionAdmin(admin.ModelAdmin):
     list_display = (
         'name', 
         'section_type', 
@@ -52,8 +46,7 @@ class SectionAdmin(ModelAdmin):
         }),
         ('Special Offer Settings', {
             'fields': ('discount_percentage', 'offer_start_date', 'offer_end_date'),
-            'classes': ('collapse',),
-            'description': 'Only applicable for Special Offer Based sections'
+            'classes': ('collapse',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -66,7 +59,6 @@ class SectionAdmin(ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('items', 'page_assignments')
     
-    @display(description="Items Count")
     def items_count(self, obj):
         count = obj.items.count()
         return format_html(
@@ -74,8 +66,8 @@ class SectionAdmin(ModelAdmin):
             'green' if count > 0 else 'red',
             count
         )
+    items_count.short_description = "Items Count"
     
-    @display(description="Pages Count")
     def pages_count(self, obj):
         count = obj.page_assignments.filter(is_active=True).count()
         return format_html(
@@ -83,15 +75,11 @@ class SectionAdmin(ModelAdmin):
             'green' if count > 0 else 'orange',
             count
         )
-    
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == 'description':
-            kwargs['widget'] = WysiwygWidget()
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+    pages_count.short_description = "Pages Count"
 
 
 @admin.register(SectionItem)
-class SectionItemAdmin(ModelAdmin):
+class SectionItemAdmin(admin.ModelAdmin):
     list_display = (
         'section', 
         'get_item_name', 
@@ -125,21 +113,21 @@ class SectionItemAdmin(ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('section', 'product', 'category')
     
-    @display(description="Item Name")
     def get_item_name(self, obj):
         if obj.product:
             return obj.product.name
         elif obj.category:
             return obj.category.name
         return "-"
+    get_item_name.short_description = "Item Name"
     
-    @display(description="Item Type")
     def get_item_type(self, obj):
         if obj.product:
             return format_html('<span style="color: blue;">Product</span>')
         elif obj.category:
             return format_html('<span style="color: green;">Category</span>')
         return "-"
+    get_item_type.short_description = "Item Type"
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "product":
@@ -150,7 +138,7 @@ class SectionItemAdmin(ModelAdmin):
 
 
 @admin.register(PageSection)
-class PageSectionAdmin(ModelAdmin):
+class PageSectionAdmin(admin.ModelAdmin):
     list_display = (
         'section', 
         'page_name', 

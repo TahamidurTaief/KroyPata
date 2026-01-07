@@ -1,17 +1,19 @@
-
 # ===================================================================
 # orders/admin.py
 
 from django.contrib import admin
-from django.forms import Media
 from django.utils.html import format_html
-from unfold.admin import ModelAdmin, TabularInline
+from import_export.admin import ImportExportModelAdmin
 from .models import (
     Order, OrderItem, ShippingMethod, OrderUpdate, OrderPayment, Coupon, ShippingTier,
-    ShippingCategory, FreeShippingRule, CashOnDelivery
+    ShippingCategory, FreeShippingRule, CashOnDelivery, ProductPreOrder
+)
+from .resources import (
+    ShippingCategoryResource, ShippingMethodResource, ShippingTierResource,
+    OrderResource, OrderItemResource, CouponResource, CashOnDeliveryResource, ProductPreOrderResource
 )
 
-class ShippingTierInline(TabularInline):
+class ShippingTierInline(admin.TabularInline):
     model = ShippingTier
     extra = 1
     fields = (
@@ -19,96 +21,28 @@ class ShippingTierInline(TabularInline):
         'base_price', 'has_incremental_pricing', 'increment_per_unit', 'increment_unit_size', 'priority'
     )
     ordering = ['pricing_type', 'priority', 'min_quantity', 'min_weight']
-    
-    def get_readonly_fields(self, request, obj=None):
-        # Make certain fields conditional based on pricing_type
-        return []
-    
-    class Media:
-        css = {
-            'all': ('admin/css/shipping_tier_admin.css',)
-        }
-        js = ('admin/js/shipping_tier_admin.js',)
 
 @admin.register(ShippingMethod)
-class ShippingMethodAdmin(ModelAdmin):
-    list_display = ('name', 'price', 'preferred_pricing_type', 'delivery_estimated_time', 'max_weight', 'max_quantity', 'is_active', 'tier_count')
+class ShippingMethodAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = ShippingMethodResource
+    list_display = ('name', 'price', 'preferred_pricing_type', 'delivery_estimated_time', 'max_weight', 'max_quantity', 'is_active')
     list_filter = ('is_active', 'preferred_pricing_type')
+    search_fields = ('name', 'description')
     fields = (
         'name', 'description', 'price', 'preferred_pricing_type', 
         'delivery_estimated_time', 'max_weight', 'max_quantity', 'is_active'
     )
     inlines = [ShippingTierInline]
-    
-    def tier_count(self, obj):
-        quantity_tiers = obj.shipping_tiers.filter(pricing_type='quantity').count()
-        weight_tiers = obj.shipping_tiers.filter(pricing_type='weight').count()
-        return f"{quantity_tiers} qty, {weight_tiers} weight"
-    tier_count.short_description = 'Pricing Tiers'
-    
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        extra_context['shipping_tier_help_text'] = format_html("""
-        <div class="shipping-tier-help" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007cba;">
-            <h3 style="color: #007cba; margin-top: 0;">📋 How to Configure Shipping Tiers</h3>
-            
-            <div style="margin: 15px 0;">
-                <h4>🎯 Priority System:</h4>
-                <ul>
-                    <li><strong>Lower numbers = Higher priority</strong> (Priority 1 beats Priority 10)</li>
-                    <li>When ranges overlap, the tier with lowest priority number is selected</li>
-                    <li>Use priority 10 for standard tiers, 5 for premium, 1 for special cases</li>
-                </ul>
-            </div>
-            
-            <div style="margin: 15px 0;">
-                <h4>⚖️ Weight-Based Pricing:</h4>
-                <ul>
-                    <li><strong>Min/Max Weight:</strong> Define weight ranges (e.g., 0-0.5kg, 0.5-1kg)</li>
-                    <li><strong>Base Price:</strong> Fixed cost for this weight range</li>
-                    <li><strong>Incremental Pricing:</strong> Add extra cost per additional weight unit</li>
-                    <li><strong>Example:</strong> 70 BDT + 20 BDT per additional kg above 1kg</li>
-                </ul>
-            </div>
-            
-            <div style="margin: 15px 0;">
-                <h4>📦 Quantity-Based Pricing:</h4>
-                <ul>
-                    <li><strong>Min/Max Quantity:</strong> Define item count ranges (e.g., 1-5 items)</li>
-                    <li><strong>Base Price:</strong> Fixed cost for this quantity range</li>
-                    <li><strong>Incremental Pricing:</strong> Add extra cost per additional item</li>
-                </ul>
-            </div>
-            
-            <div style="margin: 15px 0;">
-                <h4>💰 Incremental Pricing Settings:</h4>
-                <ul>
-                    <li><strong>Increment Per Unit:</strong> Extra cost per additional unit (e.g., 20 BDT)</li>
-                    <li><strong>Increment Unit Size:</strong> How to count units (e.g., per 1kg or per 0.5kg)</li>
-                    <li><strong>Calculation:</strong> Base Price + (excess_units × increment_per_unit)</li>
-                </ul>
-            </div>
-            
-            <div style="background: #fff3cd; padding: 10px; border-radius: 5px; border: 1px solid #ffeaa7;">
-                <strong>💡 Pro Tip:</strong> Test your configuration using the shipping test page to verify calculations work as expected!
-            </div>
-        </div>
-        """)
-        return super().change_view(request, object_id, form_url, extra_context)
-    
-    class Media:
-        css = {
-            'all': ('admin/css/shipping_tier_admin.css',)
-        }
-        js = ('admin/js/shipping_tier_admin.js',)
 
 @admin.register(ShippingTier)
-class ShippingTierAdmin(ModelAdmin):
+class ShippingTierAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = ShippingTierResource
     list_display = (
         'shipping_method', 'pricing_type', 'tier_range', 'pricing_display', 
         'has_incremental_pricing', 'priority'
     )
     list_filter = ('pricing_type', 'has_incremental_pricing', 'shipping_method')
+    autocomplete_fields = ['shipping_method']
     ordering = ['shipping_method', 'pricing_type', 'priority', 'min_quantity', 'min_weight']
     
     fields = (
@@ -144,8 +78,9 @@ class ShippingTierAdmin(ModelAdmin):
     pricing_display.short_description = 'Pricing'
 
 @admin.register(Coupon)
-class CouponAdmin(ModelAdmin):
-    list_display = ('code', 'type', 'discount_percent', 'min_quantity_required', 'min_cart_total', 'active', 'valid_from', 'expires_at', 'eligible_users_count')
+class CouponAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = CouponResource
+    list_display = ('code', 'type', 'discount_percent', 'active', 'valid_from', 'expires_at')
     list_filter = ('type', 'active', 'created_at', 'valid_from', 'expires_at')
     search_fields = ('code',)
     readonly_fields = ('created_at',)
@@ -160,28 +95,15 @@ class CouponAdmin(ModelAdmin):
         }),
         ('User Restrictions', {
             'fields': ('eligible_users',),
-            'classes': ('collapse',),
-            'description': 'Select specific users for USER_SPECIFIC coupon type'
+            'classes': ('collapse',)
         }),
         ('Validity Period', {
             'fields': ('created_at', 'valid_from', 'expires_at')
         }),
     )
-    
-    def eligible_users_count(self, obj):
-        if obj.type == obj.CouponType.USER_SPECIFIC:
-            return obj.eligible_users.count()
-        return '-'
-    eligible_users_count.short_description = 'Eligible Users'
-    
-    def get_queryset(self, request):
-        """Add custom ordering and filters"""
-        qs = super().get_queryset(request)
-        return qs.select_related()
 
 # Order Admin Configuration
 class OrderItemInline(admin.TabularInline):
-    """Inline for order items"""
     model = OrderItem
     extra = 0
     readonly_fields = ('product', 'color', 'size', 'quantity', 'unit_price')
@@ -191,7 +113,6 @@ class OrderItemInline(admin.TabularInline):
         return False
 
 class OrderPaymentInline(admin.StackedInline):
-    """Inline for order payment"""
     model = OrderPayment
     extra = 0
     readonly_fields = ('payment_method', 'sender_number', 'transaction_id', 'admin_account_number', 'created_at', 'updated_at')
@@ -211,7 +132,6 @@ class OrderPaymentInline(admin.StackedInline):
         return False
 
 class CashOnDeliveryInline(admin.StackedInline):
-    """Inline for cash on delivery details"""
     model = CashOnDelivery
     extra = 0
     readonly_fields = ('created_at', 'updated_at', 'payment_collected_at', 'actual_delivery_date')
@@ -240,17 +160,19 @@ class CashOnDeliveryInline(admin.StackedInline):
         }),
     )
 
-class OrderUpdateInline(TabularInline):
+class OrderUpdateInline(admin.TabularInline):
     model = OrderUpdate
     extra = 1
     readonly_fields = ('timestamp',)
 
 @admin.register(Order)
-class OrderAdmin(ModelAdmin):
-    list_display = ('order_number', 'customer_name', 'customer_email', 'total_amount', 'payment_status', 'status', 'ordered_at')
+class OrderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = OrderResource
+    list_display = ('order_number', 'customer_name', 'status', 'created_at')
     list_filter = ('status', 'payment_status', 'shipping_method', 'ordered_at')
-    search_fields = ('order_number', 'customer_name', 'customer_email', 'customer_phone', 'tracking_number')
+    search_fields = ('order_number', 'customer_email')
     readonly_fields = ('order_number', 'total_amount', 'cart_subtotal', 'ordered_at')
+    autocomplete_fields = ['user', 'shipping_address', 'shipping_method']
     inlines = [OrderItemInline, OrderPaymentInline, CashOnDeliveryInline, OrderUpdateInline]
     
     fieldsets = (
@@ -269,17 +191,22 @@ class OrderAdmin(ModelAdmin):
         }),
     )
     
+    def created_at(self, obj):
+        return obj.ordered_at
+    created_at.short_description = 'Created'
+    created_at.admin_order_field = 'ordered_at'
+    
     def get_queryset(self, request):
-        """Optimize queryset with related objects"""
         qs = super().get_queryset(request)
-        return qs.select_related('user', 'shipping_method', 'shipping_address').prefetch_related('items', 'payment')
+        return qs.select_related('user', 'shipping_method', 'shipping_address').prefetch_related('items')
 
 @admin.register(OrderPayment)
-class OrderPaymentAdmin(ModelAdmin):
+class OrderPaymentAdmin(admin.ModelAdmin):
     list_display = ('order', 'payment_method', 'sender_number', 'transaction_id', 'created_at')
     list_filter = ('payment_method', 'created_at')
-    search_fields = ('order__order_number', 'sender_number', 'transaction_id', 'admin_account_number')
+    search_fields = ('order__order_number', 'sender_number', 'transaction_id')
     readonly_fields = ('created_at', 'updated_at')
+    autocomplete_fields = ['order']
     
     fieldsets = (
         ('Order Information', {
@@ -295,7 +222,8 @@ class OrderPaymentAdmin(ModelAdmin):
     )
 
 @admin.register(ShippingCategory)
-class ShippingCategoryAdmin(ModelAdmin):
+class ShippingCategoryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = ShippingCategoryResource
     list_display = ('name', 'description', 'allowed_methods_count')
     search_fields = ('name', 'description')
     filter_horizontal = ('allowed_shipping_methods',)
@@ -305,7 +233,7 @@ class ShippingCategoryAdmin(ModelAdmin):
     allowed_methods_count.short_description = 'Allowed Methods'
 
 @admin.register(FreeShippingRule)
-class FreeShippingRuleAdmin(ModelAdmin):
+class FreeShippingRuleAdmin(admin.ModelAdmin):
     list_display = ('threshold_amount', 'active', 'applicable_categories_count', 'created_at')
     list_filter = ('active', 'created_at')
     filter_horizontal = ('applicable_categories',)
@@ -317,44 +245,39 @@ class FreeShippingRuleAdmin(ModelAdmin):
     applicable_categories_count.short_description = 'Applies To'
 
 @admin.register(CashOnDelivery)
-class CashOnDeliveryAdmin(ModelAdmin):
+class CashOnDeliveryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = CashOnDeliveryResource
     list_display = (
-        'order_number', 'customer_full_name', 'alternative_phone', 
-        'delivery_status', 'amount_to_collect', 'amount_collected', 
-        'delivery_attempts', 'scheduled_delivery_date', 'created_at'
+        'order_number', 'customer_full_name', 'delivery_status', 
+        'amount_to_collect', 'created_at'
     )
     list_filter = ('delivery_status', 'created_at', 'scheduled_delivery_date')
     search_fields = (
-        'order__order_number', 'customer_full_name', 'alternative_phone', 
-        'delivery_person_name', 'delivery_person_phone'
+        'order__order_number', 'customer_full_name', 'alternative_phone'
     )
     readonly_fields = ('created_at', 'updated_at', 'payment_collected_at', 'actual_delivery_date')
+    autocomplete_fields = ['order']
     
-    # Unfold-style fieldsets with tabs
     fieldsets = (
         ('Order Information', {
-            'fields': ('order',),
-            'classes': ('tab',)
+            'fields': ('order',)
         }),
         ('Customer Contact Details', {
-            'fields': ('customer_full_name', 'alternative_phone', 'special_instructions'),
-            'classes': ('tab',)
+            'fields': ('customer_full_name', 'alternative_phone', 'special_instructions')
         }),
         ('Delivery Management', {
-            'fields': ('delivery_status', 'scheduled_delivery_date', 'actual_delivery_date', 'delivery_attempts'),
-            'classes': ('tab',)
+            'fields': ('delivery_status', 'scheduled_delivery_date', 'actual_delivery_date', 'delivery_attempts')
         }),
         ('Payment Collection', {
-            'fields': ('amount_to_collect', 'amount_collected', 'payment_collected_at'),
-            'classes': ('tab',)
+            'fields': ('amount_to_collect', 'amount_collected', 'payment_collected_at')
         }),
         ('Delivery Team Assignment', {
             'fields': ('delivery_person_name', 'delivery_person_phone'),
-            'classes': ('tab',)
+            'classes': ('collapse',)
         }),
-        ('Delivery Notes & Tracking', {
+        ('Delivery Notes', {
             'fields': ('delivery_notes',),
-            'classes': ('tab',)
+            'classes': ('collapse',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -368,28 +291,48 @@ class CashOnDeliveryAdmin(ModelAdmin):
     order_number.admin_order_field = 'order__order_number'
     
     def get_queryset(self, request):
-        """Optimize queryset with related objects"""
         qs = super().get_queryset(request)
         return qs.select_related('order')
     
-    actions = ['mark_out_for_delivery', 'mark_delivered', 'increment_delivery_attempts']
+    actions = ['mark_out_for_delivery', 'mark_delivered']
     
     def mark_out_for_delivery(self, request, queryset):
-        """Mark selected COD orders as out for delivery"""
         updated = queryset.update(delivery_status=CashOnDelivery.DeliveryStatus.OUT_FOR_DELIVERY)
         self.message_user(request, f'{updated} orders marked as out for delivery.')
     mark_out_for_delivery.short_description = 'Mark as out for delivery'
     
     def mark_delivered(self, request, queryset):
-        """Mark selected COD orders as delivered"""
         for cod in queryset:
             cod.mark_as_delivered()
         self.message_user(request, f'{queryset.count()} orders marked as delivered and paid.')
     mark_delivered.short_description = 'Mark as delivered & paid'
+
+
+@admin.register(ProductPreOrder)
+class ProductPreOrderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = ProductPreOrderResource
+    list_display = ('order_number', 'product', 'quantity', 'total_price', 'status', 'full_name', 'created_at')
+    list_filter = ('status', 'created_at', 'product')
+    search_fields = ('order_number', 'full_name', 'email', 'phone', 'product__name')
+    readonly_fields = ('order_number', 'created_at', 'updated_at')
+    autocomplete_fields = ['product', 'variant', 'shipping_method']
+    list_per_page = 50
+    ordering = ('-created_at',)
     
-    def increment_delivery_attempts(self, request, queryset):
-        """Increment delivery attempts for selected orders"""
-        for cod in queryset:
-            cod.increment_delivery_attempt("Delivery attempt via admin action")
-        self.message_user(request, f'Incremented delivery attempts for {queryset.count()} orders.')
-    increment_delivery_attempts.short_description = 'Increment delivery attempts'
+    fieldsets = (
+        ('Order Information', {
+            'fields': ('order_number', 'status', 'created_at', 'updated_at')
+        }),
+        ('Product Details', {
+            'fields': ('product', 'variant', 'quantity', 'unit_price', 'total_price')
+        }),
+        ('Shipping', {
+            'fields': ('shipping_method', 'shipping_charge', 'expected_delivery_days')
+        }),
+        ('Customer Information', {
+            'fields': ('full_name', 'email', 'phone', 'detailed_address')
+        }),
+        ('Additional Information', {
+            'fields': ('preorder_note',)
+        }),
+    )

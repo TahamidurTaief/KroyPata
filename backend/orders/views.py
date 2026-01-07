@@ -11,12 +11,12 @@ from django.db.models import Q
 from products.models import Product
 from .models import (
     Order, ShippingMethod, OrderPayment, Coupon, OrderItem, OrderUpdate,
-    ShippingCategory, FreeShippingRule
+    ShippingCategory, FreeShippingRule, ProductPreOrder
 )
 from .serializers import (
     OrderSerializer, ShippingMethodSerializer, OrderPaymentSerializer, 
     OrderCreateSerializer, OrderReadSerializer, CouponSerializer, CouponValidationSerializer,
-    ShippingCategorySerializer, FreeShippingRuleSerializer
+    ShippingCategorySerializer, FreeShippingRuleSerializer, ProductPreOrderSerializer
 )
 from users.permissions import IsCustomerForOrder
 
@@ -1544,3 +1544,32 @@ def debug_orders_api(request):
                 'total_users': 'error',
             }
         }, status=500)
+
+
+class ProductPreOrderViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing product preorders"""
+    queryset = ProductPreOrder.objects.all().select_related(
+        'product', 'variant', 'shipping_method', 'variant__color', 'variant__size'
+    ).order_by('-created_at')
+    serializer_class = ProductPreOrderSerializer
+    permission_classes = [permissions.AllowAny]
+    
+    def get_queryset(self):
+        """Filter preorders based on user permissions"""
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # If user is authenticated and staff, show all preorders
+        if user.is_authenticated and user.is_staff:
+            return queryset
+        
+        # For anonymous users, only allow create operation (handled in create method)
+        return queryset.none()
+    
+    def create(self, request, *args, **kwargs):
+        """Create a new preorder"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

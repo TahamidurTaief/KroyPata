@@ -3,11 +3,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import gettext_lazy as _
 from django import forms
-from import_export.admin import ExportMixin
+from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 
-from unfold.admin import ModelAdmin, TabularInline
-# from unfold.decorators import display_with_icon
 from django.utils import timezone
 
 from .models import User, Address, WholesalerProfile, AffiliateProfile
@@ -71,7 +69,7 @@ class UserResource(resources.ModelResource):
 # ------------------------------
 # Inline Classes for User Profiles
 # ------------------------------
-class WholesalerProfileInline(TabularInline):
+class WholesalerProfileInline(admin.TabularInline):
     model = WholesalerProfile
     fk_name = 'user'
     extra = 0
@@ -89,7 +87,7 @@ class WholesalerProfileInline(TabularInline):
         super().save_model(request, obj, form, change)
 
 
-class AffiliateProfileInline(TabularInline):
+class AffiliateProfileInline(admin.TabularInline):
     model = AffiliateProfile
     fk_name = 'user'
     extra = 0
@@ -111,28 +109,22 @@ class AffiliateProfileInline(TabularInline):
 # User Admin
 # ------------------------------
 @admin.register(User)
-class CustomUserAdmin(ExportMixin, BaseUserAdmin, ModelAdmin):
-    # The forms to add and change user instances
+class CustomUserAdmin(ImportExportModelAdmin, BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
     resource_class = UserResource
 
-    # The fields to be used in displaying the User model.
-    # These override the definitions on the base UserAdmin
-    # that reference specific fields on auth.User.
-    list_display = ('email', 'name', 'user_type', 'is_active', 'is_staff', 'is_superuser', 'date_joined')
+    list_display = ('email', 'name', 'user_type', 'is_active', 'is_staff', 'date_joined')
     list_filter = ('user_type', 'is_active', 'is_staff', 'is_superuser', 'date_joined')
     search_fields = ('email', 'name', 'full_name', 'phone')
     ordering = ('-date_joined',)
     readonly_fields = ('last_login', 'date_joined')
     filter_horizontal = ('groups', 'user_permissions')
 
-    # Fieldsets for editing users
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         (_('Personal Info'), {
             'fields': ('name', 'user_type', 'full_name', 'phone'),
-            'classes': ('wide',)
         }),
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
@@ -144,8 +136,6 @@ class CustomUserAdmin(ExportMixin, BaseUserAdmin, ModelAdmin):
         }),
     )
 
-    # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
-    # overrides get_fieldsets to use this attribute when creating a user.
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -160,9 +150,6 @@ class CustomUserAdmin(ExportMixin, BaseUserAdmin, ModelAdmin):
     inlines = [WholesalerProfileInline, AffiliateProfileInline]
 
     def get_form(self, request, obj=None, **kwargs):
-        """
-        Use special form during user creation
-        """
         defaults = {}
         if obj is None:
             defaults['form'] = self.add_form
@@ -176,8 +163,8 @@ class AddressResource(resources.ModelResource):
     class Meta:
         model = Address
         fields = (
-            'id', 'user__email', 'address_line_1', 'address_line_2',
-            'city', 'state', 'postal_code', 'country', 'is_default'
+            'id', 'user__email', 'label', 'street_address',
+            'city', 'state', 'postal_code', 'country', 'phone', 'is_default'
         )
         export_order = fields
 
@@ -185,13 +172,11 @@ class AddressResource(resources.ModelResource):
 # Address Admin
 # ------------------------------
 @admin.register(Address)
-class AddressAdmin(ExportMixin, ModelAdmin):
+class AddressAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_class = AddressResource
-
     list_display = ('user', 'address_line_1', 'city', 'state', 'country', 'is_default')
     list_filter = ('city', 'state', 'country', 'is_default')
-    search_fields = ('user__email', 'address_line_1', 'city', 'postal_code', 'country')
-
+    search_fields = ('user__email', 'address_line_1', 'city', 'postal_code')
     autocomplete_fields = ('user',)
 
 
@@ -199,18 +184,17 @@ class AddressAdmin(ExportMixin, ModelAdmin):
 # WholesalerProfile Admin
 # ------------------------------
 @admin.register(WholesalerProfile)
-class WholesalerProfileAdmin(ModelAdmin):
-    list_display = ('user', 'business_name', 'approval_status', 'created_at', 'approved_at', 'approved_by')
+class WholesalerProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'business_name', 'approval_status', 'created_at', 'approved_at')
     list_filter = ('approval_status', 'created_at', 'approved_at')
     search_fields = ('user__email', 'business_name')
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'approved_at')
     autocomplete_fields = ('user', 'approved_by')
     
     fieldsets = (
         (None, {'fields': ('user', 'business_name', 'trade_license')}),
         (_('Approval'), {
             'fields': ('approval_status', 'approved_by', 'approved_at'),
-            'classes': ('wide',)
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
@@ -219,7 +203,6 @@ class WholesalerProfileAdmin(ModelAdmin):
     )
     
     def save_model(self, request, obj, form, change):
-        # Set approved_by and approved_at when status changes to APPROVED
         if obj.approval_status == 'APPROVED' and not obj.approved_at:
             obj.approved_by = request.user
             obj.approved_at = timezone.now()
@@ -233,18 +216,17 @@ class WholesalerProfileAdmin(ModelAdmin):
 # AffiliateProfile Admin
 # ------------------------------
 @admin.register(AffiliateProfile)
-class AffiliateProfileAdmin(ModelAdmin):
-    list_display = ('user', 'referral_code', 'approval_status', 'created_at', 'approved_at', 'approved_by')
+class AffiliateProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'referral_code', 'approval_status', 'created_at', 'approved_at')
     list_filter = ('approval_status', 'created_at', 'approved_at')
     search_fields = ('user__email', 'referral_code')
-    readonly_fields = ('referral_code', 'created_at', 'updated_at')
+    readonly_fields = ('referral_code', 'created_at', 'updated_at', 'approved_at')
     autocomplete_fields = ('user', 'approved_by')
     
     fieldsets = (
         (None, {'fields': ('user', 'referral_code')}),
         (_('Approval'), {
             'fields': ('approval_status', 'approved_by', 'approved_at'),
-            'classes': ('wide',)
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
@@ -253,7 +235,6 @@ class AffiliateProfileAdmin(ModelAdmin):
     )
     
     def save_model(self, request, obj, form, change):
-        # Set approved_by and approved_at when status changes to APPROVED
         if obj.approval_status == 'APPROVED' and not obj.approved_at:
             obj.approved_by = request.user
             obj.approved_at = timezone.now()

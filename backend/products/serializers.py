@@ -111,14 +111,27 @@ class ProductVariantSerializer(serializers.ModelSerializer):
     color = ColorSerializer(read_only=True)
     size = SizeSerializer(read_only=True)
     images = VariantImageSerializer(many=True, read_only=True)
+    is_preorder = serializers.SerializerMethodField()
+    preorder_message = serializers.SerializerMethodField()
     
     class Meta:
         model = ProductVariant
         fields = [
             'id', 'sku', 'color', 'size', 'material',
             'price', 'discount_price', 'wholesale_price', 'minimum_purchase',
-            'stock', 'weight', 'is_active', 'is_default', 'images'
+            'stock', 'quantity', 'weight', 'is_active', 'is_default', 'images',
+            'is_preorder', 'preorder_message'
         ]
+    
+    def get_is_preorder(self, obj):
+        """Return True if variant quantity is 0 (preorder-only)"""
+        return obj.quantity == 0
+    
+    def get_preorder_message(self, obj):
+        """Return preorder message if variant is preorder-only"""
+        if obj.quantity == 0:
+            return "This product will be delivered in 25–30 days (Imported from China)"
+        return None
     
     def to_representation(self, instance):
         """Hide wholesale pricing from non-approved wholesalers"""
