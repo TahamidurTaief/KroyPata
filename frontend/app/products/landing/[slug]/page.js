@@ -375,6 +375,92 @@ export default function ProductLandingPage() {
         ...(token && { 'Authorization': `Bearer ${token}` })
       };
       
+      // Check if this is a preorder (stock === 0)
+      const effectiveProduct = selectedVariant || product;
+      const variantStock = effectiveProduct.stock || 0;
+      const isPreorder = variantStock === 0;
+      
+      // If preorder, use preorder endpoint
+      if (isPreorder) {
+        const effectivePrice = effectiveProduct.discount_price || effectiveProduct.price;
+        const unitPrice = parseFloat(effectivePrice) || 0;
+        const shippingCost = parseFloat(shippingCharge) || 0;
+        const totalPrice = (unitPrice * formData.quantity) + shippingCost;
+        
+        const preorderData = {
+          product: product.id,
+          variant: selectedVariant?.id || null,
+          quantity: formData.quantity,
+          unit_price: unitPrice,
+          total_price: totalPrice,
+          shipping_method: selectedShippingMethod.id,
+          shipping_charge: shippingCost,
+          full_name: formData.full_name,
+          email: formData.email,
+          phone: formData.phone,
+          detailed_address: formData.detailed_address,
+          preorder_note: formData.customer_notes || '',
+          expected_delivery_days: '25–30 days'
+        };
+        
+        console.log('Submitting preorder with data:', preorderData);
+        console.log('API URL:', `${API_BASE}/api/orders/preorders/`);
+        
+        // Track Lead/Purchase event
+        trackPixelEvent('Lead', {
+          content_ids: [effectiveProduct.id || product.id],
+          content_name: product.name,
+          content_type: 'product',
+          value: totalPrice,
+          currency: 'BDT',
+          predicted_ltv: totalPrice
+        });
+        
+        const response = await fetch(`${API_BASE}/api/orders/preorders/`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(preorderData)
+        });
+        
+        console.log('Response status:', response.status);
+        const result = await response.json();
+        console.log('Response data:', result);
+        
+        if (!response.ok) {
+          if (result.error) {
+            throw new Error(result.error);
+          }
+          if (typeof result === 'object') {
+            const errors = Object.entries(result)
+              .map(([field, messages]) => {
+                const msgArray = Array.isArray(messages) ? messages : [messages];
+                return `${field}: ${msgArray.join(', ')}`;
+              })
+              .join('\n');
+            throw new Error(errors || 'প্রিঅর্ডার করতে সমস্যা হয়েছে');
+          }
+          throw new Error('প্রিঅর্ডার করতে সমস্যা হয়েছে');
+        }
+        
+        toast.success(`প্রিঅর্ডার সফল হয়েছে! অর্ডার #${result.order_number} (২৫–৩০ দিনে ডেলিভারি)`);
+        
+        // Show success modal
+        setOrderResult({
+          order_number: result.order_number,
+          product_name: product.name,
+          quantity: formData.quantity,
+          unit_price: result.unit_price,
+          shipping_charge: result.shipping_charge,
+          total_price: result.total_price,
+          is_preorder: true
+        });
+        setShowSuccessModal(true);
+        
+        setSubmitting(false);
+        return;
+      }
+      
+      // Regular order flow
       const orderData = {
         product: product.id,
         variant: selectedVariant?.id || null,
@@ -739,12 +825,17 @@ export default function ProductLandingPage() {
             </div>
             
             {/* Info Message */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
-              <p className="text-sm text-blue-800 dark:text-blue-300 flex items-start">
+            <div className={`border rounded-lg p-3 mb-4 ${orderResult?.is_preorder ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'}`}>
+              <p className={`text-sm flex items-start ${orderResult?.is_preorder ? 'text-blue-800 dark:text-blue-300' : 'text-green-800 dark:text-green-300'}`}>
                 <svg className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
-                <span>আমাদের প্রতিনিধি শীঘ্রই আপনার সাথে যোগাযোগ করবেন এবং অর্ডারটি নিশ্চিত করবেন।</span>
+                <span>
+                  {orderResult?.is_preorder 
+                    ? '⏰ এটি একটি প্রিঅর্ডার। পণ্যটি চীন থেকে আমদানি হবে এবং ২৫–৩০ দিনের মধ্যে ডেলিভারি হবে। আমাদের প্রতিনিধি শীঘ্রই আপনার সাথে যোগাযোগ করবেন।'
+                    : 'আমাদের প্রতিনিধি শীঘ্রই আপনার সাথে যোগাযোগ করবেন এবং অর্ডারটি নিশ্চিত করবেন।'
+                  }
+                </span>
               </p>
             </div>
             
@@ -1604,11 +1695,19 @@ export default function ProductLandingPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="submit-btn"
-                disabled={submitting || effectiveProduct.stock === 0}
+                className={`submit-btn ${effectiveProduct.stock === 0 ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                disabled={submitting}
               >
-                {submitting ? 'অর্ডার প্রসেস হচ্ছে...' : 'অর্ডার কনফার্ম করুন'}
+                {submitting 
+                  ? (effectiveProduct.stock === 0 ? 'প্রিঅর্ডার প্রসেস হচ্ছে...' : 'অর্ডার প্রসেস হচ্ছে...') 
+                  : (effectiveProduct.stock === 0 ? '🕐 প্রিঅর্ডার কনফার্ম করুন (২৫–৩০ দিন)' : 'অর্ডার কনফার্ম করুন')
+                }
               </button>
+              {effectiveProduct.stock === 0 && (
+                <p className="text-xs text-center text-blue-600 dark:text-blue-400 mt-2">
+                  ⏰ এই পণ্যটি চীন থেকে আমদানি করা হবে। ডেলিভারি সময়: ২৫–৩০ দিন
+                </p>
+              )}
             </form>
           </div>
         </div>

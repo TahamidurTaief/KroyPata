@@ -22,7 +22,12 @@ const ProductCard = ({ productData }) => {
   
   const colors = productData?.colors || [];
   const sizes = productData?.sizes || [];
-  const inStock = productData?.stock > 0;
+  
+  // Check stock status - prioritize default variant, then product stock
+  const defaultVariant = productData?.default_variant;
+  const effectiveStock = defaultVariant ? (defaultVariant.quantity || 0) : (productData?.stock || 0);
+  const inStock = effectiveStock > 0;
+  const isPreorder = effectiveStock <= 0;
   const isWholesaler = user?.user_type === 'WHOLESALER';
 
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -73,6 +78,16 @@ const ProductCard = ({ productData }) => {
         primaryActionText: 'OK'
       });
     }
+  };
+
+  const handlePreorder = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Redirect to checkout with preorder mode
+    const variantId = defaultVariant?.id || '';
+    const preorderUrl = `/checkout?mode=preorder&product=${productData.id}&variant=${variantId}&quantity=1`;
+    window.location.href = preorderUrl;
   };
 
   const handleAddToWishlist = (e) => {
@@ -275,24 +290,38 @@ const ProductCard = ({ productData }) => {
               )}
             </div>
 
-            {/* Add to Cart Button - Full Width */}
-            <motion.button
-              onClick={handleAddToCart}
-              disabled={!inStock}
-              whileTap={{ scale: 0.95 }}
-              className={`
-                w-full px-3 py-2 rounded-full font-semibold text-sm shadow-lg transition-all duration-300
-                flex items-center justify-center gap-1.5 whitespace-nowrap
-                ${inStock 
-                  ? 'bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 hover:shadow-xl' 
-                  : 'bg-[var(--muted)] text-[var(--muted-foreground)] cursor-not-allowed'
-                }
-              `}
-              aria-label="Add to cart"
-            >
-              <LuShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>{inStock ? "Add to Cart" : "Sold Out"}</span>
-            </motion.button>
+            {/* Action Button - Add to Cart or Preorder */}
+            {isPreorder ? (
+              <motion.button
+                onClick={handlePreorder}
+                whileTap={{ scale: 0.95 }}
+                className="w-full px-3 py-2 rounded-full font-semibold text-sm shadow-lg transition-all duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap bg-blue-600 text-white hover:bg-blue-700 hover:shadow-xl"
+                aria-label="Preorder now"
+              >
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Preorder</span>
+              </motion.button>
+            ) : (
+              <motion.button
+                onClick={handleAddToCart}
+                disabled={!inStock}
+                whileTap={{ scale: 0.95 }}
+                className={`
+                  w-full px-3 py-2 rounded-full font-semibold text-sm shadow-lg transition-all duration-300
+                  flex items-center justify-center gap-1.5 whitespace-nowrap
+                  ${inStock 
+                    ? 'bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 hover:shadow-xl' 
+                    : 'bg-[var(--muted)] text-[var(--muted-foreground)] cursor-not-allowed'
+                  }
+                `}
+                aria-label="Add to cart"
+              >
+                <LuShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{inStock ? "Add to Cart" : "Sold Out"}</span>
+              </motion.button>
+            )}
           </div>
         </div>
       </motion.div>
